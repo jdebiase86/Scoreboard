@@ -27,7 +27,7 @@ arduino-cli, esp32 core 2.0.9, libraries ArduinoJson 7.4.2, PNGdec 1.1.7, ESP32 
 
 The update file is build/scoreboard.ino.bin renamed scoreboard-X.Y.bin (first byte 0xE9).
 
-If the cloud session can't download the esp32 core, rely on the GitHub Action build (it runs on every push to main that touches firmware/scoreboard) and check its log.
+If the cloud session can't download the esp32 core, rely on the GitHub Action build and check its log. It builds (without publishing) on every pull request that touches firmware/scoreboard, and builds and publishes on every push to main that does.
 
 ## Releasing
 - Version lives in firmware/scoreboard/sb_version.h (FW_VERSION "X.Y"). Bump it for every update Joe should get; never reuse a version.
@@ -44,8 +44,8 @@ If the cloud session can't download the esp32 core, rely on the GitHub Action bu
 - AUTO: live favourites take turns (football first); none live = cycle all favourites every rotation interval.
 - Unreadable logos show the team letters in team colour (lettersOnly list in sb_net.cpp).
 
-## Next up (approved by Joe 2026-10-04)
-Football full-game screen, Option B: both logos side by side at full size (26x24 boxes at x=0 and x=38, y=8), each score under its logo, the ball between the logos for possession, timeout dots under each score. Cleaned-up field: solid grass, faint midfield line, end zones in full team colours with AWAY on the left and HOME on the right (matching the logos), a small football on its spot (no white arrow), yellow line to gain, red tint only on the 20 yards in front of the goal being attacked. Win bar: away share from the left; if the two team colours look alike, the away side is white. Prototype code: work/option_b_sb_render.cpp (style 1). Needs 26x24 logos published for live games (today only 16-px logos are published once a game starts).
+## Football full-game screen (1.8, Option B)
+renderFootballFull in sb_render.cpp: both 26x24 logos side by side (away x=0, home x=38, y=8), scores under them, the ball between them for possession, timeout dots under the scores. Field: solid grass, faint midfield line, end zones in team colours (away left, home right), small football on its spot, yellow line to gain, red tint only on the 20 yards in front of the goal being attacked. Win bar: away share from the left; away goes white if the colours look alike. The net task now publishes the 26x24 logos for live football games too (the old 16-px live logos are gone). Mock-up: firmware/hosttest/mock_full2.cpp.
 
 ## Later
 Full-game screens for baseball, hockey and basketball (need live data captures), night mode, all-teams countdown screen, QR code on the setup screen, father-in-law board setup (his teams Cowboys and LSU, Central time), then the setup PDF. Racing (NASCAR/F1) much later.

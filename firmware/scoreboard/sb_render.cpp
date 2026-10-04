@@ -1,4 +1,5 @@
 #include "sb_render.h"
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -519,7 +520,82 @@ void renderFullTicker(Frame& fb, const FullGame* games, int n, int page, const c
 }
 
 // --------------------------------------------------- football full-game
-void renderFootballFull(Frame& fb, const Game& g, const Logo* la16, const Logo* lh16, uint32_t ms) {
+// Option B: both logos full size side by side (away left, home right), each
+// score under its logo, the ball between them for possession, timeout dots
+// under the scores, then the field, the win bar and the last play.
+
+// a logo centred in a box, or the team's letters if there's no logo
+static void logoBox(Frame& fb, const Logo* l, int x, int y, int bw, int bh, const char* abbr, bool hasC, uint32_t c) {
+  if (l && l->n) { drawLogo(fb, *l, x + ((bw - l->w) >> 1), y + ((bh - l->h) >> 1), 1); return; }
+  char a[5]; fullAbbr(a, abbr);
+  int w = tw(a, F5);
+  text(fb, x + ((bw - w) >> 1), y + ((bh - 7) >> 1), a, ledColor(hasC, c), F5);
+}
+
+static int colorGap(RGB a, RGB b) {
+  return abs((int)((a >> 16) & 255) - (int)((b >> 16) & 255)) + abs((int)((a >> 8) & 255) - (int)((b >> 8) & 255)) +
+         abs((int)(a & 255) - (int)(b & 255));
+}
+
+// The mini field, TV style: solid grass, a faint midfield line, end zones in
+// team colours (away on the left, home on the right, matching the logos),
+// the ball on its spot and the yellow line to gain. In the red zone only the
+// 20 yards in front of the goal being attacked turn red.
+// ESPN's yard line 0 is the home goal line, so the home team attacks left.
+static void drawField(Frame& fb, const Game& g, int FY, int FH) {
+  const int X0 = 6, LEN = 52;
+  auto X = [&](int yd) { return X0 + (100 - yd) * LEN / 100; };   // yard 0 (home goal) at x=58
+  RGB grass = rgb(8, 52, 18), rz = rgb(85, 12, 12);
+  for (int x = X0; x <= X0 + LEN; x++) for (int yy = FY; yy < FY + FH; yy++) fb.put(x, yy, grass);
+  bool homeBall = g.possession == 1;
+  if (g.redzone && g.possession) {
+    int from = homeBall ? 100 : 20, to = homeBall ? 80 : 0;
+    for (int x = X(from); x <= X(to); x++)
+      for (int yy = FY; yy < FY + FH; yy++) fb.put(x, yy, rz);
+  }
+  for (int yy = FY; yy < FY + FH; yy++) fb.put(X0 + LEN / 2, yy, rgb(45, 90, 55));   // midfield
+  auto ez = [&](int x0, int x1, bool has, uint32_t c) {
+    RGB l = ledColor(has, c);
+    for (int x = x0; x <= x1; x++) for (int yy = FY; yy < FY + FH; yy++) fb.put(x, yy, l);
+  };
+  ez(1, X0 - 1, g.away.hasColor, g.away.color);
+  ez(X0 + LEN + 1, 62, g.home.hasColor, g.home.color);
+  if (g.yardLine < 0 || g.yardLine > 100 || !g.possession) return;
+  int dir = homeBall ? -1 : 1;   // on screen: home drives left, away drives right
+  int bx = X(g.yardLine);
+  if (g.distance > 0) {
+    int fd = g.yardLine + (homeBall ? g.distance : -g.distance);
+    if (fd >= 0 && fd <= 100) {
+      int fx = X(fd);
+      for (int yy = FY; yy < FY + FH; yy++) fb.put(fx, yy, rgb(255, 215, 0));
+    }
+  }
+  // the ball: a little football pointing the way they're going
+  int cy = FY + (FH >> 1);
+  RGB br = rgb(200, 100, 35);
+  for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) fb.put(bx + dx, cy + dy, br);
+  fb.put(bx + 2 * dir, cy, br);
+  fb.put(bx - 2 * dir, cy, br);
+  fb.put(bx, cy, WHITE);   // the laces
+}
+
+// win chance: a thin bar, away share from the left (like the field); if the
+// two colours look alike the away side goes white so the split still shows
+static void drawWinBar(Frame& fb, const Game& g, int y) {
+  if (g.winHome < 0) return;
+  int split = 2 + (100 - g.winHome) * 60 / 100;
+  RGB ch = ledColor(g.home.hasColor, g.home.color), ca = ledColor(g.away.hasColor, g.away.color);
+  if (colorGap(ch, ca) < 120) ca = rgb(200, 200, 200);
+  for (int x = 2; x <= 61; x++) fb.put(x, y, x < split ? ca : ch);
+}
+
+static void timeoutDots(Frame& fb, int x, int y, int left) {
+  if (left < 0) return;
+  for (int i = 0; i < 3; i++)
+    for (int xx = 0; xx < 2; xx++) fb.put(x + i * 3 + xx, y, i < left ? rgb(255, 200, 0) : rgb(45, 45, 45));
+}
+
+void renderFootballFull(Frame& fb, const Game& g, const Logo* la, const Logo* lh, uint32_t ms) {
   fb.clear();
   char left[20];
   snprintf(left, sizeof(left), "%s %s", g.periodLabel[0] ? g.periodLabel : "", g.clock);
@@ -527,51 +603,21 @@ void renderFootballFull(Frame& fb, const Game& g, const Logo* la16, const Logo* 
   char r[32];
   shortDown(r, g.shortDD[0] ? g.shortDD : g.downDistance, tw(left, F3));
   if (r[0]) text(fb, W - 2 - tw(r, F3), 1, r, g.redzone ? RED : DATEC, F3);
-  // your team on top, like the main screen
+  const Side* sides[2] = {&g.away, &g.home};
+  const Logo* lg[2] = {la, lh};
   for (int k = 0; k < 2; k++) {
-    bool homeRow = (k == 0) == g.pinnedHome;
-    const Side& sd = homeRow ? g.home : g.away;
-    const Logo* lg = homeRow ? lh16 : la16;
-    int y = 8 + k * 18;
-    static const Logo none;
-    logoOrLetters(fb, lg ? *lg : none, 1, y, sd.abbr, sd.hasColor, sd.color);
+    const Side& sd = *sides[k];
+    bool homeSide = k == 1;
+    int x = homeSide ? 38 : 0;
+    logoBox(fb, lg[k], x, 8, MATCHUP_W, MATCHUP_H, sd.abbr, sd.hasColor, sd.color);
     char s[6]; snprintf(s, sizeof(s), "%d", sd.score);
-    RGB scol = WHITE;
-    if (k == 0) scol = scoreTop; else scol = scoreBot;
-    scoreText(fb, W - 2 - tw(s, F5, 2), y + 1, s, scol, F5, 2);
-    bool ball = g.possession && ((g.possession == 1) == homeRow);
-    if (ball) sprite(fb, 22, y + 4, BALL, 5, BROWN);
-    int to = homeRow ? g.toHome : g.toAway;
-    if (to >= 0)
-      for (int i = 0; i < 3; i++)
-        for (int xx = 0; xx < 3; xx++) fb.put(21 + i * 4 + xx, y + 13, i < to ? rgb(255, 200, 0) : rgb(50, 50, 50));
+    RGB sc = homeSide == g.pinnedHome ? scoreTop : scoreBot;   // scoreTop is your team's
+    scoreText(fb, x + 13 - (tw(s, F5, 2) >> 1), 32, s, sc, F5, 2);
+    timeoutDots(fb, x + 9, 47, homeSide ? g.toHome : g.toAway);
   }
-  // mini field: home goal on the left (yard line 0), away on the right
-  const int FY = 45, X0 = 6, LEN = 52;
-  RGB grass = g.redzone ? rgb(80, 12, 12) : rgb(10, 60, 20);
-  RGB mark = g.redzone ? rgb(140, 40, 40) : rgb(40, 110, 50);
-  for (int x = 2; x <= 61; x++) for (int yy = FY; yy < FY + 5; yy++) fb.put(x, yy, grass);
-  auto dimC = [](bool has, uint32_t c) { RGB l = ledColor(has, c); return rgb(((l >> 16) & 255) * 7 / 10, ((l >> 8) & 255) * 7 / 10, (l & 255) * 7 / 10); };
-  for (int x = 2; x < X0; x++) for (int yy = FY; yy < FY + 5; yy++) fb.put(x, yy, dimC(g.home.hasColor, g.home.color));
-  for (int x = X0 + LEN; x <= 61; x++) for (int yy = FY; yy < FY + 5; yy++) fb.put(x, yy, dimC(g.away.hasColor, g.away.color));
-  for (int yd = 10; yd < 100; yd += 10) { int x = X0 + yd * LEN / 100; fb.put(x, FY, mark); fb.put(x, FY + 4, mark); }
-  if (g.yardLine >= 0 && g.yardLine <= 100 && g.possession) {
-    bool homeBall = g.possession == 1;          // home drives toward the away goal (right)
-    int dir = homeBall ? 1 : -1;
-    int bx = X0 + g.yardLine * LEN / 100;
-    if (g.distance > 0) {
-      int fd = g.yardLine + dir * g.distance;
-      if (fd >= 0 && fd <= 100) { int fx = X0 + fd * LEN / 100; for (int yy = FY; yy < FY + 5; yy++) fb.put(fx, yy, rgb(255, 215, 0)); }
-    }
-    for (int yy = FY + 1; yy < FY + 4; yy++) { fb.put(bx, yy, rgb(230, 120, 40)); fb.put(bx - dir, yy, rgb(230, 120, 40)); }
-    fb.put(bx + dir, FY + 2, WHITE); fb.put(bx + 2 * dir, FY + 2, WHITE); fb.put(bx + dir, FY + 1, WHITE); fb.put(bx + dir, FY + 3, WHITE);
-  }
-  // win chance: home share from the left, in team colours
-  if (g.winHome >= 0) {
-    int split = 2 + g.winHome * 60 / 100;
-    RGB ch = ledColor(g.home.hasColor, g.home.color), ca = ledColor(g.away.hasColor, g.away.color);
-    for (int x = 2; x <= 61; x++) fb.put(x, 52, x < split ? ch : ca);
-  }
+  if (g.possession) sprite(fb, g.possession == 2 ? 27 : 31, 18, BALL, 5, BROWN);
+  drawField(fb, g, 49, 5);
+  drawWinBar(fb, g, 55);
   // last play, gold when it scored
   if (g.lastPlay[0]) {
     char up[200]; int i = 0;
@@ -581,7 +627,7 @@ void renderFootballFull(Frame& fb, const Game& g, const Logo* la16, const Logo* 
     while (*s == ' ') s++;
     RGB c = g.playScore > 0 ? GOLD : DATEC;
     int w = tw(s, F3);
-    if (w <= W - 4) text(fb, (W - w) >> 1, 57, s, c, F3);
-    else text(fb, W - (int)((ms / 40) % (uint32_t)(w + W)), 57, s, c, F3);
+    if (w <= W - 4) text(fb, (W - w) >> 1, 58, s, c, F3);
+    else text(fb, W - (int)((ms / 40) % (uint32_t)(w + W)), 58, s, c, F3);
   }
 }

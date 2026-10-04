@@ -38,7 +38,7 @@ void renderCard(Frame& fb, const ChanCard& c, int pos, int count);
 // Full ticker (wheel: ALL NFL / ALL COLLEGE): two games a page, both teams'
 // 16-dot logos (or their letters), the score between, clock / FINAL / start
 // time under it. games: array of n; page counts up every few seconds.
-static const int SMALL_LOGO = 16;   // logos on the full ticker and the full-game screen
+static const int SMALL_LOGO = 16;   // logos on the full ticker
 struct FullGame {
   Tick t;
   Logo la, lh;
@@ -47,7 +47,9 @@ struct FullGame {
 void renderFullTicker(Frame& fb, const FullGame* games, int n, int page, const char* title);
 
 // The football full-game screen (wheel push during a live football game):
-// logos, big scores, timeouts, a mini field with the ball and the line to
-// gain (tinted red in the red zone), win chance, and the last play scrolling
-// (gold when it scored). la16/lh16: away/home 16-dot logos (may be empty).
-void renderFootballFull(Frame& fb, const Game& g, const Logo* la16, const Logo* lh16, uint32_t ms);
+// both logos side by side (away left, home right) with the scores under
+// them, the ball between them for possession, timeouts, a mini field (end
+// zones in team colours, the ball, the line to gain, red in front of the
+// goal in the red zone), win chance, and the last play scrolling (gold when
+// it scored). la/lh: away/home 26x24 logos (may be empty: letters instead).
+void renderFootballFull(Frame& fb, const Game& g, const Logo* la, const Logo* lh, uint32_t ms);

@@ -564,7 +564,7 @@ void loop() {
             drawMessage(*fb, l, 2);
           }
         } else if (shown->game.valid && bigMode && shown->game.sport == FOOTBALL && shown->game.state == ST_IN)
-          renderFootballFull(*fb, shown->game, &shown->away16, &shown->home16, millis());
+          renderFootballFull(*fb, shown->game, &shown->away, &shown->home, millis());
         else if (shown->game.valid)
           renderGame(*fb, shown->game, pairN, &shown->away, &shown->home, bigMode, millis());
         else statusScreen(shown->status);

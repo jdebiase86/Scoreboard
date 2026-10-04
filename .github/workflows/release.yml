@@ -1,11 +1,14 @@
 # Builds the firmware and publishes it as a release whenever FW_VERSION in
 # firmware/scoreboard/sb_version.h changes on main. The boards install the
-# latest release's scoreboard-X.Y.bin.
+# latest release's scoreboard-X.Y.bin. On a pull request it only builds, so a
+# change that doesn't compile shows up before it's approved.
 name: Build and release firmware
 
 on:
   push:
     branches: [main]
+    paths: ["firmware/scoreboard/**"]
+  pull_request:
     paths: ["firmware/scoreboard/**"]
   workflow_dispatch:
 
@@ -23,7 +26,8 @@ jobs:
         run: |
           V=$(grep -oP 'FW_VERSION "\K[^"]+' firmware/scoreboard/sb_version.h)
           echo "version=$V" >> "$GITHUB_OUTPUT"
-          if gh release view "v$V" > /dev/null 2>&1; then echo "exists=1" >> "$GITHUB_OUTPUT"; fi
+          # on a pull request: always build, never publish
+          if [ "${{ github.event_name }}" != pull_request ] && gh release view "v$V" > /dev/null 2>&1; then echo "exists=1" >> "$GITHUB_OUTPUT"; fi
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -56,7 +60,7 @@ jobs:
           ls -la "scoreboard-$V.bin"
 
       - name: Publish the release
-        if: steps.ver.outputs.exists != '1'
+        if: steps.ver.outputs.exists != '1' && github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
