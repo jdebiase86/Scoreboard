@@ -1,0 +1,739 @@
+<title>Gameday Panel</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f0eeea;
+    --surface: #ffffff;
+    --border: #d9d4cb;
+    --ink: #16181c;
+    --ink-soft: #5d6067;
+    --ink-faint: #8b8e95;
+    --accent: #c06a12;
+    --accent-soft: #f4e3cd;
+    --chassis: #0a0b0d;
+    --chassis-edge: #26292f;
+    --focus: #c06a12;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #101216;
+      --surface: #191c22;
+      --border: #2b2f37;
+      --ink: #e9ebef;
+      --ink-soft: #a3a7b0;
+      --ink-faint: #767b85;
+      --accent: #e8a33d;
+      --accent-soft: #332614;
+      --chassis: #050607;
+      --chassis-edge: #1d2026;
+      --focus: #e8a33d;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #101216;
+    --surface: #191c22;
+    --border: #2b2f37;
+    --ink: #e9ebef;
+    --ink-soft: #a3a7b0;
+    --ink-faint: #767b85;
+    --accent: #e8a33d;
+    --accent-soft: #332614;
+    --chassis: #050607;
+    --chassis-edge: #1d2026;
+    --focus: #e8a33d;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    margin: 0;
+  }
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding-inline: 16px;
+    padding-block: 28px 44px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  header { display: flex; flex-direction: column; gap: 5px; }
+  h1 {
+    font-family: Oswald, "Arial Narrow", sans-serif;
+    font-weight: 600;
+    font-size: clamp(27px, 7vw, 36px);
+    letter-spacing: 0.012em;
+    line-height: 1.04;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .sub { color: var(--ink-soft); font-size: 14px; line-height: 1.5; margin: 0; }
+
+  /* ---- the panel, in its chassis ---- */
+  .chassis {
+    background: var(--chassis);
+    border: 1px solid var(--chassis-edge);
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    justify-content: center;
+  }
+  canvas {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    image-rendering: pixelated;
+  }
+
+  /* ---- controls ---- */
+  .controls { display: flex; flex-direction: column; gap: 14px; }
+  .group { display: flex; flex-direction: column; gap: 7px; }
+  .grouplabel {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  button.chip {
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 13px;
+    cursor: pointer;
+    line-height: 1.2;
+  }
+  button.chip:hover { border-color: var(--ink-faint); color: var(--ink); }
+  button.chip[aria-pressed="true"] {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  button.chip:focus-visible,
+  a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* ---- legend ---- */
+  .legend {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 15px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .legend h2 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+  .legrow { display: flex; align-items: baseline; gap: 10px; font-size: 13.5px; line-height: 1.45; }
+  .swatch {
+    flex: none;
+    width: 13px; height: 13px;
+    border-radius: 3px;
+    position: relative;
+    top: 2px;
+  }
+  .legrow span { color: var(--ink-soft); }
+  .legrow b { color: var(--ink); font-weight: 600; }
+
+  .spec {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11.5px;
+    line-height: 1.7;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .spec b { color: var(--ink-soft); font-weight: 500; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Gameday Panel</h1>
+    <p class="sub">Every pixel here is drawn at 64&times;64 &mdash; the panel's real resolution &mdash; so this is what the LEDs will show, not an impression of it.</p>
+  </header>
+
+  <div class="chassis">
+    <canvas id="panel" width="640" height="640" aria-label="Simulated 64 by 64 LED scoreboard panel"></canvas>
+  </div>
+
+  <div class="controls">
+    <div class="group">
+      <div class="grouplabel">Board</div>
+      <div class="chips" id="teamChips"></div>
+    </div>
+    <div class="group">
+      <div class="grouplabel">Game state</div>
+      <div class="chips" id="stateChips"></div>
+    </div>
+    <div class="group">
+      <div class="grouplabel">Ticker</div>
+      <div class="chips">
+        <button class="chip" id="playBtn" aria-pressed="true">Pause</button>
+        <button class="chip" id="nextBtn">Next two games</button>
+        <button class="chip" id="fxBtn" type="button">Touchdown</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <h2>Reading the board</h2>
+    <div class="legrow"><div class="swatch" style="background:#be5f1e"></div>
+      <span><b>Football</b> sits beside whoever has the ball.</span></div>
+    <div class="legrow"><div class="swatch" style="background:#ff2828"></div>
+      <span><b>Red bars</b> down both edges of a ticker game mean somebody's in the red zone. Your own game shows it as red down &amp; distance up top.</span></div>
+    <div class="legrow"><div class="swatch" style="background:#00e650"></div>
+      <span><b>Green bars</b> mean one of your fantasy players is in that game. <b>FINAL</b> is green too.</span></div>
+    <div class="legrow"><div class="swatch" style="background:#ffd700"></div>
+      <span><b>Fireworks</b> when your team scores a touchdown &mdash; yours only, not the opponent's.</span></div>
+    <div class="legrow"><div class="swatch" style="background:#696969"></div>
+      <span><b>Grey lines</b> split your game from the ticker, and the two ticker games from each other.</span></div>
+  </div>
+
+  <div class="spec">
+    <b>Panel</b> 64&times;64, 3mm pitch, 4096 RGB LEDs<br>
+    <b>Controller</b> Seengreat ESP32-S3 HUB75, driven over DMA<br>
+    <b>Data</b> ESPN scoreboard API &mdash; every 15 min pre-game, 5 sec live<br>
+    <b>Boards</b> one firmware; the team is a one-line change before flashing
+  </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------- fonts
+// Hand-drawn on the pixel grid. A shrunk-down system font turns to grey
+// mush at five pixels tall; on a panel a stroke is lit or it isn't.
+const F5 = {
+"0":["01110","10001","10011","10101","11001","10001","01110"],
+"1":["00100","01100","00100","00100","00100","00100","01110"],
+"2":["01110","10001","00001","00010","00100","01000","11111"],
+"3":["11111","00010","00100","00010","00001","10001","01110"],
+"4":["00010","00110","01010","10010","11111","00010","00010"],
+"5":["11111","10000","11110","00001","00001","10001","01110"],
+"6":["00110","01000","10000","11110","10001","10001","01110"],
+"7":["11111","00001","00010","00100","01000","01000","01000"],
+"8":["01110","10001","10001","01110","10001","10001","01110"],
+"9":["01110","10001","10001","01111","00001","00010","01100"],
+"A":["01110","10001","10001","11111","10001","10001","10001"],
+"B":["11110","10001","10001","11110","10001","10001","11110"],
+"C":["01110","10001","10000","10000","10000","10001","01110"],
+"D":["11100","10010","10001","10001","10001","10010","11100"],
+"E":["11111","10000","10000","11110","10000","10000","11111"],
+"F":["11111","10000","10000","11110","10000","10000","10000"],
+"G":["01110","10001","10000","10111","10001","10001","01111"],
+"H":["10001","10001","10001","11111","10001","10001","10001"],
+"I":["01110","00100","00100","00100","00100","00100","01110"],
+"J":["00111","00010","00010","00010","00010","10010","01100"],
+"K":["10001","10010","10100","11000","10100","10010","10001"],
+"L":["10000","10000","10000","10000","10000","10000","11111"],
+"M":["10001","11011","10101","10101","10001","10001","10001"],
+"N":["10001","10001","11001","10101","10011","10001","10001"],
+"O":["01110","10001","10001","10001","10001","10001","01110"],
+"P":["11110","10001","10001","11110","10000","10000","10000"],
+"Q":["01110","10001","10001","10001","10101","10010","01101"],
+"R":["11110","10001","10001","11110","10100","10010","10001"],
+"S":["01111","10000","10000","01110","00001","00001","11110"],
+"T":["11111","00100","00100","00100","00100","00100","00100"],
+"U":["10001","10001","10001","10001","10001","10001","01110"],
+"V":["10001","10001","10001","10001","10001","01010","00100"],
+"W":["10001","10001","10001","10101","10101","11011","10001"],
+"X":["10001","10001","01010","00100","01010","10001","10001"],
+"Y":["10001","10001","01010","00100","00100","00100","00100"],
+"Z":["11111","00001","00010","00100","01000","10000","11111"],
+" ":["00000","00000","00000","00000","00000","00000","00000"],
+"-":["00000","00000","00000","11111","00000","00000","00000"],
+":":["00000","00100","00100","00000","00100","00100","00000"]
+};
+const F3 = {
+"0":["111","101","101","101","111"],"1":["010","110","010","010","111"],
+"2":["111","001","111","100","111"],"3":["111","001","111","001","111"],
+"4":["101","101","111","001","001"],"5":["111","100","111","001","111"],
+"6":["111","100","111","101","111"],"7":["111","001","001","001","001"],
+"8":["111","101","111","101","111"],"9":["111","101","111","001","111"],
+"A":["111","101","111","101","101"],"B":["110","101","110","101","110"],
+"C":["111","100","100","100","111"],"D":["110","101","101","101","110"],
+"E":["111","100","111","100","111"],"F":["111","100","111","100","100"],
+"G":["111","100","101","101","111"],"H":["101","101","111","101","101"],
+"I":["111","010","010","010","111"],"J":["001","001","001","101","111"],
+"K":["101","101","110","101","101"],"L":["100","100","100","100","111"],
+"M":["101","111","111","101","101"],"N":["101","111","111","111","101"],
+"O":["111","101","101","101","111"],"P":["111","101","111","100","100"],
+"Q":["111","101","101","111","001"],"R":["111","101","111","110","101"],
+"S":["111","100","111","001","111"],"T":["111","010","010","010","010"],
+"U":["101","101","101","101","111"],"V":["101","101","101","101","010"],
+"W":["101","101","111","111","101"],"X":["101","101","010","101","101"],
+"Y":["101","101","010","010","010"],"Z":["111","001","010","100","111"],
+" ":["000","000","000","000","000"],"-":["000","000","111","000","000"],
+":":["000","010","000","010","000"],"&":["010","101","010","101","011"],
+"/":["001","001","010","100","100"],"#":["101","111","101","111","101"],
+".":["000","000","000","000","010"]
+};
+// leather = 1, laces = 2
+const BALL = ["0011100","0111110","1112111","0111110","0011100"];
+
+// ---------------------------------------------------------------- color
+const W = 64, H = 64;
+const WHITE="rgb(255,255,255)", DIM="rgb(120,120,120)", GRAY="rgb(90,90,90)",
+      GOLD="rgb(255,190,0)", RED="rgb(255,40,40)", GREEN="rgb(0,230,80)",
+      BROWN="rgb(190,95,30)", LINE="rgb(105,105,105)", OFF="rgb(26,26,26)",
+      CLOCK="rgb(235,235,235)",   // the time itself - reads first
+      DATEC="rgb(140,140,140)";   // the date / period label behind it
+
+const TEAMS = {
+  NYG:[11,35,79], PHI:[0,76,84], DAL:[0,34,68], WSH:[90,20,20],
+  UF:[0,33,165], TENN:[255,130,0], LSU:[70,29,124], TEX:[191,87,0],
+  CAR:[0,133,202], CLE:[255,60,0], LAC:[0,128,198], BUF:[0,51,141],
+  NYJ:[18,87,64], DET:[0,118,182], HOU:[3,32,47], IND:[0,44,95],
+  ATL:[167,25,48], GB:[24,48,40], MIN:[79,38,131], NO:[211,188,141],
+  SEA:[0,34,68], ARI:[151,35,63], SF:[170,0,0], TEN:[12,35,64],
+  OSU:[187,0,0], MICH:[0,39,76], ALA:[155,12,26], AUB:[12,35,64],
+  GA:[186,12,47], OLE:[20,0,58]
+};
+// Navy and forest green read as black on a panel. Lift them until they light.
+function ledColor(abbr) {
+  const c = TEAMS[abbr];
+  if (!c) return WHITE;
+  const m = Math.max(c[0], c[1], c[2]);
+  if (m === 0) return WHITE;
+  if (m < 140) { const f = 190 / m;
+    return `rgb(${Math.min(255, c[0]*f|0)},${Math.min(255, c[1]*f|0)},${Math.min(255, c[2]*f|0)})`; }
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+
+const TEAMS2 = {   // each team's second colour, for the celebration
+  NYG:[163,25,48], DAL:[134,147,151], UF:[250,70,22], LSU:[253,208,35],
+  PHI:[165,172,175], WSH:[255,182,18], TENN:[255,255,255], TEX:[255,255,255]
+};
+// Team's own two colours first, then gold / white / ember, so the blast
+// stays colourful even for a team whose colours are both dark.
+function teamPalette(abbr) {
+  const pal = [];
+  if (TEAMS[abbr]) pal.push(TEAMS[abbr]);
+  if (TEAMS2[abbr]) pal.push(TEAMS2[abbr]);
+  pal.push([255,215,0], [255,255,255], [255,110,30]);
+  return pal;
+}
+
+// ------------------------------------------------------------- plotting
+let px = new Array(W * H).fill(null);
+const put = (x, y, c) => { if (x>=0 && x<W && y>=0 && y<H) px[y*W+x] = c; };
+
+function tw(s, font, scale) {
+  scale = scale || 1;
+  if (!s) return 0;
+  const gw = font === F5 ? 5 : 3;
+  return s.length * (gw * scale + 1) - 1;
+}
+function text(x, y, s, color, font, scale) {
+  scale = scale || 1;
+  const gw = font === F5 ? 5 : 3;
+  for (const ch of String(s).toUpperCase()) {
+    const g = font[ch];
+    if (g) {
+      for (let ry = 0; ry < g.length; ry++)
+        for (let rx = 0; rx < g[ry].length; rx++)
+          if (g[ry][rx] === "1")
+            for (let sy = 0; sy < scale; sy++)
+              for (let sx = 0; sx < scale; sx++)
+                put(x + rx*scale + sx, y + ry*scale + sy, color);
+    }
+    x += gw * scale + 1;
+  }
+}
+function sprite(x, y, rows, color, color2) {
+  for (let ry = 0; ry < rows.length; ry++)
+    for (let rx = 0; rx < rows[ry].length; rx++) {
+      const b = rows[ry][rx];
+      if (b !== "0") put(x + rx, y + ry, b === "1" ? color : (color2 || WHITE));
+    }
+}
+
+// --------------------------------------------------------------- layout
+const LAY = { status:1, row1:7, row2:22, divider:37, tickA:39, tickDiv:51, tickB:53 };
+
+function teamRow(y, abbr, score, color, hasBall, record) {
+  const rowH = 14;
+  // Before kickoff the slot carries the team's record, not a dash
+  const pre = (score === null || score === undefined);
+  let txt, sc;
+  if (pre && record) { txt = String(record); sc = 1; }
+  else if (pre) { txt = "-"; sc = 2; }
+  else { txt = String(score); sc = 2; }
+  const sw = tw(txt, F5, sc);
+  // Size the abbreviation against a full score so nothing shifts at kickoff
+  const scale = (tw(abbr, F5, 2) + 9 + tw("00", F5, 2) <= 63) ? 2 : 1;
+  text(1, y + ((rowH - 7*scale) >> 1), abbr, color, F5, scale);
+  const sx = W - 1 - sw;
+  text(sx, y + ((rowH - 7*sc) >> 1), txt, WHITE, F5, sc);
+  if (hasBall) sprite(sx - 9, y + ((rowH - 5) >> 1), BALL, BROWN);
+}
+
+function drawMain(g) {
+  const pinnedHome = g.pinnedSide === "home";
+  const top = pinnedHome ? g.home : g.away;
+  const bot = pinnedHome ? g.away : g.home;
+  const topBall = g.possession != null && ((g.possession === "home") === pinnedHome);
+  const botBall = g.possession != null && !topBall;
+
+  if (g.state === "post") {
+    const t = "FINAL";
+    text((W - tw(t, F3, 1)) >> 1, LAY.status, t, GOLD, F3, 1);
+  } else if (g.state === "pre") {
+    text(2, LAY.status, g.kickoff || "", CLOCK, F3, 1);
+  } else {
+    const q = {1:"1ST",2:"2ND",3:"3RD",4:"4TH"}[g.period] || "OT";
+    text(2, LAY.status, q + " " + (g.clock || ""), CLOCK, F3, 1);
+    // "1st & Goal" spelled out collides with the clock on the left, so
+    // Goal becomes G and anything still too long gets trimmed to fit.
+    const left = q + " " + (g.clock || "");
+    let r = (g.downDistance || "").toUpperCase().replace(/ /g, "").replace("GOAL", "G");
+    while (r && tw(left, F3, 1) + 2 + tw(r, F3, 1) > W) r = r.slice(0, -1);
+    if (r) text(W - 2 - tw(r, F3, 1), LAY.status, r, g.redzone ? RED : GRAY, F3, 1);
+  }
+  teamRow(LAY.row1, top.abbr, top.score, ledColor(top.abbr), topBall, top.record);
+  teamRow(LAY.row2, bot.abbr, bot.score, ledColor(bot.abbr), botBall, bot.record);
+}
+
+function tickerBlock(y, g) {
+  let aS = null, hS = null;
+  if (g.score) { const p = g.score.split("-"); aS = p[0]; hS = p[1]; }
+
+  let rt, rb;
+  if (g.status === "F") { rt = "FINAL"; rb = ""; }
+  else if (!g.score) { rt = g.kickTime || ""; rb = g.kickDate || ""; }
+  else { rt = g.status || ""; rb = g.clock || ""; }
+
+  [[g.away, aS, false], [g.home, hS, true]].forEach(([abbr, sc, isHome], i) => {
+    const ry = y + i*6;
+    text(3, ry, abbr, ledColor(abbr), F3, 1);
+    if (sc !== null) text(21, ry, sc, WHITE, F3, 1);
+    if (g.possession && (g.possession === "home") === isHome)
+      sprite(31, ry, BALL, BROWN);
+  });
+
+  // A time reads bright; a date or period label sits behind it.
+  const sched = !g.score && g.status !== "F";
+  if (rt) text(W - 3 - tw(rt, F3, 1), y, rt, rt === "FINAL" ? GREEN : (sched ? CLOCK : DATEC), F3, 1);
+  if (rb) text(W - 3 - tw(rb, F3, 1), y + 6, rb, sched ? DATEC : CLOCK, F3, 1);
+
+  const bar = g.redzone ? RED : (g.fantasy ? GREEN : null);
+  if (bar) for (let yy = y; yy < y + 11; yy++) { put(0, yy, bar); put(W-1, yy, bar); }
+}
+
+function renderPixels(g, pair) {
+  px = new Array(W * H).fill(null);
+  drawMain(g);
+  for (let x = 0; x < W; x++) put(x, LAY.divider, LINE);
+  const games = g.ticker || [];
+  if (games.length) {
+    const i = (pair * 2) % games.length;
+    tickerBlock(LAY.tickA, games[i % games.length]);
+    // Runs under the teams and scores only, stopping short of the clock
+    for (let x = 2; x < 39; x++) put(x, LAY.tickDiv, LINE);
+    tickerBlock(LAY.tickB, games[(i + 1) % games.length]);
+  }
+}
+
+// ---------------------------------------------------------------- paint
+const cv = document.getElementById("panel");
+const ctx = cv.getContext("2d");
+function paint() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const cssW = cv.clientWidth || 512;
+  const cell = Math.max(4, Math.floor((cssW * dpr) / W));
+  const size = cell * W;
+  if (cv.width !== size) { cv.width = size; cv.height = size; }
+  ctx.fillStyle = "#0a0b0d";
+  ctx.fillRect(0, 0, size, size);
+  const r = cell * 0.39;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    ctx.fillStyle = px[y*W + x] || OFF;
+    ctx.beginPath();
+    ctx.arc(x*cell + cell/2, y*cell + cell/2, r, 0, 6.2832);
+    ctx.fill();
+  }
+}
+
+
+// ------------------------------------------------------ touchdown explosion
+// A blast, not a firework: the panel flashes white, a shockwave ring tears
+// outward in the team's colors, debris flies with trails, and secondary
+// blasts keep going off around it. All of it drawn on the same 64x64 grid
+// as the scoreboard, so the panel firmware can do exactly this.
+const FX_MS = 5200;
+let fx = null;
+
+function rgbStr(c, b) {
+  return "rgb(" + Math.round(c[0]*b) + "," + Math.round(c[1]*b) + "," + Math.round(c[2]*b) + ")";
+}
+
+// Dark team colors would vanish against black, so lift them the same way
+// the scoreboard does before using them in the blast.
+function liftFx(c) {
+  if (!c) return [255,255,255];
+  const m = Math.max(c[0], c[1], c[2]);
+  if (m === 0) return [255,255,255];
+  if (m < 150) { const f = 200/m;
+    return [Math.min(255, c[0]*f|0), Math.min(255, c[1]*f|0), Math.min(255, c[2]*f|0)]; }
+  return c;
+}
+
+function makeBlast(cx, cy, palette, power) {
+  const parts = [];
+  // three shells at different speeds - reads as one violent burst rather
+  // than a tidy ring
+  const rings = [{n: 30*power, spd: 1.9}, {n: 22*power, spd: 1.15}, {n: 14*power, spd: 0.55}];
+  for (const ring of rings) {
+    for (let i = 0; i < ring.n; i++) {
+      const ang = Math.random() * Math.PI * 2;
+      const spd = ring.spd * (0.6 + Math.random()*0.8);
+      parts.push({
+        x: cx, y: cy,
+        vx: Math.cos(ang)*spd, vy: Math.sin(ang)*spd,
+        life: 1, decay: 0.008 + Math.random()*0.007,
+        color: palette[(Math.random()*palette.length)|0]
+      });
+    }
+  }
+  return parts;
+}
+
+function startFireworks(palette, label) {
+  const pal = palette.map(liftFx);
+  fx = {
+    t0: performance.now(),
+    pal: pal,
+    label: label,
+    parts: makeBlast(32, 30, pal, 1.6),      // the main hit, centre panel
+    waves: [
+      {cx:32, cy:30, t0:0,   color: pal[0], speed:0.055, max:56},
+      {cx:32, cy:30, t0:110, color: pal[1] || pal[0], speed:0.042, max:50},
+      {cx:32, cy:30, t0:230, color: [255,255,255], speed:0.032, max:44}
+    ],
+    nextBlast: 620
+  };
+  requestAnimationFrame(stepFireworks);
+}
+
+function drawRing(cx, cy, r, color, bright) {
+  if (r < 1) return;
+  const steps = Math.max(10, Math.round(r * 7));
+  for (let i = 0; i < steps; i++) {
+    const a = (Math.PI*2*i)/steps;
+    put(Math.round(cx + Math.cos(a)*r), Math.round(cy + Math.sin(a)*r), rgbStr(color, bright));
+  }
+}
+
+function stepFireworks(now) {
+  if (!fx) return;
+  const el = now - fx.t0;
+  px = new Array(W*H).fill(null);
+
+  // 1. the flash - whole panel white, gone in a blink
+  if (el < 130) {
+    const b = 1 - el/130;
+    const c = rgbStr([255,255,255], b);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) put(x, y, c);
+  }
+
+  // 2. shockwave rings tearing outward
+  for (const w of fx.waves) {
+    const t = el - w.t0;
+    if (t <= 0) continue;
+    const r = t * w.speed;
+    if (r > w.max) continue;
+    drawRing(w.cx, w.cy, r, w.color, Math.max(0, 1 - r/w.max));
+    drawRing(w.cx, w.cy, r - 1, w.color, Math.max(0, 0.45 - r/w.max));
+  }
+
+  // 3. secondary blasts, so it keeps erupting instead of petering out
+  if (el > fx.nextBlast && el < FX_MS - 800) {
+    const cx = 6 + Math.random()*52, cy = 6 + Math.random()*46;
+    fx.parts = fx.parts.concat(makeBlast(cx, cy, fx.pal, 1.05));
+    fx.waves.push({cx:cx, cy:cy, t0:el, color: fx.pal[(Math.random()*fx.pal.length)|0],
+                   speed:0.045, max:30});
+    // drop spent debris so the list doesn't grow without bound
+    fx.parts = fx.parts.filter(p => p.life > 0);
+    fx.nextBlast = el + 240 + Math.random()*200;
+  }
+
+  // 4. debris
+  for (const pt of fx.parts) {
+    if (pt.life <= 0) continue;
+    pt.x += pt.vx; pt.y += pt.vy;
+    pt.vy += 0.022;      // gravity
+    pt.vx *= 0.985;
+    pt.life -= pt.decay;
+    if (pt.life > 0) {
+      const b = Math.max(0, Math.min(1, pt.life));
+      put(Math.round(pt.x), Math.round(pt.y), rgbStr(pt.color, b));
+      if (b > 0.4) put(Math.round(pt.x - pt.vx), Math.round(pt.y - pt.vy), rgbStr(pt.color, b*0.4));
+      if (b > 0.7) put(Math.round(pt.x - pt.vx*2), Math.round(pt.y - pt.vy*2), rgbStr(pt.color, b*0.18));
+    }
+  }
+
+  // 5. the team punches through once the first blast clears
+  if (el > 620) {
+    const cyc = fx.pal[Math.floor(el/130) % fx.pal.length];
+    const lw = tw(fx.label, F5, 2);
+    if (lw <= W - 2) {
+      text((W-lw)>>1, 20, fx.label, rgbStr(cyc, 1), F5, 2);
+    } else {
+      const lw1 = tw(fx.label, F5, 1);
+      text((W-lw1)>>1, 24, fx.label, rgbStr(cyc, 1), F5, 1);
+    }
+    // always bright - cycling this through a navy team colour made it
+    // disappear against the black panel on every other blink
+    const sw = tw("TOUCHDOWN", F3, 1);
+    for (let bx = -1; bx <= sw; bx++) for (let by = -1; by <= 5; by++)
+      put(((W-sw)>>1) + bx, 40 + by, "rgb(0,0,0)");
+    text((W-sw)>>1, 40, "TOUCHDOWN",
+         (Math.floor(el/130) % 2) ? "rgb(255,255,255)" : "rgb(255,190,0)", F3, 1);
+  }
+
+  paint();
+  if (el < FX_MS) requestAnimationFrame(stepFireworks);
+  else { fx = null; draw(); }
+}
+
+// ----------------------------------------------------------- demo games
+const NFL_SLATE = [
+  {away:"CAR", home:"CLE", status:"F", score:"13-27"},
+  {away:"LAC", home:"BUF", status:"3RD", clock:"8:41", score:"10-14", possession:"home", redzone:true},
+  {away:"NYJ", home:"DET", status:"2ND", clock:"2:00", score:"7-13", possession:"away", fantasy:true},
+  {away:"HOU", home:"IND", status:"F", score:"24-21"},
+  {away:"ATL", home:"GB", status:"4TH", clock:"1:12", score:"17-20", possession:"away", fantasy:true},
+  {away:"MIN", home:"NO", status:"1ST", clock:"11:36", score:"3-0", possession:"home"},
+  {away:"SEA", home:"ARI", kickTime:"4:25P", kickDate:"9/27"},
+  {away:"SF", home:"TEN", kickTime:"4:25P", kickDate:"9/27"}
+];
+const CFB_SLATE = [
+  {away:"OSU", home:"MICH", status:"2ND", clock:"6:21", score:"14-10", possession:"away"},
+  {away:"ALA", home:"AUB", status:"F", score:"31-17"},
+  {away:"LSU", home:"TEX", status:"3RD", clock:"4:02", score:"17-20", possession:"home", redzone:true},
+  {away:"GA", home:"OLE", kickTime:"7:30P", kickDate:"9/26"}
+];
+
+const BOARDS = {
+  NYG: {label:"Giants",  opp:"PHI",  side:"away", score:[20,17], final:[27,20], dd:"3RD & 6",  rz:true,  slate:NFL_SLATE, kick:"9/27 1:00P", rec:["1-1","2-0"]},
+  DAL: {label:"Cowboys", opp:"WSH",  side:"home", score:[24,21], final:[31,21], dd:"2ND & 3",  rz:true,  slate:NFL_SLATE, kick:"9/27 4:25P", rec:["2-1","1-2"]},
+  UF:  {label:"Gators",  opp:"TENN", side:"home", score:[24,20], final:[31,27], dd:"1ST & 10", rz:false, slate:CFB_SLATE, kick:"9/26 3:30P", rec:["3-0","2-1"]},
+  LSU: {label:"LSU",     opp:"TEX",  side:"away", score:[17,20], final:[24,27], dd:"3RD & 4",  rz:false, slate:CFB_SLATE, kick:"9/26 7:30P", rec:["2-1","3-0"]}
+};
+
+function makeGame(key, state, clock) {
+  const b = BOARDS[key];
+  const mine = state === "post" ? b.final[0] : b.score[0];
+  const their = state === "post" ? b.final[1] : b.score[1];
+  const me   = {abbr:key,   score: state === "pre" ? null : mine,  record: b.rec[0]};
+  const them = {abbr:b.opp, score: state === "pre" ? null : their, record: b.rec[1]};
+  const g = {
+    state,
+    home: b.side === "home" ? me : them,
+    away: b.side === "home" ? them : me,
+    pinnedSide: b.side,
+    ticker: b.slate,
+    kickoff: b.kick
+  };
+  if (state === "in") {
+    g.clock = clock;
+    g.period = 4;
+    g.downDistance = b.dd;
+    g.redzone = b.rz;
+    g.possession = b.side;
+  }
+  return g;
+}
+
+// ---------------------------------------------------------------- state
+let team = "NYG", gstate = "in", pair = 0, seconds = 252, playing = true;
+const fmt = s => Math.floor(s/60) + ":" + String(s%60).padStart(2, "0");
+
+function draw() {
+  if (fx) return;             // fireworks own the panel while they run
+  renderPixels(makeGame(team, gstate, fmt(seconds)), pair);
+  paint();
+}
+
+const teamChips = document.getElementById("teamChips");
+Object.keys(BOARDS).forEach(k => {
+  const b = document.createElement("button");
+  b.className = "chip";
+  b.type = "button";
+  b.textContent = BOARDS[k].label;
+  b.setAttribute("aria-pressed", String(k === team));
+  b.addEventListener("click", () => {
+    team = k;
+    pair = 0;
+    [...teamChips.children].forEach((c, i) =>
+      c.setAttribute("aria-pressed", String(Object.keys(BOARDS)[i] === team)));
+    draw();
+  });
+  teamChips.appendChild(b);
+});
+
+const STATES = [["in","Live"], ["pre","Pregame"], ["post","Final"]];
+const stateChips = document.getElementById("stateChips");
+STATES.forEach(([k, label]) => {
+  const b = document.createElement("button");
+  b.className = "chip";
+  b.type = "button";
+  b.textContent = label;
+  b.setAttribute("aria-pressed", String(k === gstate));
+  b.addEventListener("click", () => {
+    gstate = k;
+    [...stateChips.children].forEach((c, i) =>
+      c.setAttribute("aria-pressed", String(STATES[i][0] === gstate)));
+    draw();
+  });
+  stateChips.appendChild(b);
+});
+
+const playBtn = document.getElementById("playBtn");
+playBtn.addEventListener("click", () => {
+  playing = !playing;
+  playBtn.textContent = playing ? "Pause" : "Play";
+  playBtn.setAttribute("aria-pressed", String(playing));
+});
+document.getElementById("fxBtn").addEventListener("click", () => startFireworks(teamPalette(team), team));
+document.getElementById("nextBtn").addEventListener("click", () => {
+  pair = (pair + 1) % Math.ceil(BOARDS[team].slate.length / 2);
+  draw();
+});
+
+if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  playing = false;
+  playBtn.textContent = "Play";
+  playBtn.setAttribute("aria-pressed", "false");
+}
+
+let tick = 0;
+setInterval(() => {
+  if (!playing || fx) return;
+  tick++;
+  if (gstate === "in" && seconds > 0) seconds--;
+  if (tick % 4 === 0) pair = (pair + 1) % Math.ceil(BOARDS[team].slate.length / 2);
+  draw();
+}, 1000);
+
+window.addEventListener("resize", paint);
+draw();
+</script>

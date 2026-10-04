@@ -1,0 +1,775 @@
+{
+ "id": "401872966",
+ "uid": "s:20~l:28~e:401872966",
+ "date": "2026-10-04T17:00Z",
+ "name": "Arizona Cardinals at New York Giants",
+ "shortName": "ARI @ NYG",
+ "season": {
+  "year": 2026,
+  "type": 2,
+  "slug": "regular-season"
+ },
+ "week": {
+  "number": 4
+ },
+ "competitions": [
+  {
+   "id": "401872966",
+   "uid": "s:20~l:28~e:401872966~c:401872966",
+   "date": "2026-10-04T17:00Z",
+   "attendance": 80893,
+   "type": {
+    "id": "1",
+    "abbreviation": "STD"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "conferenceCompetition": false,
+   "playByPlayAvailable": true,
+   "recent": true,
+   "venue": {
+    "id": "3839",
+    "fullName": "MetLife Stadium",
+    "address": {
+     "city": "East Rutherford",
+     "state": "NJ",
+     "country": "USA"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "19",
+     "uid": "s:20~l:28~t:19",
+     "type": "team",
+     "order": 0,
+     "homeAway": "home",
+     "winner": true,
+     "team": {
+      "id": "19",
+      "uid": "s:20~l:28~t:19",
+      "location": "New York",
+      "name": "Giants",
+      "abbreviation": "NYG",
+      "displayName": "New York Giants",
+      "shortDisplayName": "Giants",
+      "color": "003c7f",
+      "alternateColor": "c9243f",
+      "isActive": true,
+      "venue": {
+       "id": "3839"
+      },
+      "links": [
+       {
+        "rel": [
+         "clubhouse",
+         "desktop",
+         "team"
+        ],
+        "href": "https://www.espn.com/nfl/team/_/name/nyg/new-york-giants",
+        "text": "Clubhouse",
+        "isExternal": false,
+        "isPremium": false
+       },
+       {
+        "rel": [
+         "roster",
+         "desktop",
+         "team"
+        ],
+        "href": "https://www.espn.com/nfl/team/roster/_/name/nyg/new-york-giants",
+        "text": "Roster",
+        "isExternal": false,
+        "isPremium": false
+       },
+       {
+        "rel": [
+         "roster",
+         "sportscenter",
+         "app",
+         "team"
+        ],
+        "href": "sportscenter://x-callback-url/showClubhouse?uid=s:20~l:28~t:19&section=roster",
+        "text": "Roster",
+        "isExternal": false,
+        "isPremium": false
+       },
+       {
+        "rel": [
+         "stats",
+         "desktop",
+         "team"
+        ],
+        "href": "https://www.espn.com/nfl/team/stats/_/name/nyg/new-york-giants",
+        "text": "Statistics",
+        "isExternal": false,
+        "isPremium": false
+       },
+       {
+        "rel": [
+         "stats",
+         "sportscenter",
+         "app",
+         "team"
+        ],
+        "href": "sportscenter://x-callback-url/showClubhouse?uid=s:20~l:28~t:19&section=stats",
+        "text": "Statistics",
+        "isExternal": false,
+        "isPremium": false
+       },
+       {
+        "rel": [
+         "schedule",
+         "desktop",
+         "team"
+        ],
+        "href": "https://www.espn.com/nfl/team/schedule/_/name/nyg",
+        "text": "Schedule",
+        "isExternal": false,
+        "isPremium": false
+       },
+       {
+        "rel": [
+         "schedule",
+         "sportscenter",
+         "app",
+         "team"
+        ],
+        "href": "sportscenter://x-callback-url/showClubhouse?uid=s:20~l:28~t:19&section=scores",
+        "text": "Schedule",
+        "isExternal": false,
+        "isPremium": false
+       }
+      ],
+      "logo": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/nyg.png"
+     },
+     "score": "36",
+     "linescores": [
+      {
+       "value": 3.0,
+       "displayValue": "3",
+       "period": 1
+      },
+      {
+       "value": 16.0,
+       "displayValue": "16",
+       "period": 2
+      },
+      {
+       "value": 8.0,
+       "displayValue": "8",
+       "period": 3
+      },
+      {
+       "value": 9.0,
+       "displayValue": "9",
+       "period": 4
+      }
+     ],
+     "statistics": [],
+     "curatedRank": {
+      "current": 99
+     },
+     "records": [
+      {
+       "name": "overall",
+       "abbreviation": "Game",
+       "type": "total",
+       "summary": "3-1"
+      },
+      {
+       "name": "Home",
+       "type": "home",
+       "summary": "3-0"
+      },
+      {
+       "name": "Road",
+       "type": "road",
+       "summary": "0-1"
+      }
+     ]
+    },
+    {
+     "id": "22",
+     "uid": "s:20~l:28~t:22",
+     "type": "team",
+     "order": 1,
+     "homeAway": "away",
+     "winner": false,
+     "team": {
+      "id": "22",
+      "uid": "s:20~l:28~t:22",
+      "location": "Arizona",
+      "name": "Cardinals",
+      "abbreviation": "ARI",
+      "displayName": "Arizona Cardinals",
+      "shortDisplayName": "Cardinals",
+      "color": "a40227",
+      "alternateColor": "ffffff",
+      "isActive": true,
+      "venue": {
+       "id": "3970"
+      },
+      "links": [
+       {
+        "rel": [
+         "clubhouse",
+         "desktop",
+         "team"
+        ],
+        "href": "https://www.espn.com/nfl/team/_/name/ari/arizona-cardinals",
+        "text": "Clubhouse",
+        "isExternal": false,
+        "isPremium": false
+       },
+       {
+        "rel": [
+         "roster",
+         "desktop",
+         "team"
+        ],
+        "href": "https://www.espn.com/nfl/team/roster/_/name/ari/arizona-cardinals",
+        "text": "Roster",
+        "isExternal": false,
+        "isPremium": false
+       },
+       {
+        "rel": [
+         "roster",
+         "sportscenter",
+         "app",
+         "team"
+        ],
+        "href": "sportscenter://x-callback-url/showClubhouse?uid=s:20~l:28~t:22&section=roster",
+        "text": "Roster",
+        "isExternal": false,
+        "isPremium": false
+       },
+       {
+        "rel": [
+         "stats",
+         "desktop",
+         "team"
+        ],
+        "href": "https://www.espn.com/nfl/team/stats/_/name/ari/arizona-cardinals",
+        "text": "Statistics",
+        "isExternal": false,
+        "isPremium": false
+       },
+       {
+        "rel": [
+         "stats",
+         "sportscenter",
+         "app",
+         "team"
+        ],
+        "href": "sportscenter://x-callback-url/showClubhouse?uid=s:20~l:28~t:22&section=stats",
+        "text": "Statistics",
+        "isExternal": false,
+        "isPremium": false
+       },
+       {
+        "rel": [
+         "schedule",
+         "desktop",
+         "team"
+        ],
+        "href": "https://www.espn.com/nfl/team/schedule/_/name/ari",
+        "text": "Schedule",
+        "isExternal": false,
+        "isPremium": false
+       },
+       {
+        "rel": [
+         "schedule",
+         "sportscenter",
+         "app",
+         "team"
+        ],
+        "href": "sportscenter://x-callback-url/showClubhouse?uid=s:20~l:28~t:22&section=scores",
+        "text": "Schedule",
+        "isExternal": false,
+        "isPremium": false
+       }
+      ],
+      "logo": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/ari.png"
+     },
+     "score": "24",
+     "linescores": [
+      {
+       "value": 14.0,
+       "displayValue": "14",
+       "period": 1
+      },
+      {
+       "value": 3.0,
+       "displayValue": "3",
+       "period": 2
+      },
+      {
+       "value": 7.0,
+       "displayValue": "7",
+       "period": 3
+      },
+      {
+       "value": 0.0,
+       "displayValue": "0",
+       "period": 4
+      }
+     ],
+     "statistics": [],
+     "curatedRank": {
+      "current": 99
+     },
+     "records": [
+      {
+       "name": "overall",
+       "abbreviation": "Game",
+       "type": "total",
+       "summary": "1-3"
+      },
+      {
+       "name": "Home",
+       "type": "home",
+       "summary": "0-1"
+      },
+      {
+       "name": "Road",
+       "type": "road",
+       "summary": "1-2"
+      }
+     ]
+    }
+   ],
+   "notes": [],
+   "status": {
+    "clock": 0.0,
+    "displayClock": "0:00",
+    "period": 4,
+    "type": {
+     "id": "3",
+     "name": "STATUS_FINAL",
+     "state": "post",
+     "completed": true,
+     "description": "Final",
+     "detail": "Final",
+     "shortDetail": "Final"
+    },
+    "isTBDFlex": false
+   },
+   "broadcasts": [
+    {
+     "market": "national",
+     "names": [
+      "CBS"
+     ]
+    }
+   ],
+   "leaders": [
+    {
+     "name": "passingYards",
+     "displayName": "Passing Leader",
+     "shortDisplayName": "PASS",
+     "abbreviation": "PYDS",
+     "leaders": [
+      {
+       "displayValue": "18/29, 250 YDS, 3 TD, 2 INT",
+       "value": 250.0,
+       "athlete": {
+        "id": "2969939",
+        "fullName": "Jameis Winston",
+        "displayName": "Jameis Winston",
+        "shortName": "J. Winston",
+        "links": [
+         {
+          "rel": [
+           "playercard",
+           "desktop",
+           "athlete"
+          ],
+          "href": "https://www.espn.com/nfl/player/_/id/2969939/jameis-winston"
+         }
+        ],
+        "headshot": "https://a.espncdn.com/i/headshots/nfl/players/full/2969939.png",
+        "jersey": "19",
+        "position": {
+         "abbreviation": "QB"
+        },
+        "team": {
+         "id": "19"
+        },
+        "active": true
+       },
+       "team": {
+        "id": "19"
+       }
+      }
+     ]
+    },
+    {
+     "name": "rushingYards",
+     "displayName": "Rushing Leader",
+     "shortDisplayName": "RUSH",
+     "abbreviation": "RYDS",
+     "leaders": [
+      {
+       "displayValue": "14 CAR, 63 YDS",
+       "value": 63.0,
+       "athlete": {
+        "id": "4870808",
+        "fullName": "Jeremiyah Love",
+        "displayName": "Jeremiyah Love",
+        "shortName": "J. Love",
+        "links": [
+         {
+          "rel": [
+           "playercard",
+           "desktop",
+           "athlete"
+          ],
+          "href": "https://www.espn.com/nfl/player/_/id/4870808/jeremiyah-love"
+         }
+        ],
+        "headshot": "https://a.espncdn.com/i/headshots/nfl/players/full/4870808.png",
+        "jersey": "4",
+        "position": {
+         "abbreviation": "RB"
+        },
+        "team": {
+         "id": "22"
+        },
+        "active": true
+       },
+       "team": {
+        "id": "22"
+       }
+      }
+     ]
+    },
+    {
+     "name": "receivingYards",
+     "displayName": "Receiving Leader",
+     "shortDisplayName": "REC",
+     "abbreviation": "RECYDS",
+     "leaders": [
+      {
+       "displayValue": "6 REC, 112 YDS, 1 TD",
+       "value": 112.0,
+       "athlete": {
+        "id": "4595348",
+        "fullName": "Malik Nabers",
+        "displayName": "Malik Nabers",
+        "shortName": "M. Nabers",
+        "links": [
+         {
+          "rel": [
+           "playercard",
+           "desktop",
+           "athlete"
+          ],
+          "href": "https://www.espn.com/nfl/player/_/id/4595348/malik-nabers"
+         }
+        ],
+        "headshot": "https://a.espncdn.com/i/headshots/nfl/players/full/4595348.png",
+        "jersey": "1",
+        "position": {
+         "abbreviation": "WR"
+        },
+        "team": {
+         "id": "19"
+        },
+        "active": true
+       },
+       "team": {
+        "id": "19"
+       }
+      }
+     ]
+    }
+   ],
+   "format": {
+    "regulation": {
+     "periods": 4
+    },
+    "overtime": {
+     "periods": 1
+    }
+   },
+   "startDate": "2026-10-04T17:00Z",
+   "broadcast": "CBS",
+   "geoBroadcasts": [
+    {
+     "type": {
+      "id": "1",
+      "shortName": "TV"
+     },
+     "market": {
+      "id": "1",
+      "type": "National"
+     },
+     "media": {
+      "shortName": "CBS"
+     },
+     "lang": "en",
+     "region": "us"
+    }
+   ],
+   "highlights": [],
+   "headlines": [
+    {
+     "type": "Recap",
+     "description": "\u2014 Jameis Winston threw three touchdown passes to offset a pair of interceptions, Deonte Banks had a 98-yard pick-6 in the final seconds and the New York Giants won another not-so-pretty game, defeating the Arizona Cardinals 36-24 on Sunday.",
+     "shortLinkText": "Winston throws 3 touchdown passes and Banks' pick-6 seals Giants' 36-24 win over Cardinals"
+    }
+   ]
+  }
+ ],
+ "links": [
+  {
+   "language": "en-US",
+   "rel": [
+    "summary",
+    "desktop",
+    "event"
+   ],
+   "href": "https://www.espn.com/nfl/game/_/gameId/401872966/cardinals-giants",
+   "text": "Gamecast",
+   "shortText": "Gamecast",
+   "isExternal": false,
+   "isPremium": false
+  },
+  {
+   "language": "en-US",
+   "rel": [
+    "boxscore",
+    "desktop",
+    "event"
+   ],
+   "href": "https://www.espn.com/nfl/boxscore/_/gameId/401872966",
+   "text": "Box Score",
+   "shortText": "Box Score",
+   "isExternal": false,
+   "isPremium": false
+  },
+  {
+   "language": "en-US",
+   "rel": [
+    "highlights",
+    "desktop"
+   ],
+   "href": "https://www.espn.com/nfl/video?gameId=401872966",
+   "text": "Highlights",
+   "shortText": "Highlights",
+   "isExternal": false,
+   "isPremium": false
+  },
+  {
+   "language": "en-US",
+   "rel": [
+    "pbp",
+    "desktop",
+    "event"
+   ],
+   "href": "https://www.espn.com/nfl/playbyplay/_/gameId/401872966",
+   "text": "Play-by-Play",
+   "shortText": "Play-by-Play",
+   "isExternal": false,
+   "isPremium": false
+  },
+  {
+   "language": "en-US",
+   "rel": [
+    "recap",
+    "desktop",
+    "event"
+   ],
+   "href": "https://www.espn.com/nfl/recap?gameId=401872966",
+   "text": "Recap",
+   "shortText": "Recap",
+   "isExternal": false,
+   "isPremium": false
+  }
+ ],
+ "status": {
+  "clock": 0.0,
+  "displayClock": "0:00",
+  "period": 4,
+  "type": {
+   "id": "3",
+   "name": "STATUS_FINAL",
+   "state": "post",
+   "completed": true,
+   "description": "Final",
+   "detail": "Final",
+   "shortDetail": "Final"
+  }
+ },
+ "tuneInPrompt": {
+  "id": "5054b999bcfc3",
+  "isAutomated": false,
+  "title": "Team Dominance",
+  "description": "Tune-in Prompt 401872966",
+  "caption": "Can't be stopped: Three straight touchdown drives.",
+  "rating": "Unrated",
+  "shortText": "Can't be stopped: Three straight touchdown drives.",
+  "images": [
+   {
+    "href": "https://a.espncdn.com/i/teamlogos/nfl/500/ari.png",
+    "width": 500,
+    "height": 500,
+    "rel": [
+     "full",
+     "default"
+    ]
+   },
+   {
+    "href": "https://a.espncdn.com/i/teamlogos/nfl/500-dark/ari.png",
+    "width": 500,
+    "height": 500,
+    "rel": [
+     "full",
+     "dark"
+    ]
+   },
+   {
+    "href": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/ari.png",
+    "width": 500,
+    "height": 500,
+    "rel": [
+     "full",
+     "scoreboard"
+    ]
+   },
+   {
+    "href": "https://a.espncdn.com/i/teamlogos/nfl/500-dark/scoreboard/ari.png",
+    "width": 500,
+    "height": 500,
+    "rel": [
+     "full",
+     "scoreboard",
+     "dark"
+    ]
+   },
+   {
+    "href": "https://a.espncdn.com/guid/8fc7b962-95e1-3cb8-6a7d-b499de9ad546/logos/grayscale.png",
+    "width": 500,
+    "height": 500,
+    "rel": [
+     "full",
+     "grayscale"
+    ]
+   },
+   {
+    "href": "https://a.espncdn.com/guid/8fc7b962-95e1-3cb8-6a7d-b499de9ad546/logos/primary_logo_on_white_color.png",
+    "width": 4096,
+    "height": 4096,
+    "rel": [
+     "full",
+     "primary_logo_on_white_color"
+    ]
+   },
+   {
+    "href": "https://a.espncdn.com/guid/8fc7b962-95e1-3cb8-6a7d-b499de9ad546/logos/primary_logo_on_black_color.png",
+    "width": 4096,
+    "height": 4096,
+    "rel": [
+     "full",
+     "primary_logo_on_black_color"
+    ]
+   },
+   {
+    "href": "https://a.espncdn.com/guid/8fc7b962-95e1-3cb8-6a7d-b499de9ad546/logos/primary_logo_on_primary_color.png",
+    "width": 4096,
+    "height": 4096,
+    "rel": [
+     "full",
+     "primary_logo_on_primary_color"
+    ]
+   },
+   {
+    "href": "https://a.espncdn.com/guid/8fc7b962-95e1-3cb8-6a7d-b499de9ad546/logos/primary_logo_on_secondary_color.png",
+    "width": 4096,
+    "height": 4096,
+    "rel": [
+     "full",
+     "primary_logo_on_secondary_color"
+    ]
+   },
+   {
+    "href": "https://a.espncdn.com/guid/8fc7b962-95e1-3cb8-6a7d-b499de9ad546/logos/primary_logo_black.png",
+    "width": 4096,
+    "height": 4096,
+    "rel": [
+     "full",
+     "primary_logo_black"
+    ]
+   },
+   {
+    "href": "https://a.espncdn.com/guid/8fc7b962-95e1-3cb8-6a7d-b499de9ad546/logos/primary_logo_white.png",
+    "width": 4096,
+    "height": 4096,
+    "rel": [
+     "full",
+     "primary_logo_white"
+    ]
+   },
+   {
+    "href": "https://a.espncdn.com/guid/8fc7b962-95e1-3cb8-6a7d-b499de9ad546/logos/secondary_logo_on_white_color.png",
+    "width": 4096,
+    "height": 4096,
+    "rel": [
+     "full",
+     "secondary_logo_on_white_color"
+    ]
+   },
+   {
+    "href": "https://a.espncdn.com/guid/8fc7b962-95e1-3cb8-6a7d-b499de9ad546/logos/secondary_logo_on_black_color.png",
+    "width": 4096,
+    "height": 4096,
+    "rel": [
+     "full",
+     "secondary_logo_on_black_color"
+    ]
+   },
+   {
+    "href": "https://a.espncdn.com/guid/8fc7b962-95e1-3cb8-6a7d-b499de9ad546/logos/secondary_logo_on_primary_color.png",
+    "width": 4096,
+    "height": 4096,
+    "rel": [
+     "full",
+     "secondary_logo_on_primary_color"
+    ]
+   },
+   {
+    "href": "https://a.espncdn.com/guid/8fc7b962-95e1-3cb8-6a7d-b499de9ad546/logos/secondary_logo_on_secondary_color.png",
+    "width": 4096,
+    "height": 4096,
+    "rel": [
+     "full",
+     "secondary_logo_on_secondary_color"
+    ]
+   },
+   {
+    "href": "https://a.espncdn.com/guid/8fc7b962-95e1-3cb8-6a7d-b499de9ad546/logos/secondary_logo_black.png",
+    "width": 4096,
+    "height": 4096,
+    "rel": [
+     "full",
+     "secondary_logo_black"
+    ]
+   },
+   {
+    "href": "https://a.espncdn.com/guid/8fc7b962-95e1-3cb8-6a7d-b499de9ad546/logos/secondary_logo_white.png",
+    "width": 4096,
+    "height": 4096,
+    "rel": [
+     "full",
+     "secondary_logo_white"
+    ]
+   }
+  ],
+  "imageType": "teamLogo",
+  "color": "a40227",
+  "alternateColor": "ffffff"
+ }
+}
