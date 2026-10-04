@@ -1,0 +1,64 @@
+# Builds the firmware and publishes it as a release whenever FW_VERSION in
+# firmware/scoreboard/sb_version.h changes on main. The boards install the
+# latest release's scoreboard-X.Y.bin.
+name: Build and release firmware
+
+on:
+  push:
+    branches: [main]
+    paths: ["firmware/scoreboard/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read the version
+        id: ver
+        run: |
+          V=$(grep -oP 'FW_VERSION "\K[^"]+' firmware/scoreboard/sb_version.h)
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          if gh release view "v$V" > /dev/null 2>&1; then echo "exists=1" >> "$GITHUB_OUTPUT"; fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Already released
+        if: steps.ver.outputs.exists == '1'
+        run: echo "v${{ steps.ver.outputs.version }} is already released - bump FW_VERSION to publish a new one."
+
+      - uses: arduino/setup-arduino-cli@v2
+        if: steps.ver.outputs.exists != '1'
+
+      - name: Install the ESP32 core and libraries
+        if: steps.ver.outputs.exists != '1'
+        run: |
+          URL=https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          arduino-cli core update-index --additional-urls "$URL"
+          arduino-cli core install esp32:esp32@2.0.9 --additional-urls "$URL"
+          arduino-cli lib install "ArduinoJson@7.4.2" "PNGdec@1.1.7" "ESP32 HUB75 LED MATRIX PANEL DMA Display@3.0.15" "Adafruit GFX Library@1.12.6" "Adafruit BusIO@1.17.4"
+
+      - name: Build
+        if: steps.ver.outputs.exists != '1'
+        run: |
+          arduino-cli compile \
+            --fqbn "esp32:esp32:esp32s3:CDCOnBoot=cdc,FlashSize=16M,PSRAM=opi,PartitionScheme=app3M_fat9M_16MB" \
+            --build-property "compiler.cpp.extra_flags=-std=gnu++17 -DPNG_MAX_BUFFERED_PIXELS=8194" \
+            --output-dir build firmware/scoreboard
+          V=${{ steps.ver.outputs.version }}
+          cp build/scoreboard.ino.bin "scoreboard-$V.bin"
+          # an app image starts with 0xE9
+          test "$(head -c1 "scoreboard-$V.bin" | od -An -tx1 | tr -d ' ')" = "e9"
+          ls -la "scoreboard-$V.bin"
+
+      - name: Publish the release
+        if: steps.ver.outputs.exists != '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V=${{ steps.ver.outputs.version }}
+          gh release create "v$V" "scoreboard-$V.bin" --title "$V" --notes "Firmware $V. Boards pick it up overnight, or tap Check for updates now at scoreboard.local."
