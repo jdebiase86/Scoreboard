@@ -489,7 +489,13 @@ void renderFullTicker(Frame& fb, const FullGame* games, int n, int page, const c
     if (fin) { bot = "FINAL"; bc = GREEN; }
     else if (sched) { top = t.kickDate; bot = t.kickTime; }
     else { top = t.status; bot = t.clock; if (t.redzone) tc = bc = RED; }
-    if (top[0]) text(fb, (W - tw(top, F3)) >> 1, y + 20, top, tc, F3);
+    if (top[0]) {
+      int w = tw(top, F3), x0 = (W - w) >> 1;
+      // a long date ("10/12") reaches under the logos' bottom corners: a dark gap round it
+      if (w > W - 2 * L - 2)
+        for (int yy = y + 19; yy <= y + 24; yy++) for (int x = x0 - 1; x <= x0 + w; x++) fb.put(x, yy, BLACK);
+      text(fb, x0, y + 20, top, tc, F3);
+    }
     text(fb, (W - tw(bot, F3)) >> 1, y + 26, bot, bc, F3);
     if (!sched) {
       char a[8] = "", h[8] = "";

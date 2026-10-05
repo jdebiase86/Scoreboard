@@ -502,15 +502,19 @@ static void noteSchedule(int team, const Game& g) {
   if (nsched < MAX_PICKS + 1) sched[nsched++] = {team, parseIso(g.eventDate), g.state};
 }
 
-// From 10 minutes before a known start until the game gets going, check
-// every minute so kickoff / first pitch / puck drop shows up right away.
-// Games start late (rain delays), so a game still waiting to start counts
-// for up to 3 hours past its listed time.
-static bool nearStart(time_t now) {
-  for (int i = 0; i < nsched; i++)
-    if (sched[i].st == ST_PRE && sched[i].start && now >= sched[i].start - 600 && now <= sched[i].start + 3 * 3600)
-      return true;
-  return false;
+// How often to look at all your teams around a known start, in ms (0 =
+// not near one). From 10 minutes before until 30 after, every minute so
+// kickoff / first pitch / puck drop shows up right away; games start late
+// (rain delays), so a game still waiting to start keeps a look every 5
+// minutes for up to 3 hours past its listed time.
+static uint32_t nearStart(time_t now) {
+  uint32_t every = 0;
+  for (int i = 0; i < nsched; i++) {
+    if (sched[i].st != ST_PRE || !sched[i].start || now < sched[i].start - 600) continue;
+    if (now <= sched[i].start + 1800) return 60000UL;
+    if (now <= sched[i].start + 3 * 3600) every = 300000UL;
+  }
+  return every;
 }
 
 // Live games of your teams right now, all in the same sport (the highest
@@ -1231,8 +1235,8 @@ static void netTask(void*) {
 
     uint32_t t0 = millis();
     time_t now = time(nullptr);
-    bool near = nearStart(now);
-    bool full = !lastFull || millis() - lastFull >= FULL_MS || (near && millis() - lastFull >= NEAR_MS - 2000);
+    uint32_t near = nearStart(now);
+    bool full = !lastFull || millis() - lastFull >= FULL_MS || (near && millis() - lastFull >= near - 2000);
     int team = -1, r;
     const char* kind;
     if (pin >= 0) {
@@ -1243,7 +1247,9 @@ static void netTask(void*) {
     } else if (full || follow < 0 || !cur->valid) {
       kind = "all teams";
       int was = follow;
+      bool wasLive = nlive > 0;
       r = autoPick(*work, team);
+      if (r == 1 && wasLive && nlive == 0) tieSince = millis();   // it just ended: its final gets a turn
       if (r >= 0) lastFull = millis();
       // taking turns between your teams: stay on the one showing until its
       // turn is up, then the next one along (the minute-by-minute looks near
@@ -1254,9 +1260,12 @@ static void netTask(void*) {
         for (int i = 0; i < nUpTies; i++) if (upTies[i] == was) at = i;
         if (at < 0) tieSince = millis();
         else {
-          int next = was;
-          if (millis() - tieSince >= ROTATE_SECS[settings.rot] * 1000UL) { next = upTies[(at + 1) % nUpTies]; tieSince = millis(); }
-          if (next != team && teamGame(next, *best) == 1) { *work = *best; team = next; }
+          bool turnUp = millis() - tieSince >= ROTATE_SECS[settings.rot] * 1000UL;
+          int next = turnUp ? upTies[(at + 1) % nUpTies] : was;
+          if (next == team || teamGame(next, *best) == 1) {
+            if (next != team) { *work = *best; team = next; }
+            if (turnUp) tieSince = millis();
+          }
         }
       }
       if (r == 1) { *cur = *work; follow = team; }
@@ -1359,7 +1368,8 @@ static void netTask(void*) {
     }
 
     bool live = cur->valid && cur->state == ST_IN;
-    uint32_t wait = live ? LIVE_MS : (nearStart(time(nullptr)) ? NEAR_MS : IDLE_MS);
+    uint32_t nearEvery = nearStart(time(nullptr));
+    uint32_t wait = live ? LIVE_MS : (nearEvery == NEAR_MS ? NEAR_MS : IDLE_MS);
     if (tickerMode) {                                   // full ticker on screen: keep it fresh
       updateFullTicker(time(nullptr));
       if (wait > 15000UL) wait = 15000UL;
