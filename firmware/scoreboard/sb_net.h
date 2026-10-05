@@ -14,11 +14,9 @@ struct Shown {
   Game game;
   int team = -1;                  // TEAMS index of the game on the board
   NetStatus status = NS_LOADING;
-  Logo away, home;                // point into the arrays below
+  Logo away, home;                // 26x24 logos (pregame, live football); point into the arrays below
   LogoPix awayPix[MATCHUP_W * MATCHUP_H];
   LogoPix homePix[MATCHUP_W * MATCHUP_H];
-  Logo away16, home16;            // 16-dot logos (full-game screen)
-  LogoPix away16Pix[SMALL_LOGO * SMALL_LOGO], home16Pix[SMALL_LOGO * SMALL_LOGO];
 };
 
 // The full ticker (wheel: ALL NFL / ALL COLLEGE): every game, live first

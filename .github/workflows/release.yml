@@ -1,11 +1,14 @@
 # Builds the firmware and publishes it as a release whenever FW_VERSION in
 # firmware/scoreboard/sb_version.h changes on main. The boards install the
-# latest release's scoreboard-X.Y.bin.
+# latest release's scoreboard-X.Y.bin. On a pull request it only builds, so a
+# change that doesn't compile shows up before it's approved.
 name: Build and release firmware
 
 on:
   push:
     branches: [main]
+    paths: ["firmware/scoreboard/**"]
+  pull_request:
     paths: ["firmware/scoreboard/**"]
   workflow_dispatch:
 
@@ -23,7 +26,8 @@ jobs:
         run: |
           V=$(grep -oP 'FW_VERSION "\K[^"]+' firmware/scoreboard/sb_version.h)
           echo "version=$V" >> "$GITHUB_OUTPUT"
-          if gh release view "v$V" > /dev/null 2>&1; then echo "exists=1" >> "$GITHUB_OUTPUT"; fi
+          # on a pull request: always build, never publish
+          if [ "${{ github.event_name }}" != pull_request ] && gh release view "v$V" > /dev/null 2>&1; then echo "exists=1" >> "$GITHUB_OUTPUT"; fi
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -40,7 +44,17 @@ jobs:
           URL=https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
           arduino-cli core update-index --additional-urls "$URL"
           arduino-cli core install esp32:esp32@2.0.9 --additional-urls "$URL"
-          arduino-cli lib install "ArduinoJson@7.4.2" "PNGdec@1.1.7" "ESP32 HUB75 LED MATRIX PANEL DMA Display@3.0.15" "Adafruit GFX Library@1.12.6" "Adafruit BusIO@1.17.4"
+          arduino-cli lib install "ArduinoJson@7.4.2"
+          # The others aren't (at these versions) in the Arduino library list:
+          # take them from GitHub. The HUB75 library's 3.0.15 has no tag, so
+          # it's pinned to the commit that set version 3.0.15.
+          arduino-cli config init --overwrite
+          arduino-cli config set library.enable_unsafe_install true
+          arduino-cli lib install --git-url https://github.com/bitbank2/PNGdec.git#1.1.7
+          arduino-cli lib install --git-url https://github.com/adafruit/Adafruit_BusIO.git#1.17.4
+          arduino-cli lib install --git-url https://github.com/adafruit/Adafruit-GFX-Library.git#1.12.6
+          arduino-cli lib install --git-url https://github.com/mrcodetastic/ESP32-HUB75-MatrixPanel-DMA.git#f0098dd24d03ac4129bb50cd00b0c965054fe6f4
+          arduino-cli lib list
 
       - name: Build
         if: steps.ver.outputs.exists != '1'
@@ -56,7 +70,7 @@ jobs:
           ls -la "scoreboard-$V.bin"
 
       - name: Publish the release
-        if: steps.ver.outputs.exists != '1'
+        if: steps.ver.outputs.exists != '1' && github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

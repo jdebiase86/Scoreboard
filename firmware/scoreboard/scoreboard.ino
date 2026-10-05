@@ -24,6 +24,7 @@
 #include "sb_portal.h"
 #include "sb_log.h"
 #include "sb_wheel.h"
+#include "sb_main.h"
 #include <Preferences.h>
 
 // A fresh over-the-air update starts "on trial": the core is told not to
@@ -34,7 +35,6 @@ extern "C" bool verifyRollbackLater() { return true; }
 #include "sb_version.h"
 #define BOOT_PIN 0
 
-enum Mode { M_SETUP, M_CONNECTING, M_FALLBACK, M_CONNECTED_MSG, M_RUNNING };
 static Mode mode;
 static uint32_t modeAt = 0, lastTry = 0, lastPairAt = 0;
 static String apName;
@@ -47,9 +47,8 @@ static bool dirty = true;
 
 // Score glow: after your team scores its number stays gold for a minute;
 // after the other team scores theirs flashes in their colour a few times.
-// Remembered per game, so taking turns between two games keeps each one's.
-struct ScoreMemo { char eventId[16] = ""; bool pinnedHome = true; int mine = -1, other = -1;
-                   uint32_t glowAt = 0, flashAt = 0, seenAt = 0; };
+// Remembered per game, so taking turns between two games keeps each one's
+// (ScoreMemo is in sb_main.h).
 static ScoreMemo memos[4];
 static const uint32_t GLOW_MS = 60000, FLASH_MS = 4000;
 
@@ -564,7 +563,7 @@ void loop() {
             drawMessage(*fb, l, 2);
           }
         } else if (shown->game.valid && bigMode && shown->game.sport == FOOTBALL && shown->game.state == ST_IN)
-          renderFootballFull(*fb, shown->game, &shown->away16, &shown->home16, millis());
+          renderFootballFull(*fb, shown->game, &shown->away, &shown->home, millis());
         else if (shown->game.valid)
           renderGame(*fb, shown->game, pairN, &shown->away, &shown->home, bigMode, millis());
         else statusScreen(shown->status);

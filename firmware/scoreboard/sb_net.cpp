@@ -934,8 +934,6 @@ static void updateFullTicker(time_t now) {
 }
 
 // ------------------------------------------------------------------ publish
-static const Logo* pub16a = nullptr;
-static const Logo* pub16h = nullptr;
 static void publish(const Game* g, int team, NetStatus st, const Logo* la, const Logo* lh) {
   xSemaphoreTake(lock, portMAX_DELAY);
   if (g) shared->game = *g;
@@ -951,15 +949,6 @@ static void publish(const Game* g, int team, NetStatus st, const Logo* la, const
   };
   copyLogo(la, shared->away, shared->awayPix);
   copyLogo(lh, shared->home, shared->homePix);
-  auto copy16 = [](const Logo* src, Logo& dst, LogoPix* store) {
-    dst = Logo();
-    if (!src || !src->n) return;
-    int n = src->n < SMALL_LOGO * SMALL_LOGO ? src->n : SMALL_LOGO * SMALL_LOGO;
-    memcpy(store, src->pix, n * sizeof(LogoPix));
-    dst.w = src->w; dst.h = src->h; dst.n = n; dst.pix = store;
-  };
-  copy16(g ? pub16a : nullptr, shared->away16, shared->away16Pix);
-  copy16(g ? pub16h : nullptr, shared->home16, shared->home16Pix);
   sharedVersion++;
   xSemaphoreGive(lock);
 }
@@ -974,10 +963,6 @@ bool netSnapshot(Shown& out, uint32_t& version) {
   memcpy(out.homePix, shared->homePix, sizeof(out.homePix));
   out.away = shared->away; out.away.pix = out.awayPix;
   out.home = shared->home; out.home.pix = out.homePix;
-  memcpy(out.away16Pix, shared->away16Pix, sizeof(out.away16Pix));
-  memcpy(out.home16Pix, shared->home16Pix, sizeof(out.home16Pix));
-  out.away16 = shared->away16; out.away16.pix = out.away16Pix;
-  out.home16 = shared->home16; out.home16.pix = out.home16Pix;
   version = sharedVersion;
   xSemaphoreGive(lock);
   return true;
@@ -1320,7 +1305,9 @@ static void netTask(void*) {
       if (cur->state == ST_IN && cur->sport == BASKETBALL && fetchJson(NBA_LIVE, *doc, *filterNba))
         enrichBasketball(doc->as<JsonObjectConst>(), *cur);
       const Logo *la = nullptr, *lh = nullptr;
-      if (cur->state == ST_PRE) {
+      // full-size logos: the pregame matchup, and the football full-game
+      // screen once the game is under way
+      if (cur->state == ST_PRE || (cur->state == ST_IN && cur->sport == FOOTBALL)) {
         la = cachedLogo(cur->away.logo, 0);
         lh = cachedLogo(cur->home.logo, 0);
       }
@@ -1341,9 +1328,6 @@ static void netTask(void*) {
           lastFull = 0;
         }
       }
-      // 16-dot logos for the full-game screen (once a game is under way)
-      pub16a = cur->state != ST_PRE ? cachedLogo(cur->away.logo, SMALL_LOGO) : nullptr;
-      pub16h = cur->state != ST_PRE ? cachedLogo(cur->home.logo, SMALL_LOGO) : nullptr;
       publish(cur, team, NS_OK, la, lh);
       noteLook(team, *cur);
       buildChannels(team);
