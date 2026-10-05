@@ -1,4 +1,5 @@
 // Renders the new screens from real ESPN data (feeds/nfl_live.json) and real logos.
+#include "logo_dir.h"
 #include "../scoreboard/sb_parse.h"
 #include "../scoreboard/sb_render.h"
 #include "../scoreboard/sb_png.h"
@@ -12,8 +13,8 @@ void* sbAlloc(size_t n){return malloc(n);} void sbFree(void*p){free(p);} void sb
 static void ppm(const char* path, const Frame& fb){ FILE* f=fopen(path,"wb"); fprintf(f,"P6 %d %d 255\n",W*6,H*6);
  for(int y=0;y<H*6;y++)for(int x=0;x<W*6;x++){RGB c=fb.px[(y/6)*W+x/6];bool d=(x%6)&&(y%6)&&(x%6<5)&&(y%6<5);
  unsigned char p[3]={(unsigned char)(c>>16),(unsigned char)(c>>8),(unsigned char)c}; if(!d)p[0]=p[1]=p[2]=0; else if(!fb.lit[(y/6)*W+x/6])p[0]=p[1]=p[2]=18; fwrite(p,1,3,f);} fclose(f);}
-static bool loadLogoWH(const char* lg, const char* abbr, int bw, int bh, Logo& L){ char pat[300]; snprintf(pat,300,"/mnt/user-data/uploads/Documents/Scoreboard/scoreboard_logos/all/%s_%s_*_full-dark.png",lg,abbr);
- glob_t g; if(glob(pat,0,0,&g)||!g.gl_pathc) return false; FILE* f=fopen(g.gl_pathv[0],"rb"); globfree(&g); if(!f) return false;
+static bool loadLogoWH(const char* lg, const char* abbr, int bw, int bh, Logo& L){ std::string path=findLogo(lg,abbr); if(path.empty()) return false;
+ FILE* f=fopen(path.c_str(),"rb"); if(!f) return false;
  fseek(f,0,2); long n=ftell(f); fseek(f,0,0); uint8_t* b=(uint8_t*)malloc(n); fread(b,1,n,f); fclose(f);
  int w,h,e; uint8_t* rgba=decodePngRGBA(b,n,w,h,&e); free(b); if(!rgba) return false; bool ok=shrinkLogo(rgba,w,h,bw,bh,L); free(rgba); return ok;}
 int main(){

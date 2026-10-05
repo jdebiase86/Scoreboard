@@ -1,0 +1,790 @@
+mlb ARI 29 mlb/ari.png Arizona Diamondbacks
+mlb ATH 11 mlb/ath.png Athletics
+mlb ATL 15 mlb/atl.png Atlanta Braves
+mlb BAL 1 mlb/bal.png Baltimore Orioles
+mlb BOS 2 mlb/bos.png Boston Red Sox
+mlb CHC 16 mlb/chc.png Chicago Cubs
+mlb CHW 4 mlb/chw.png Chicago White Sox
+mlb CIN 17 mlb/cin.png Cincinnati Reds
+mlb CLE 5 mlb/cle.png Cleveland Guardians
+mlb COL 27 mlb/col.png Colorado Rockies
+mlb DET 6 mlb/det.png Detroit Tigers
+mlb HOU 18 mlb/hou.png Houston Astros
+mlb KC 7 mlb/kc.png Kansas City Royals
+mlb LAA 3 mlb/laa.png Los Angeles Angels
+mlb LAD 19 mlb/lad.png Los Angeles Dodgers
+mlb MIA 28 mlb/mia.png Miami Marlins
+mlb MIL 8 mlb/mil.png Milwaukee Brewers
+mlb MIN 9 mlb/min.png Minnesota Twins
+mlb NYM 21 mlb/nym.png New York Mets
+mlb NYY 10 mlb/nyy.png New York Yankees
+mlb PHI 22 mlb/phi.png Philadelphia Phillies
+mlb PIT 23 mlb/pit.png Pittsburgh Pirates
+mlb SD 25 mlb/sd.png San Diego Padres
+mlb SEA 12 mlb/sea.png Seattle Mariners
+mlb SF 26 mlb/sf.png San Francisco Giants
+mlb STL 24 mlb/stl.png St. Louis Cardinals
+mlb TB 30 mlb/tb.png Tampa Bay Rays
+mlb TEX 13 mlb/tex.png Texas Rangers
+mlb TOR 14 mlb/tor.png Toronto Blue Jays
+mlb WSH 20 mlb/wsh.png Washington Nationals
+nba ATL 1 nba/atl.png Atlanta Hawks
+nba BKN 17 nba/bkn.png Brooklyn Nets
+nba BOS 2 nba/bos.png Boston Celtics
+nba CHA 30 nba/cha.png Charlotte Hornets
+nba CHI 4 nba/chi.png Chicago Bulls
+nba CLE 5 nba/cle.png Cleveland Cavaliers
+nba DAL 6 nba/dal.png Dallas Mavericks
+nba DEN 7 nba/den.png Denver Nuggets
+nba DET 8 nba/det.png Detroit Pistons
+nba GS 9 nba/gs.png Golden State Warriors
+nba HOU 10 nba/hou.png Houston Rockets
+nba IND 11 nba/ind.png Indiana Pacers
+nba LAC 12 nba/lac.png LA Clippers
+nba LAL 13 nba/lal.png Los Angeles Lakers
+nba MEM 29 nba/mem.png Memphis Grizzlies
+nba MIA 14 nba/mia.png Miami Heat
+nba MIL 15 nba/mil.png Milwaukee Bucks
+nba MIN 16 nba/min.png Minnesota Timberwolves
+nba NO 3 nba/no.png New Orleans Pelicans
+nba NY 18 nba/ny.png New York Knicks
+nba OKC 25 nba/okc.png Oklahoma City Thunder
+nba ORL 19 nba/orl.png Orlando Magic
+nba PHI 20 nba/phi.png Philadelphia 76ers
+nba PHX 21 nba/phx.png Phoenix Suns
+nba POR 22 nba/por.png Portland Trail Blazers
+nba SA 24 nba/sa.png San Antonio Spurs
+nba SAC 23 nba/sac.png Sacramento Kings
+nba TOR 28 nba/tor.png Toronto Raptors
+nba UTAH 26 nba/utah.png Utah Jazz
+nba WSH 27 nba/wsh.png Washington Wizards
+ncaa AAMU 2010 ncaa/2010.png Alabama A&M
+ncaa ABSU 2013 ncaa/2013.png Albany State
+ncaa ACU 2000 ncaa/2000.png Abilene Christian
+ncaa ADR 2003 ncaa/2003.png Adrian
+ncaa ADSU 2001 ncaa/2001.png Adams State
+ncaa AF 2005 ncaa/2005.png Air Force
+ncaa AFST 3162 ncaa/3162.png Alfred State
+ncaa AGSU 2025 ncaa/2025.png Angelo State
+ncaa AIC 2022 ncaa/2022.png American International
+ncaa AKR 2006 ncaa/2006.png Akron
+ncaa ALA 333 ncaa/333.png Alabama
+ncaa ALBI 2790 ncaa/2790.png Albion
+ncaa ALBR 2015 ncaa/2015.png Albright
+ncaa ALFR 365 ncaa/365.png Alfred
+ncaa ALLG 2018 ncaa/2018.png Allegheny
+ncaa ALMA 2800 ncaa/2800.png Alma
+ncaa ALNU 2019 ncaa/2019.png Allen
+ncaa ALST 2011 ncaa/2011.png Alabama State
+ncaa ALVR 111674 ncaa/111674.png Alvernia
+ncaa AMH 7 ncaa/7.png Amherst
+ncaa ANIN 2023 ncaa/2023.png Anderson (IN)
+ncaa ANSC 129469 ncaa/129469.png Anderson (SC)
+ncaa APP 2026 ncaa/2026.png App State
+ncaa APSU 2046 ncaa/2046.png Austin Peay
+ncaa ARIZ 12 ncaa/12.png Arizona
+ncaa ARK 8 ncaa/8.png Arkansas
+ncaa ARMY 349 ncaa/349.png Army
+ncaa ARST 2032 ncaa/2032.png Arkansas State
+ncaa ARTE 2033 ncaa/2033.png Arkansas Tech
+ncaa ASH 308 ncaa/308.png Ashland
+ncaa ASP 2038 ncaa/2038.png Assumption
+ncaa ASU 9 ncaa/9.png Arizona State
+ncaa AUB 2 ncaa/2.png Auburn
+ncaa AUGC 2042 ncaa/2042.png Augustana (IL)
+ncaa AUGS 124 ncaa/124.png Augsburg
+ncaa AUR 2044 ncaa/2044.png Aurora
+ncaa AUS 2045 ncaa/2045.png Austin
+ncaa AUSD 2043 ncaa/2043.png Augustana (SD)
+ncaa AVER 2047 ncaa/2047.png Averett
+ncaa BALL 2050 ncaa/2050.png Ball State
+ncaa BART 122666 ncaa/122666.png Barton
+ncaa BATE 121 ncaa/121.png Bates
+ncaa BAY 239 ncaa/239.png Baylor
+ncaa BBU 2071 ncaa/2071.png Bloomsburg
+ncaa BC 103 ncaa/103.png Boston College
+ncaa BCU 2065 ncaa/2065.png Bethune-Cookman
+ncaa BCWV 2062 ncaa/2062.png Bethany (WV)
+ncaa BELH 2056 ncaa/2056.png Belhaven
+ncaa BELO 266 ncaa/266.png Beloit
+ncaa BEN 490 ncaa/490.png Benedict
+ncaa BENT 2060 ncaa/2060.png Bentley
+ncaa BERR 2757 ncaa/2757.png Berry
+ncaa BGSU 189 ncaa/189.png Bowling Green
+ncaa BHSU 2069 ncaa/2069.png Black Hills State
+ncaa BLF 2074 ncaa/2074.png Bluffton
+ncaa BLUS 124180 ncaa/124180.png Bluefield State
+ncaa BNIL 2283 ncaa/2283.png Benedictine (IL)
+ncaa BOIS 68 ncaa/68.png Boise State
+ncaa BOW 340 ncaa/340.png Bowdoin
+ncaa BOWE 2075 ncaa/2075.png Bowie State
+ncaa BRE 2913 ncaa/2913.png Brevard
+ncaa BRI 2079 ncaa/2079.png Bridgewater
+ncaa BRIS 18 ncaa/18.png Bridgewater State
+ncaa BRO 2781 ncaa/2781.png Brockport
+ncaa BRWN 225 ncaa/225.png Brown
+ncaa BRY 2803 ncaa/2803.png Bryant
+ncaa BST 132 ncaa/132.png Bemidji State
+ncaa BSU 2085 ncaa/2085.png Buffalo State
+ncaa BTLR 2086 ncaa/2086.png Butler
+ncaa BTTN 2064 ncaa/2064.png Bethel (TN)
+ncaa BUCK 2083 ncaa/2083.png Bucknell
+ncaa BUF 2084 ncaa/2084.png Buffalo
+ncaa BUMN 2802 ncaa/2802.png Bethel (MN)
+ncaa BVU 63 ncaa/63.png Buena Vista
+ncaa BW 188 ncaa/188.png Baldwin Wallace
+ncaa BYU 252 ncaa/252.png BYU
+ncaa CAL 25 ncaa/25.png California
+ncaa CAM 2097 ncaa/2097.png Campbell
+ncaa CAPA 2858 ncaa/2858.png California (PA)
+ncaa CAPU 424 ncaa/424.png Capital
+ncaa CAR 2101 ncaa/2101.png Carleton
+ncaa CARK 2110 ncaa/2110.png Central Arkansas
+ncaa CAT 2107 ncaa/2107.png Catawba
+ncaa CATH 2108 ncaa/2108.png Catholic
+ncaa CC 40 ncaa/40.png Curry
+ncaa CCMN 2152 ncaa/2152.png Concordia (MN)
+ncaa CCO 2121 ncaa/2121.png Centre
+ncaa CCSU 2115 ncaa/2115.png Central Connecticut
+ncaa CCU 324 ncaa/324.png Coastal Carolina
+ncaa CCW 2106 ncaa/2106.png Carthage
+ncaa CGMU 2102 ncaa/2102.png Carnegie Mellon
+ncaa CHAD 2123 ncaa/2123.png Chadron State
+ncaa CHAP 411 ncaa/411.png Chapman
+ncaa CHI 80 ncaa/80.png Chicago
+ncaa CHSO 2127 ncaa/2127.png Charleston Southern
+ncaa CHST 2130 ncaa/2130.png Chicago State
+ncaa CIN 2132 ncaa/2132.png Cincinnati
+ncaa CIT 2643 ncaa/2643.png The Citadel
+ncaa CKGA 2805 ncaa/2805.png Clark Atlanta
+ncaa CLBY 33 ncaa/33.png Colby
+ncaa CLEM 228 ncaa/228.png Clemson
+ncaa CLRN 2134 ncaa/2134.png Clarion
+ncaa CLT 2429 ncaa/2429.png Charlotte
+ncaa CLU 2094 ncaa/2094.png Cal Lutheran
+ncaa CMIN 2146 ncaa/2146.png Colorado School of Mines
+ncaa CMS 17 ncaa/17.png Claremont Mudd Scripps
+ncaa CMU 2117 ncaa/2117.png Central Michigan
+ncaa CN 2105 ncaa/2105.png Carson Newman
+ncaa CNIA 2155 ncaa/2155.png Cornell (IA)
+ncaa CNSU 2119 ncaa/2119.png Central State
+ncaa CNTC 2964 ncaa/2964.png Central College
+ncaa CNU 3112 ncaa/3112.png Christopher Newport
+ncaa COE 2141 ncaa/2141.png Coe
+ncaa COLG 2142 ncaa/2142.png Colgate
+ncaa COLO 38 ncaa/38.png Colorado
+ncaa COLU 171 ncaa/171.png Columbia
+ncaa COMU 11 ncaa/11.png Colorado Mesa
+ncaa CONC 2148 ncaa/2148.png Concord
+ncaa CONN 41 ncaa/41.png UConn
+ncaa COR 172 ncaa/172.png Cornell
+ncaa CP 13 ncaa/13.png Cal Poly
+ncaa CRU 32 ncaa/32.png Carroll (WI)
+ncaa CRWN 509 ncaa/509.png Crown
+ncaa CSP 3066 ncaa/3066.png Concordia St. Paul
+ncaa CSS 375 ncaa/375.png St. Scholastica
+ncaa CSU 36 ncaa/36.png Colorado State
+ncaa CSUP 2570 ncaa/2570.png CSU Pueblo
+ncaa CUC 2151 ncaa/2151.png Concordia Chicago
+ncaa CUW 409 ncaa/409.png Concordia (WI)
+ncaa CWAN 2804 ncaa/2804.png Chowan
+ncaa CWAU 2120 ncaa/2120.png Central Washington
+ncaa CWRU 2963 ncaa/2963.png Case Western Reserve
+ncaa DAKOT 512 ncaa/512.png Dakota State University
+ncaa DART 159 ncaa/159.png Dartmouth
+ncaa DAY 2168 ncaa/2168.png Dayton
+ncaa DBQ 49 ncaa/49.png Dubuque
+ncaa DEAN 110438 ncaa/110438.png Dean
+ncaa DEF 190 ncaa/190.png Defiance College
+ncaa DEL 48 ncaa/48.png Delaware
+ncaa DKSN 2175 ncaa/2175.png Dickinson
+ncaa DLST 2170 ncaa/2170.png Delta State
+ncaa DPU 83 ncaa/83.png DePauw
+ncaa DRKE 2181 ncaa/2181.png Drake
+ncaa DSN 2171 ncaa/2171.png Denison
+ncaa DSU 2169 ncaa/2169.png Delaware State
+ncaa DUKE 150 ncaa/150.png Duke
+ncaa DUQ 2184 ncaa/2184.png Duquesne
+ncaa DVU 2808 ncaa/2808.png Delaware Valley
+ncaa ECNU 2191 ncaa/2191.png East Central
+ncaa ECSU 2207 ncaa/2207.png Elizabeth City State
+ncaa ECU 151 ncaa/151.png East Carolina
+ncaa EDBR 2205 ncaa/2205.png Edinboro
+ncaa EDW 2206 ncaa/2206.png Edward Waters
+ncaa EHC 2213 ncaa/2213.png Emory & Henry
+ncaa EIU 2197 ncaa/2197.png Eastern Illinois
+ncaa EKU 2198 ncaa/2198.png Eastern Kentucky
+ncaa ELMH 72 ncaa/72.png Elmhurst
+ncaa ELON 2210 ncaa/2210.png Elon
+ncaa EMSU 2214 ncaa/2214.png Emporia State
+ncaa EMU 2199 ncaa/2199.png Eastern Michigan
+ncaa ENDC 452 ncaa/452.png Endicott
+ncaa ENMU 2201 ncaa/2201.png Eastern New Mexico
+ncaa ERKA 101 ncaa/101.png Eureka
+ncaa ERSK 101784 ncaa/101784.png Erskine
+ncaa ESU 2188 ncaa/2188.png East Stroudsburg
+ncaa ETAM 2837 ncaa/2837.png East Texas A&M
+ncaa ETBU 2194 ncaa/2194.png East Texas Baptist
+ncaa ETSU 2193 ncaa/2193.png East Tennessee State
+ncaa EU 127954 ncaa/127954.png Eastern
+ncaa EWU 331 ncaa/331.png Eastern Washington
+ncaa FAMU 50 ncaa/50.png Florida A&M
+ncaa FAU 2226 ncaa/2226.png Florida Atlantic
+ncaa FAYU 2220 ncaa/2220.png Fayetteville State
+ncaa FBSU 114 ncaa/114.png Fitchburg State
+ncaa FC 366 ncaa/366.png Ferrum
+ncaa FDUF 2221 ncaa/2221.png FDU Florham
+ncaa FHSU 2231 ncaa/2231.png Fort Hays
+ncaa FIU 2229 ncaa/2229.png Florida International
+ncaa FLA 57 ncaa/57.png Florida
+ncaa FLWC 2237 ncaa/2237.png Fort Lewis
+ncaa FMC 2234 ncaa/2234.png Franklin & Marshall
+ncaa FMSU 2986 ncaa/2986.png Fairmont State
+ncaa FOR 2230 ncaa/2230.png Fordham
+ncaa FP 112334 ncaa/112334.png Franklin Pierce
+ncaa FRES 278 ncaa/278.png Fresno State
+ncaa FRKL 2233 ncaa/2233.png Franklin
+ncaa FRST 2222 ncaa/2222.png Ferris State
+ncaa FRSU 2967 ncaa/2967.png Framingham State
+ncaa FSTU 341 ncaa/341.png Frostburg State
+ncaa FSU 52 ncaa/52.png Florida State
+ncaa FUR 231 ncaa/231.png Furman
+ncaa FVSU 2232 ncaa/2232.png Fort Valley State
+ncaa GAC 2968 ncaa/2968.png Gustavus Adolphus
+ncaa GANN 367 ncaa/367.png Gannon
+ncaa GASO 290 ncaa/290.png Georgia Southern
+ncaa GAST 2247 ncaa/2247.png Georgia State
+ncaa GEN 2242 ncaa/2242.png Geneva
+ncaa GFU 415 ncaa/415.png George Fox
+ncaa GLDT 417 ncaa/417.png Gallaudet
+ncaa GLFD 2258 ncaa/2258.png Guilford
+ncaa GMU 2244 ncaa/2244.png George Mason University
+ncaa GRAM 2755 ncaa/2755.png Grambling
+ncaa GRANDVIEW 2254 ncaa/2254.png Des Moines
+ncaa GRC 530 ncaa/530.png Graceland University
+ncaa GRNB 2256 ncaa/2256.png Greensboro
+ncaa GRNL 65 ncaa/65.png Grinnell
+ncaa GRNV 2257 ncaa/2257.png Greenville
+ncaa GRO 146 ncaa/146.png Grove City
+ncaa GT 59 ncaa/59.png Georgia Tech
+ncaa GTKY 2245 ncaa/2245.png Georgetown (KY)
+ncaa GTWN 46 ncaa/46.png Georgetown
+ncaa GVLS 2249 ncaa/2249.png Glenville State
+ncaa GVSU 125 ncaa/125.png Grand Valley State
+ncaa GWEB 2241 ncaa/2241.png Gardner-Webb
+ncaa HAM 348 ncaa/348.png Hamilton
+ncaa HAMP 2261 ncaa/2261.png Hampton
+ncaa HARD 2264 ncaa/2264.png Harding
+ncaa HARV 108 ncaa/108.png Harvard
+ncaa HAW 62 ncaa/62.png Hawai'i
+ncaa HBRT 174 ncaa/174.png Hobart
+ncaa HC 107 ncaa/107.png Holy Cross
+ncaa HCU 2277 ncaa/2277.png Houston Christian
+ncaa HDBG 191 ncaa/191.png Heidelberg
+ncaa HDX 418 ncaa/418.png Hendrix
+ncaa HIRM 2274 ncaa/2274.png Hiram
+ncaa HLBT 125974 ncaa/125974.png Hilbert
+ncaa HLDL 2273 ncaa/2273.png Hillsdale
+ncaa HMLN 162 ncaa/162.png Hamline
+ncaa HNTC 2938 ncaa/2938.png Huntingdon
+ncaa HNVR 2262 ncaa/2262.png Hanover
+ncaa HOPE 2812 ncaa/2812.png Hope
+ncaa HOU 248 ncaa/248.png Houston
+ncaa HOW 47 ncaa/47.png Howard
+ncaa HRTW 173 ncaa/173.png Hartwick
+ncaa HSC 297 ncaa/297.png Hampden Sydney
+ncaa HSTU 2271 ncaa/2271.png Henderson State
+ncaa HSU 2810 ncaa/2810.png Hardin Simmons
+ncaa HUSS 2280 ncaa/2280.png Husson
+ncaa HWPU 2758 ncaa/2758.png Howard Payne
+ncaa IDHO 70 ncaa/70.png Idaho
+ncaa IDST 304 ncaa/304.png Idaho State
+ncaa ILL 356 ncaa/356.png Illinois
+ncaa ILLC 2286 ncaa/2286.png Illinois College
+ncaa ILST 2287 ncaa/2287.png Illinois State
+ncaa ILWU 306 ncaa/306.png Illinois Wesleyan
+ncaa INDY 2292 ncaa/2292.png Indianapolis
+ncaa INST 282 ncaa/282.png Indiana State
+ncaa IOWA 2294 ncaa/2294.png Iowa
+ncaa ISU 66 ncaa/66.png Iowa State
+ncaa ITH 175 ncaa/175.png Ithaca
+ncaa IU 84 ncaa/84.png Indiana
+ncaa IUP 2291 ncaa/2291.png IU Pennsylvania
+ncaa JCSU 2304 ncaa/2304.png Johnson C. Smith
+ncaa JCU 2302 ncaa/2302.png John Carroll
+ncaa JHU 118 ncaa/118.png Johns Hopkins
+ncaa JKST 2296 ncaa/2296.png Jackson State
+ncaa JMU 256 ncaa/256.png James Madison
+ncaa JUN 246 ncaa/246.png Juniata
+ncaa JXST 55 ncaa/55.png Jacksonville State
+ncaa KALC 126 ncaa/126.png Kalamazoo
+ncaa KEAN 2871 ncaa/2871.png Kean
+ncaa KENN 338 ncaa/338.png Kennesaw State
+ncaa KENT 2309 ncaa/2309.png Kent State
+ncaa KNGS 247 ncaa/247.png King's
+ncaa KNOX 255 ncaa/255.png Knox
+ncaa KNY 352 ncaa/352.png Kenyon
+ncaa KSU 2306 ncaa/2306.png Kansas State
+ncaa KU 2305 ncaa/2305.png Kansas
+ncaa KUTZ 2315 ncaa/2315.png Kutztown
+ncaa KWC 2316 ncaa/2316.png Kentucky Wesleyan
+ncaa KYSN 122774 ncaa/122774.png Keystone
+ncaa KYSU 2310 ncaa/2310.png Kentucky State
+ncaa LAF 322 ncaa/322.png Lafayette
+ncaa LAM 2320 ncaa/2320.png Lamar
+ncaa LANE 2323 ncaa/2323.png Lane College
+ncaa LAW 268 ncaa/268.png Lawrence
+ncaa LC 2333 ncaa/2333.png Lewis & Clark
+ncaa LEH 2329 ncaa/2329.png Lehigh
+ncaa LENR 2331 ncaa/2331.png Lenoir Rhyne
+ncaa LFC 262 ncaa/262.png Lake Forest
+ncaa LGC 548 ncaa/548.png LaGrange
+ncaa LHU 209 ncaa/209.png Lock Haven
+ncaa LIB 2335 ncaa/2335.png Liberty
+ncaa LIN 2815 ncaa/2815.png Lindenwood
+ncaa LINF 203 ncaa/203.png Linfield
+ncaa LIU 2341 ncaa/2341.png Long Island University
+ncaa LIV 2940 ncaa/2940.png Livingstone
+ncaa LKER 437 ncaa/437.png Lake Erie
+ncaa LKLD 6353 ncaa/6353.png Lakeland
+ncaa LNMO 2876 ncaa/2876.png Lincoln (MO)
+ncaa LNPA 2339 ncaa/2339.png Lincoln (PA)
+ncaa LOR 263 ncaa/263.png Loras
+ncaa LOU 97 ncaa/97.png Louisville
+ncaa LSU 99 ncaa/99.png LSU
+ncaa LT 2348 ncaa/2348.png Louisiana Tech
+ncaa LUTH 67 ncaa/67.png Luther
+ncaa LVC 388 ncaa/388.png Lebanon Valley
+ncaa LYCO 2354 ncaa/2354.png Lycoming
+ncaa M-OH 193 ncaa/193.png Miami (OH)
+ncaa MAC 2359 ncaa/2359.png Macalester
+ncaa MARY 559 ncaa/559.png University of Mary
+ncaa MASS 113 ncaa/113.png Massachusetts
+ncaa MCD 2700 ncaa/2700.png McDaniel
+ncaa MCK 2816 ncaa/2816.png McKendree
+ncaa MCM 241 ncaa/241.png McMurry
+ncaa MCN 2377 ncaa/2377.png McNeese
+ncaa MCST 2818 ncaa/2818.png Montclair State
+ncaa MCTN 2373 ncaa/2373.png Maryville (TN)
+ncaa MD 120 ncaa/120.png Maryland
+ncaa MDAR 379 ncaa/379.png UMass Dartmouth
+ncaa ME 311 ncaa/311.png Maine
+ncaa MEM 235 ncaa/235.png Memphis
+ncaa MER 2382 ncaa/2382.png Mercer
+ncaa MERC 2385 ncaa/2385.png Mercyhurst
+ncaa MHB 2371 ncaa/2371.png Mary Hardin Baylor
+ncaa MHU 2369 ncaa/2369.png Mars Hill
+ncaa MIA 2390 ncaa/2390.png Miami
+ncaa MICH 130 ncaa/130.png Michigan
+ncaa MIDB 2394 ncaa/2394.png Middlebury
+ncaa MILE 2396 ncaa/2396.png Miles
+ncaa MILK 74 ncaa/74.png Millikin
+ncaa MILL 210 ncaa/210.png Millersville
+ncaa MINN 135 ncaa/135.png Minnesota
+ncaa MINS 568 ncaa/568.png Minot State
+ncaa MISE 2969 ncaa/2969.png Misericordia
+ncaa MISS 145 ncaa/145.png Ole Miss
+ncaa MIT 109 ncaa/109.png MIT
+ncaa MIZ 142 ncaa/142.png Missouri
+ncaa MLC 446 ncaa/446.png Martin Luther
+ncaa MLSP 2398 ncaa/2398.png Millsaps
+ncaa MMA 2383 ncaa/2383.png Merchant Marine
+ncaa MMT 110 ncaa/110.png Mass Maritime
+ncaa MNCH 2362 ncaa/2362.png Manchester
+ncaa MNFD 2365 ncaa/2365.png Mansfield
+ncaa MNIL 2919 ncaa/2919.png Monmouth (IL)
+ncaa MNMO 2399 ncaa/2399.png Minnesota Morris
+ncaa MNST 2364 ncaa/2364.png Minnesota State
+ncaa MOBU 2880 ncaa/2880.png Missouri Baptist
+ncaa MONM 2405 ncaa/2405.png Monmouth
+ncaa MONT 149 ncaa/149.png Montana
+ncaa MOR 323 ncaa/323.png Moravian
+ncaa MORE 2413 ncaa/2413.png Morehead State
+ncaa MORG 2415 ncaa/2415.png Morgan State
+ncaa MOST 2623 ncaa/2623.png Missouri State
+ncaa MOWE 137 ncaa/137.png Missouri Western
+ncaa MRHO 60 ncaa/60.png Morehouse
+ncaa MRMK 2771 ncaa/2771.png Merrimack
+ncaa MRSH 276 ncaa/276.png Marshall
+ncaa MRST 2368 ncaa/2368.png Marist
+ncaa MRTT 317 ncaa/317.png Marietta
+ncaa MS&T 2402 ncaa/2402.png Missouri S&T
+ncaa MSJ 2419 ncaa/2419.png Mount St Joseph
+ncaa MSK 332 ncaa/332.png Muskingum
+ncaa MSST 344 ncaa/344.png Mississippi State
+ncaa MSSU 2403 ncaa/2403.png Missouri Southern State
+ncaa MSU 127 ncaa/127.png Michigan State
+ncaa MSUM 2817 ncaa/2817.png Minnesota St Moorhead
+ncaa MTST 147 ncaa/147.png Montana State
+ncaa MTSU 2393 ncaa/2393.png Middle Tennessee
+ncaa MTU 2392 ncaa/2392.png Michigan Tech
+ncaa MU 291 ncaa/291.png Methodist
+ncaa MUHL 2422 ncaa/2422.png Muhlenberg
+ncaa MUR 93 ncaa/93.png Murray State
+ncaa MVSU 2400 ncaa/2400.png Mississippi Valley State
+ncaa MWMO 138 ncaa/138.png Northwest Missouri State
+ncaa NAMU 123086 ncaa/123086.png North American
+ncaa NAU 2464 ncaa/2464.png Northern Arizona
+ncaa NAVY 2426 ncaa/2426.png Navy
+ncaa NBRY 2444 ncaa/2444.png Newberry
+ncaa NCAT 2448 ncaa/2448.png North Carolina A&T
+ncaa NCC 3071 ncaa/3071.png North Central College
+ncaa NCCU 2428 ncaa/2428.png North Carolina Central
+ncaa NCSU 152 ncaa/152.png NC State
+ncaa NCW 286 ncaa/286.png North Carolina Wesleyan
+ncaa ND 87 ncaa/87.png Notre Dame
+ncaa NDSU 2449 ncaa/2449.png North Dakota State
+ncaa NEB 158 ncaa/158.png Nebraska
+ncaa NEBK 2438 ncaa/2438.png Nebraska Kearney
+ncaa NESU 196 ncaa/196.png Northeastern State
+ncaa NEV 2440 ncaa/2440.png Nevada
+ncaa NGU 2822 ncaa/2822.png North Greenville
+ncaa NHVN 2441 ncaa/2441.png New Haven
+ncaa NICC 2884 ncaa/2884.png Nichols
+ncaa NICH 2447 ncaa/2447.png Nicholls
+ncaa NIU 2459 ncaa/2459.png Northern Illinois
+ncaa NMHU 2424 ncaa/2424.png New Mexico Highlands
+ncaa NMI 128 ncaa/128.png Northern Michigan
+ncaa NMSU 166 ncaa/166.png New Mexico State
+ncaa NORF 2450 ncaa/2450.png Norfolk State
+ncaa NPU 75 ncaa/75.png North Park
+ncaa NU 77 ncaa/77.png Northwestern
+ncaa NWCH 2467 ncaa/2467.png Norwich
+ncaa NWD 2886 ncaa/2886.png Northwood
+ncaa NWOK 2823 ncaa/2823.png Northwestern (OK)
+ncaa NWST 2466 ncaa/2466.png Northwestern State
+ncaa NWU 6845 ncaa/6845.png Nebraska Wesleyan
+ncaa NYCL 2782 ncaa/2782.png SUNY Cortland
+ncaa NYMS 3110 ncaa/3110.png SUNY Morrisville
+ncaa NYMT 2951 ncaa/2951.png SUNY Maritime
+ncaa OBE 391 ncaa/391.png Oberlin
+ncaa OBU 2888 ncaa/2888.png Ouachita Baptist
+ncaa ODU 295 ncaa/295.png Old Dominion
+ncaa OHDU 2477 ncaa/2477.png Ohio Dominican
+ncaa OHIO 195 ncaa/195.png Ohio
+ncaa OHNU 427 ncaa/427.png Ohio Northern
+ncaa OKBU 319 ncaa/319.png Oklahoma Baptist
+ncaa OKST 197 ncaa/197.png Oklahoma State
+ncaa OLAF 133 ncaa/133.png St. Olaf
+ncaa ORE 2483 ncaa/2483.png Oregon
+ncaa ORST 204 ncaa/204.png Oregon State
+ncaa OSU 194 ncaa/194.png Ohio State
+ncaa OTTB 359 ncaa/359.png Otterbein
+ncaa OU 201 ncaa/201.png Oklahoma
+ncaa OWU 2980 ncaa/2980.png Ohio Wesleyan
+ncaa PACE 2487 ncaa/2487.png Pace
+ncaa PCLT 2486 ncaa/2486.png Pacific Lutheran
+ncaa PCOR 205 ncaa/205.png Pacific (OR)
+ncaa PENN 219 ncaa/219.png Pennsylvania
+ncaa PITT 221 ncaa/221.png Pittsburgh
+ncaa PLYM 2972 ncaa/2972.png Plymouth State
+ncaa POPI 2923 ncaa/2923.png Pomona Pitzer
+ncaa POST 126086 ncaa/126086.png Post
+ncaa PRES 2506 ncaa/2506.png Presbyterian
+ncaa PRIN 163 ncaa/163.png Princeton
+ncaa PRST 2502 ncaa/2502.png Portland State
+ncaa PSU 213 ncaa/213.png Penn State
+ncaa PTSU 90 ncaa/90.png Pittsburg State
+ncaa PUG 2508 ncaa/2508.png Puget Sound
+ncaa PUR 2509 ncaa/2509.png Purdue
+ncaa PV 2504 ncaa/2504.png Prairie View A&M
+ncaa QUI 2825 ncaa/2825.png Quincy
+ncaa REDL 29 ncaa/29.png Redlands
+ncaa RFU 2524 ncaa/2524.png Rockford
+ncaa RHDS 2519 ncaa/2519.png Rhodes
+ncaa RHIT 86 ncaa/86.png Rose Hulman
+ncaa RICE 242 ncaa/242.png Rice
+ncaa RICH 257 ncaa/257.png Richmond
+ncaa RIP 2891 ncaa/2891.png Ripon
+ncaa RMC 2516 ncaa/2516.png Randolph Macon
+ncaa RMU 2523 ncaa/2523.png Robert Morris
+ncaa ROW 2827 ncaa/2827.png Rowan
+ncaa RPI 2528 ncaa/2528.png Rensselaer
+ncaa RUTG 164 ncaa/164.png Rutgers
+ncaa SAC 16 ncaa/16.png Sacramento State
+ncaa SAL 2532 ncaa/2532.png Salisbury
+ncaa SALV 2776 ncaa/2776.png Salve Regina
+ncaa SAM 2535 ncaa/2535.png Samford
+ncaa SANS 2830 ncaa/2830.png Saint Anselm
+ncaa SAR 2568 ncaa/2568.png Southern Arkansas
+ncaa SAV 2542 ncaa/2542.png Savannah State
+ncaa SC 2579 ncaa/2579.png South Carolina
+ncaa SCIA 2564 ncaa/2564.png Simpson (IA)
+ncaa SCST 2569 ncaa/2569.png South Carolina State
+ncaa SCTS 2583 ncaa/2583.png Southern Connecticut State
+ncaa SDAK 233 ncaa/233.png South Dakota
+ncaa SDMT 613 ncaa/613.png South Dakota Mines
+ncaa SDST 2571 ncaa/2571.png South Dakota State
+ncaa SDSU 21 ncaa/21.png San Diego State
+ncaa SEHI 611 ncaa/611.png Seton Hill
+ncaa SELA 2545 ncaa/2545.png SE Louisiana
+ncaa SEMO 2546 ncaa/2546.png Southeast Missouri State
+ncaa SEOK 199 ncaa/199.png Southeastern Oklahoma State
+ncaa SEWA 2553 ncaa/2553.png Sewanee
+ncaa SFA 2617 ncaa/2617.png Stephen F. Austin
+ncaa SFPA 2598 ncaa/2598.png Saint Francis
+ncaa SFU 2894 ncaa/2894.png Sioux Falls
+ncaa SHAW 2551 ncaa/2551.png Shaw
+ncaa SHEN 2828 ncaa/2828.png Shenandoah
+ncaa SHEP 2974 ncaa/2974.png Shepherd
+ncaa SHIP 2559 ncaa/2559.png Shippensburg
+ncaa SHOU 2560 ncaa/2560.png Shorter
+ncaa SHSU 2534 ncaa/2534.png Sam Houston
+ncaa SHU 2529 ncaa/2529.png Sacred Heart
+ncaa SIU 79 ncaa/79.png Southern Illinois
+ncaa SJSU 23 ncaa/23.png San José State
+ncaa SMU 2567 ncaa/2567.png SMU
+ncaa SNU 200 ncaa/200.png Southern Nazarene
+ncaa SOR 2584 ncaa/2584.png Southern Oregon
+ncaa SOSU 2927 ncaa/2927.png Southwestern Oklahoma State
+ncaa SOU 2582 ncaa/2582.png Southern
+ncaa SOVA 2896 ncaa/2896.png Southern Virginia
+ncaa SPR 81 ncaa/81.png Springfield
+ncaa SRST 2834 ncaa/2834.png Sul Ross State
+ncaa SRU 215 ncaa/215.png Slippery Rock
+ncaa STAM 2591 ncaa/2591.png St. Ambrose
+ncaa STAN 24 ncaa/24.png Stanford
+ncaa STBK 2619 ncaa/2619.png Stony Brook
+ncaa STET 56 ncaa/56.png Stetson
+ncaa STJF 374 ncaa/374.png St. John Fisher
+ncaa STJM 2600 ncaa/2600.png Saint John's (MN)
+ncaa STMN 2900 ncaa/2900.png St. Thomas
+ncaa STNC 2832 ncaa/2832.png St. Norbert
+ncaa STO 284 ncaa/284.png Stonehill
+ncaa STVS 471 ncaa/471.png Stevenson
+ncaa SUSQ 216 ncaa/216.png Susquehanna
+ncaa SUU 253 ncaa/253.png Southern Utah
+ncaa SVC 2614 ncaa/2614.png Saint Vincent
+ncaa SVSU 129 ncaa/129.png Saginaw Valley State
+ncaa SWBU 2586 ncaa/2586.png Southwest Baptist
+ncaa SWMS 2587 ncaa/2587.png Southwest Minnesota State
+ncaa SWU 2588 ncaa/2588.png Southwestern U
+ncaa SYR 183 ncaa/183.png Syracuse
+ncaa TA&M 245 ncaa/245.png Texas A&M
+ncaa TAMK 2658 ncaa/2658.png Texas A&M-Kingsville
+ncaa TAR 2627 ncaa/2627.png Tarleton State
+ncaa TCCT 2977 ncaa/2977.png Trinity (CT)
+ncaa TCNJ 2442 ncaa/2442.png The College of New Jersey
+ncaa TCU 2628 ncaa/2628.png TCU
+ncaa TEM 218 ncaa/218.png Temple
+ncaa TENN 2633 ncaa/2633.png Tennessee
+ncaa TEX 251 ncaa/251.png Texas
+ncaa THI 2644 ncaa/2644.png Thiel
+ncaa TIFF 2838 ncaa/2838.png Tiffin
+ncaa TLSA 202 ncaa/202.png Tulsa
+ncaa TNST 2634 ncaa/2634.png Tennessee State
+ncaa TNTC 2635 ncaa/2635.png Tennessee Tech
+ncaa TOL 2649 ncaa/2649.png Toledo
+ncaa TOW 119 ncaa/119.png Towson
+ncaa TRNE 2651 ncaa/2651.png Trine
+ncaa TROY 2653 ncaa/2653.png Troy
+ncaa TRST 2654 ncaa/2654.png Truman State
+ncaa TTU 2641 ncaa/2641.png Texas Tech
+ncaa TUFT 112 ncaa/112.png Tufts
+ncaa TULN 2655 ncaa/2655.png Tulane
+ncaa TUSC 2839 ncaa/2839.png Tusculum
+ncaa TUSK 2657 ncaa/2657.png Tuskegee
+ncaa TUTX 386 ncaa/386.png Trinity (TX)
+ncaa TXLU 2639 ncaa/2639.png Texas Lutheran
+ncaa TXSO 2640 ncaa/2640.png Texas Southern
+ncaa TXST 326 ncaa/326.png Texas State
+ncaa UAB 5 ncaa/5.png UAB
+ncaa UALB 399 ncaa/399.png UAlbany
+ncaa UAM 2028 ncaa/2028.png Arkansas Monticello
+ncaa UAPB 2029 ncaa/2029.png Arkansas-Pine Bluff
+ncaa UCD 302 ncaa/302.png UC Davis
+ncaa UCF 2116 ncaa/2116.png UCF
+ncaa UCLA 26 ncaa/26.png UCLA
+ncaa UCM 2118 ncaa/2118.png Central Missouri
+ncaa UCO 2122 ncaa/2122.png Central Oklahoma
+ncaa UCWV 2128 ncaa/2128.png Charleston (WV)
+ncaa UF 2224 ncaa/2224.png Findlay
+ncaa UGA 61 ncaa/61.png Georgia
+ncaa UIU 389 ncaa/389.png Upper Iowa
+ncaa UIW 2916 ncaa/2916.png Incarnate Word
+ncaa UK 96 ncaa/96.png Kentucky
+ncaa UL 309 ncaa/309.png Louisiana
+ncaa ULM 2433 ncaa/2433.png UL Monroe
+ncaa ULV 2318 ncaa/2318.png La Verne
+ncaa UMD 134 ncaa/134.png Minnesota Duluth
+ncaa UMU 426 ncaa/426.png Mount Union
+ncaa UMW 2701 ncaa/2701.png Montana Western
+ncaa UNA 2453 ncaa/2453.png North Alabama
+ncaa UNC 153 ncaa/153.png North Carolina
+ncaa UNCO 2458 ncaa/2458.png Northern Colorado
+ncaa UNCP 2882 ncaa/2882.png UNC Pembroke
+ncaa UND 155 ncaa/155.png North Dakota
+ncaa UNE 111675 ncaa/111675.png New England
+ncaa UNH 160 ncaa/160.png New Hampshire
+ncaa UNI 2460 ncaa/2460.png Northern Iowa
+ncaa UNLV 2439 ncaa/2439.png UNLV
+ncaa UNM 167 ncaa/167.png New Mexico
+ncaa UNNY 237 ncaa/237.png Union
+ncaa UNT 249 ncaa/249.png North Texas
+ncaa UNW 583 ncaa/583.png Northwestern (MN)
+ncaa UOO 354 ncaa/354.png Olivet
+ncaa URI 227 ncaa/227.png Rhode Island
+ncaa URNY 184 ncaa/184.png Rochester (NY)
+ncaa URSN 2667 ncaa/2667.png Ursinus
+ncaa USA 6 ncaa/6.png South Alabama
+ncaa USC 30 ncaa/30.png USC
+ncaa USCG 2557 ncaa/2557.png Coast Guard
+ncaa USD 301 ncaa/301.png San Diego
+ncaa USF 58 ncaa/58.png South Florida
+ncaa USL 2779 ncaa/2779.png St. Lawrence
+ncaa USM 2572 ncaa/2572.png Southern Miss
+ncaa USU 328 ncaa/328.png Utah State
+ncaa UTAH 254 ncaa/254.png Utah
+ncaa UTC 236 ncaa/236.png Chattanooga
+ncaa UTEP 2638 ncaa/2638.png UTEP
+ncaa UTIC 390 ncaa/390.png Utica
+ncaa UTM 2630 ncaa/2630.png UT Martin
+ncaa UTPB 110243 ncaa/110243.png UT Permian Basin
+ncaa UTSA 2636 ncaa/2636.png UTSA
+ncaa UTU 3101 ncaa/3101.png Utah Tech
+ncaa UVA 258 ncaa/258.png Virginia
+ncaa UVAW 2842 ncaa/2842.png UVA Wise
+ncaa UWA 2695 ncaa/2695.png West Alabama
+ncaa UWEC 2738 ncaa/2738.png Wisconsin Eau Claire
+ncaa UWF 110242 ncaa/110242.png West Florida
+ncaa UWL 2740 ncaa/2740.png Wisconsin La Crosse
+ncaa UWO 271 ncaa/271.png Wisconsin Oshkosh
+ncaa UWP 272 ncaa/272.png Wisconsin Platteville
+ncaa UWRF 2723 ncaa/2723.png Wisconsin River Falls
+ncaa UWSP 2743 ncaa/2743.png Wisconsin Stevens Point
+ncaa UWST 2744 ncaa/2744.png Wisconsin Stout
+ncaa UWW 2745 ncaa/2745.png Wisconsin Whitewater
+ncaa VAL 2674 ncaa/2674.png Valparaiso
+ncaa VALD 2673 ncaa/2673.png Valdosta State
+ncaa VAN 238 ncaa/238.png Vanderbilt
+ncaa VILL 222 ncaa/222.png Villanova
+ncaa VMI 2678 ncaa/2678.png VMI
+ncaa VSU 330 ncaa/330.png Virginia State
+ncaa VT 259 ncaa/259.png Virginia Tech
+ncaa VTSC 293 ncaa/293.png Vermont State Castleton
+ncaa VUU 2676 ncaa/2676.png Virginia Union
+ncaa W&J 2686 ncaa/2686.png Washington & Jefferson
+ncaa W&L 2688 ncaa/2688.png Washington and Lee
+ncaa W&M 2729 ncaa/2729.png William & Mary
+ncaa WAB 89 ncaa/89.png Wabash
+ncaa WAG 2681 ncaa/2681.png Wagner
+ncaa WAKE 154 ncaa/154.png Wake Forest
+ncaa WASH 264 ncaa/264.png Washington
+ncaa WAYN 2845 ncaa/2845.png Waynesburg
+ncaa WCHT 223 ncaa/223.png West Chester
+ncaa WCIL 396 ncaa/396.png Wheaton (IL)
+ncaa WCMO 433 ncaa/433.png Westminster (MO)
+ncaa WCOH 2733 ncaa/2733.png Wilmington (OH)
+ncaa WCOL 2714 ncaa/2714.png Western Colorado
+ncaa WCPA 2849 ncaa/2849.png Westminster (PA)
+ncaa WCSU 2843 ncaa/2843.png Western Connecticut State
+ncaa WCU 2717 ncaa/2717.png Western Carolina
+ncaa WEB 2692 ncaa/2692.png Weber State
+ncaa WFST 2909 ncaa/2909.png Westfield State
+ncaa WGA 2698 ncaa/2698.png West Georgia
+ncaa WHIW 2721 ncaa/2721.png Whitworth
+ncaa WHLG 112335 ncaa/112335.png Wheeling
+ncaa WHTR 2850 ncaa/2850.png Whittier
+ncaa WIDE 2725 ncaa/2725.png Widener
+ncaa WILK 398 ncaa/398.png Wilkes
+ncaa WINU 351 ncaa/351.png Wingate
+ncaa WIS 275 ncaa/275.png Wisconsin
+ncaa WITT 2746 ncaa/2746.png Wittenberg
+ncaa WIU 2710 ncaa/2710.png Western Illinois
+ncaa WJC 2911 ncaa/2911.png William Jewell
+ncaa WKU 98 ncaa/98.png Western Kentucky
+ncaa WLC 2741 ncaa/2741.png Wisconsin Lutheran
+ncaa WLM 2731 ncaa/2731.png Williams
+ncaa WLMT 2930 ncaa/2930.png Willamette
+ncaa WLSH 2682 ncaa/2682.png Walsh
+ncaa WLU 2699 ncaa/2699.png West Liberty
+ncaa WMU 2711 ncaa/2711.png Western Michigan
+ncaa WNE 2702 ncaa/2702.png Western New England
+ncaa WNMU 2703 ncaa/2703.png Western New Mexico
+ncaa WNST 2851 ncaa/2851.png Winona State
+ncaa WOF 2747 ncaa/2747.png Wofford
+ncaa WOO 2748 ncaa/2748.png Wooster
+ncaa WORC 402 ncaa/402.png Worcester State
+ncaa WORU 2848 ncaa/2848.png Western Oregon
+ncaa WPI 2749 ncaa/2749.png WPI
+ncaa WPU 2970 ncaa/2970.png William Paterson
+ncaa WSBN 2687 ncaa/2687.png Washburn
+ncaa WSCT 336 ncaa/336.png Wesleyan (CT)
+ncaa WSMI 131 ncaa/131.png Wayne State (MI)
+ncaa WSNE 2844 ncaa/2844.png Wayne State (NE)
+ncaa WSSU 2736 ncaa/2736.png Winston-Salem State
+ncaa WSU 265 ncaa/265.png Washington State
+ncaa WTAM 2704 ncaa/2704.png West Texas
+ncaa WTBG 2685 ncaa/2685.png Wartburg
+ncaa WUMO 143 ncaa/143.png Washington St. Louis
+ncaa WVSU 2707 ncaa/2707.png West Virginia State
+ncaa WVU 277 ncaa/277.png West Virginia
+ncaa WVUT 2706 ncaa/2706.png WVU Tech
+ncaa WVWC 455 ncaa/455.png West Virginia Wesleyan
+ncaa WYO 2751 ncaa/2751.png Wyoming
+ncaa YALE 43 ncaa/43.png Yale
+ncaa YSU 2754 ncaa/2754.png Youngstown State
+nfl ARI 22 nfl/ari.png Arizona Cardinals
+nfl ATL 1 nfl/atl.png Atlanta Falcons
+nfl BAL 33 nfl/bal.png Baltimore Ravens
+nfl BUF 2 nfl/buf.png Buffalo Bills
+nfl CAR 29 nfl/car.png Carolina Panthers
+nfl CHI 3 nfl/chi.png Chicago Bears
+nfl CIN 4 nfl/cin.png Cincinnati Bengals
+nfl CLE 5 nfl/cle.png Cleveland Browns
+nfl DAL 6 nfl/dal.png Dallas Cowboys
+nfl DEN 7 nfl/den.png Denver Broncos
+nfl DET 8 nfl/det.png Detroit Lions
+nfl GB 9 nfl/gb.png Green Bay Packers
+nfl HOU 34 nfl/hou.png Houston Texans
+nfl IND 11 nfl/ind.png Indianapolis Colts
+nfl JAX 30 nfl/jax.png Jacksonville Jaguars
+nfl KC 12 nfl/kc.png Kansas City Chiefs
+nfl LAC 24 nfl/lac.png Los Angeles Chargers
+nfl LAR 14 nfl/lar.png Los Angeles Rams
+nfl LV 13 nfl/lv.png Las Vegas Raiders
+nfl MIA 15 nfl/mia.png Miami Dolphins
+nfl MIN 16 nfl/min.png Minnesota Vikings
+nfl NE 17 nfl/ne.png New England Patriots
+nfl NO 18 nfl/no.png New Orleans Saints
+nfl NYG 19 nfl/nyg.png New York Giants
+nfl NYJ 20 nfl/nyj.png New York Jets
+nfl PHI 21 nfl/phi.png Philadelphia Eagles
+nfl PIT 23 nfl/pit.png Pittsburgh Steelers
+nfl SEA 26 nfl/sea.png Seattle Seahawks
+nfl SF 25 nfl/sf.png San Francisco 49ers
+nfl TB 27 nfl/tb.png Tampa Bay Buccaneers
+nfl TEN 10 nfl/ten.png Tennessee Titans
+nfl WSH 28 nfl/wsh.png Washington Commanders
+nhl ANA 25 nhl/ana.png Anaheim Ducks
+nhl BOS 1 nhl/bos.png Boston Bruins
+nhl BUF 2 nhl/buf.png Buffalo Sabres
+nhl CAR 7 nhl/car.png Carolina Hurricanes
+nhl CBJ 29 nhl/cbj.png Columbus Blue Jackets
+nhl CGY 3 nhl/cgy.png Calgary Flames
+nhl CHI 4 nhl/chi.png Chicago Blackhawks
+nhl COL 17 nhl/col.png Colorado Avalanche
+nhl DAL 9 nhl/dal.png Dallas Stars
+nhl DET 5 nhl/det.png Detroit Red Wings
+nhl EDM 6 nhl/edm.png Edmonton Oilers
+nhl FLA 26 nhl/fla.png Florida Panthers
+nhl LA 8 nhl/la.png Los Angeles Kings
+nhl MIN 30 nhl/min.png Minnesota Wild
+nhl MTL 10 nhl/mtl.png Montreal Canadiens
+nhl NJ 11 nhl/nj.png New Jersey Devils
+nhl NSH 27 nhl/nsh.png Nashville Predators
+nhl NYI 12 nhl/nyi.png New York Islanders
+nhl NYR 13 nhl/nyr.png New York Rangers
+nhl OTT 14 nhl/ott.png Ottawa Senators
+nhl PHI 15 nhl/phi.png Philadelphia Flyers
+nhl PIT 16 nhl/pit.png Pittsburgh Penguins
+nhl SEA 124292 nhl/sea.png Seattle Kraken
+nhl SJ 18 nhl/sj.png San Jose Sharks
+nhl STL 19 nhl/stl.png St. Louis Blues
+nhl TB 20 nhl/tb.png Tampa Bay Lightning
+nhl TOR 21 nhl/tor.png Toronto Maple Leafs
+nhl UTAH 129764 nhl/utah.png Utah Mammoth
+nhl VAN 22 nhl/van.png Vancouver Canucks
+nhl VGK 37 nhl/vgk.png Vegas Golden Knights
+nhl WPG 28 nhl/wpg.png Winnipeg Jets
+nhl WSH 23 nhl/wsh.png Washington Capitals

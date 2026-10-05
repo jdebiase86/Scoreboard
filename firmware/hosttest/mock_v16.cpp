@@ -1,3 +1,4 @@
+#include "logo_dir.h"
 #include "../scoreboard/sb_render.h"
 #include "../scoreboard/sb_png.h"
 #include <stdio.h>
@@ -7,7 +8,7 @@ void* sbAlloc(size_t n){return malloc(n);} void sbFree(void*p){free(p);} void sb
 static void ppm(const char* path, const Frame& fb){ FILE* f=fopen(path,"wb"); fprintf(f,"P6 %d %d 255\n",W*6,H*6);
  for(int y=0;y<H*6;y++)for(int x=0;x<W*6;x++){RGB c=fb.px[(y/6)*W+x/6];bool d=(x%6)&&(y%6)&&(x%6<5)&&(y%6<5);
  unsigned char p[3]={(unsigned char)(c>>16),(unsigned char)(c>>8),(unsigned char)c}; if(!d)p[0]=p[1]=p[2]=0; else if(!fb.lit[(y/6)*W+x/6])p[0]=p[1]=p[2]=18; fwrite(p,1,3,f);} fclose(f);}
-static bool load(const char* name, int bw, int bh, Logo& L){ char path[300]; snprintf(path,300,"/mnt/user-data/uploads/Documents/Scoreboard/scoreboard_logos/%s",name);
+static bool load(const char* name, int bw, int bh, Logo& L){ char path[300]; snprintf(path,300,LOGO_DIR "%s",name);
  FILE* f=fopen(path,"rb"); if(!f) return false; fseek(f,0,2); long n=ftell(f); fseek(f,0,0); uint8_t* b=(uint8_t*)malloc(n); fread(b,1,n,f); fclose(f);
  int w,h,e; uint8_t* rgba=decodePngRGBA(b,n,w,h,&e); free(b); if(!rgba) return false; bool ok=shrinkLogo(rgba,w,h,bw,bh,L); free(rgba); return ok;}
 static void banner(Frame& fb, const char* s, int y, RGB c){ int w=tw(s,F3); int x=(W-w)>>1;
@@ -15,8 +16,8 @@ static void banner(Frame& fb, const char* s, int y, RGB c){ int w=tw(s,F3); int 
 static void logoCard(Frame& fb, const Logo& L, const char* word){ fb.clear(); drawLogo(fb,L,(W-L.w)>>1,(54-L.h)>>1>0?(54-L.h)>>1:0,1); banner(fb,word,58,0xFFBE00);}
 int main(){
   static Frame fb; Logo nyg, dal, nygS, dalS;
-  load("nfl_500-dark_scoreboard_nyg.png",54,54,nyg); load("nfl_500-dark_scoreboard_dal.png",54,54,dal);
-  load("nfl_500-dark_scoreboard_nyg.png",MATCHUP_W,MATCHUP_H,nygS); load("nfl_500-dark_scoreboard_dal.png",MATCHUP_W,MATCHUP_H,dalS);
+  load("nfl/nyg.png",54,54,nyg); load("nfl/dal.png",54,54,dal);
+  load("nfl/nyg.png",MATCHUP_W,MATCHUP_H,nygS); load("nfl/dal.png",MATCHUP_W,MATCHUP_H,dalS);
   logoCard(fb,nyg,"FIELD GOAL"); ppm("/tmp/m1.ppm",fb);
   logoCard(fb,nyg,"1ST DOWN"); ppm("/tmp/m2.ppm",fb);
   // kickoff end: both logos + KICKOFF

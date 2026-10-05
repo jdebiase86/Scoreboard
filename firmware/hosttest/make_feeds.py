@@ -1,9 +1,11 @@
 """Synthetic ESPN feeds built from a real saved event, and what the
 preview's own parser (scoreboard_sim.parse_live) makes of each."""
-import json, copy, sys
-sys.path.insert(0, '/home/claude/scoreboard')
+import json, copy, os, sys
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, '..', '..', 'preview'))
 import scoreboard_sim as SB
-base = json.load(open('/mnt/user-data/uploads/Documents/Scoreboard/scoreboard_last_event.json'))
+base = json.load(open(os.path.join(HERE, 'feeds', 'scoreboard_last_event.json')))
+os.makedirs('/tmp/feeds', exist_ok=True)
 
 def ev(eid, away, home, state, sport_period=1, date="2026-10-03T23:05Z", short="10/3 - 7:05 PM EDT",
        ascore="0", hscore="0", sit=None, season=(2, "regular-season"), series=None, notes=None, ranks=(99, 99),
