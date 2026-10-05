@@ -1,3 +1,4 @@
+#include "logo_dir.h"
 #include "../scoreboard/sb_render.h"
 #include "../scoreboard/sb_png.h"
 #include <stdio.h>
@@ -7,14 +8,14 @@ void* sbAlloc(size_t n){return malloc(n);} void sbFree(void*p){free(p);} void sb
 static void ppm(const char* path, const Frame& fb){ FILE* f=fopen(path,"wb"); fprintf(f,"P6 %d %d 255\n",W*6,H*6);
  for(int y=0;y<H*6;y++)for(int x=0;x<W*6;x++){RGB c=fb.px[(y/6)*W+x/6];bool d=(x%6)&&(y%6)&&(x%6<5)&&(y%6<5);
  unsigned char p[3]={(unsigned char)(c>>16),(unsigned char)(c>>8),(unsigned char)c}; if(!d)p[0]=p[1]=p[2]=0; else if(!fb.lit[(y/6)*W+x/6])p[0]=p[1]=p[2]=18; fwrite(p,1,3,f);} fclose(f);}
-static bool load(const char* name, int bw, int bh, Logo& L){ char path[300]; snprintf(path,300,"/mnt/user-data/uploads/Documents/Scoreboard/scoreboard_logos/%s",name);
+static bool load(const char* name, int bw, int bh, Logo& L){ char path[300]; snprintf(path,300,LOGO_DIR "%s",name);
  FILE* f=fopen(path,"rb"); if(!f) return false; fseek(f,0,2); long n=ftell(f); fseek(f,0,0); uint8_t* b=(uint8_t*)malloc(n); fread(b,1,n,f); fclose(f);
  int w,h,e; uint8_t* rgba=decodePngRGBA(b,n,w,h,&e); free(b); if(!rgba) return false; bool ok=shrinkLogo(rgba,w,h,bw,bh,L); free(rgba); return ok;}
 static const char* const BALL[] = {"0011100", "0111110", "1112111", "0111110", "0011100"};
 struct G { const char *a,*h; uint32_t ca,ch; int sa,sh; const char *st,*cl; int poss; bool rz; const char* la; const char* lh; };
 static G games[]={
- {"ARI","NYG",0x97233F,0x0B2265,17,24,"4TH","2:11",1,true,"nfl_500-dark_scoreboard_ari.png","nfl_500-dark_scoreboard_nyg.png"},
- {"DAL","HOU",0x002A5C,0x03202F,21,14,"3RD","8:42",2,false,"nfl_500-dark_scoreboard_dal.png","nfl_500-dark_scoreboard_hou.png"},
+ {"ARI","NYG",0x97233F,0x0B2265,17,24,"4TH","2:11",1,true,"nfl/ari.png","nfl/nyg.png"},
+ {"DAL","HOU",0x002A5C,0x03202F,21,14,"3RD","8:42",2,false,"nfl/dal.png","nfl/hou.png"},
  {"SEA","LAC",0x002244,0x0080C6,10,10,"HALF","",0,false,0,0},
  {"SF","DEN",0xAA0000,0xFB4F14,27,3,"FINAL","",0,false,0,0}};
 static RGB lc(uint32_t c){ return ledColor(true,c); }

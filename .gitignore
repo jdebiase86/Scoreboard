@@ -1,0 +1,32 @@
+# build output and update files
+build/
+*.bin
+*.elf
+*.map
+
+# test and mock-up programs built in firmware/hosttest (sources are .cpp)
+firmware/hosttest/test_render
+firmware/hosttest/test_parse
+firmware/hosttest/test_enrich
+firmware/hosttest/test_foot
+firmware/hosttest/test_logo
+firmware/hosttest/test_fx
+firmware/hosttest/test_events
+firmware/hosttest/test_dns
+firmware/hosttest/test_ver
+firmware/hosttest/portal_host
+firmware/hosttest/page_host
+firmware/hosttest/gen_art
+firmware/hosttest/logo_sheet
+firmware/hosttest/mock_*
+!firmware/hosttest/mock_*.cpp
+*.o
+*.ppm
+
+# Python and Mac clutter
+__pycache__/
+*.pyc
+.DS_Store
+
+# the preview's own logo copies (assets/logos is the shared set)
+preview/scoreboard_logos/

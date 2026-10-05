@@ -4,6 +4,7 @@
 #include "sb_settings.h"
 #include "sb_log.h"
 #include "sb_events.h"
+#include "sb_logofix.h"
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
@@ -501,14 +502,19 @@ static void noteSchedule(int team, const Game& g) {
   if (nsched < MAX_PICKS + 1) sched[nsched++] = {team, parseIso(g.eventDate), g.state};
 }
 
-// From 10 minutes before a known start until 30 minutes after (games start
-// late), check every minute so kickoff / first pitch / puck drop shows up
-// right away.
-static bool nearStart(time_t now) {
-  for (int i = 0; i < nsched; i++)
-    if (sched[i].st == ST_PRE && sched[i].start && now >= sched[i].start - 600 && now <= sched[i].start + 1800)
-      return true;
-  return false;
+// How often to look at all your teams around a known start, in ms (0 =
+// not near one). From 10 minutes before until 30 after, every minute so
+// kickoff / first pitch / puck drop shows up right away; games start late
+// (rain delays), so a game still waiting to start keeps a look every 5
+// minutes for up to 3 hours past its listed time.
+static uint32_t nearStart(time_t now) {
+  uint32_t every = 0;
+  for (int i = 0; i < nsched; i++) {
+    if (sched[i].st != ST_PRE || !sched[i].start || now < sched[i].start - 600) continue;
+    if (now <= sched[i].start + 1800) return 60000UL;
+    if (now <= sched[i].start + 3 * 3600) every = 300000UL;
+  }
+  return every;
 }
 
 // Live games of your teams right now, all in the same sport (the highest
@@ -645,9 +651,13 @@ static int refreshLive(Game& out, int& chosen) {
 struct CachedLogo { String url; int size = 0; Logo logo; uint32_t used = 0, failedAt = 0; };
 static CachedLogo logos[80];   // matchups, celebrations, wheel cards, full ticker
 
-static void logoCandidates(const String& url, String* out, int& n) {
+// ESPN's dark-background logo first (its /scoreboard/ cut, then the plain
+// one), then the regular logo - unless Joe picked the regular, team-colour
+// logo for this team at small sizes (sb_logofix.h).
+static void logoCandidates(const String& url, bool small, String* out, int& n) {
   n = 0;
-  if (url.indexOf("/500/") >= 0) {
+  bool light = small && (logoFix(url.c_str()) & FIX_LIGHT);
+  if (!light && url.indexOf("/500/") >= 0) {
     String dark = url; dark.replace("/500/", "/500-dark/");
     out[n++] = dark;
     if (dark.indexOf("/scoreboard/") >= 0) { String d2 = dark; d2.replace("/scoreboard/", "/"); out[n++] = d2; }
@@ -675,24 +685,9 @@ static bool logoFailedLately(const char* url, int size) {
   return false;
 }
 
-// Teams whose logo is mostly lettering or script and can't be made out at
-// 26 dots: the board shows their letters instead (Joe's call - a rough logo
-// that still reads is kept; only the hopeless ones go). League folder +
-// file name in ESPN's logo address; college logos are named by team id.
-static bool lettersOnly(const char* url) {
-  static const char* const LIST[][2] = {
-      {"/nba/", "bkn"}, {"/nba/", "lal"}, {"/nba/", "lac"}, {"/nba/", "det"}, {"/nba/", "dal"}, {"/nba/", "no"},
-      {"/nba/", "okc"}, {"/mlb/", "det"}, {"/mlb/", "mia"}, {"/ncaa/", "344"}, {"/ncaa/", "145"}, {"/ncaa/", "96"},
-      {"/nhl/", "la"},  {"/nhl/", "wsh"}};
-  const char* f = strrchr(url, '/');
-  if (!f) return false;
-  f++;
-  const char* dot = strchr(f, '.');
-  size_t n = dot ? (size_t)(dot - f) : strlen(f);
-  for (auto& e : LIST)
-    if (strstr(url, e[0]) && strlen(e[1]) == n && !strncasecmp(f, e[1], n)) return true;
-  return false;
-}
+// Teams whose logo can't be made out even at 26 dots: the board shows their
+// letters instead (FIX_LETTERS in sb_logofix.h; Joe's call).
+static bool lettersOnly(const char* url) { return logoFix(url) & FIX_LETTERS; }
 
 // size 0: the pregame matchup (26x24); 54: celebrations
 static const Logo* cachedLogo(const char* url, int size) {
@@ -715,8 +710,10 @@ static const Logo* cachedLogo(const char* url, int size) {
   slot->url = url;
   slot->size = size;
   slot->used = millis();
+  bool small = size < 40;   // the matchup (0), ticker and card sizes; not celebrations
+  uint8_t fix = small ? logoFix(url) : 0;
   String cands[4]; int nc;
-  logoCandidates(String(url), cands, nc);
+  logoCandidates(String(url), small, cands, nc);
   for (int i = 0; i < nc; i++) {
     size_t n;
     uint8_t* png = fetchBytes(cands[i], n);
@@ -725,8 +722,11 @@ static const Logo* cachedLogo(const char* url, int size) {
     uint8_t* rgba = decodePngRGBA(png, n, w, h, &err);
     sbFree(png);
     if (!rgba) { sbLog("logo %s: can't decode (%u bytes, error %d)", cands[i].c_str() + 8, (unsigned)n, err); continue; }
-    bool ok = size ? shrinkLogo(rgba, w, h, size, size, slot->logo)
-                   : shrinkLogo(rgba, w, h, MATCHUP_W, MATCHUP_H, slot->logo);
+    if (fix & FIX_CROP_TOP)   // see-through above the cut
+      for (int y = 0; y < h * 2 / 5; y++) for (int x = 0; x < w; x++) rgba[((size_t)y * w + x) * 4 + 3] = 0;
+    bool kl = fix & FIX_KEYLINE;
+    bool ok = size ? shrinkLogo(rgba, w, h, size, size, slot->logo, kl)
+                   : shrinkLogo(rgba, w, h, MATCHUP_W, MATCHUP_H, slot->logo, kl);
     sbFree(rgba);
     sbLog("logo %s: %s (%d px)", cands[i].c_str() + 8, ok ? "ok" : "empty", slot->logo.n);
     if (ok) return &slot->logo;
@@ -1235,8 +1235,8 @@ static void netTask(void*) {
 
     uint32_t t0 = millis();
     time_t now = time(nullptr);
-    bool near = nearStart(now);
-    bool full = !lastFull || millis() - lastFull >= FULL_MS || (near && millis() - lastFull >= NEAR_MS - 2000);
+    uint32_t near = nearStart(now);
+    bool full = !lastFull || millis() - lastFull >= FULL_MS || (near && millis() - lastFull >= near - 2000);
     int team = -1, r;
     const char* kind;
     if (pin >= 0) {
@@ -1247,21 +1247,33 @@ static void netTask(void*) {
     } else if (full || follow < 0 || !cur->valid) {
       kind = "all teams";
       int was = follow;
+      bool wasLive = nlive > 0;
       r = autoPick(*work, team);
+      if (r == 1 && wasLive && nlive == 0) tieSince = millis();   // it just ended: its final gets a turn
       if (r >= 0) lastFull = millis();
-      // taking turns between your teams: stay on the one showing until its turn is up
-      if (r == 1 && nUpTies >= 2 && nlive == 0 && was >= 0 && was != team) {
-        bool tied = false;
-        for (int i = 0; i < nUpTies; i++) if (upTies[i] == was) tied = true;
-        if (tied && millis() - tieSince < ROTATE_SECS[settings.rot] * 1000UL && teamGame(was, *best) == 1) { *work = *best; team = was; }
-        else tieSince = millis();
+      // taking turns between your teams: stay on the one showing until its
+      // turn is up, then the next one along (the minute-by-minute looks near
+      // a start used to snap back to whoever plays next, so the board sat on
+      // that team)
+      if (r == 1 && nUpTies >= 2 && nlive == 0 && was >= 0) {
+        int at = -1;
+        for (int i = 0; i < nUpTies; i++) if (upTies[i] == was) at = i;
+        if (at < 0) tieSince = millis();
+        else {
+          bool turnUp = millis() - tieSince >= ROTATE_SECS[settings.rot] * 1000UL;
+          int next = turnUp ? upTies[(at + 1) % nUpTies] : was;
+          if (next == team || teamGame(next, *best) == 1) {
+            if (next != team) { *work = *best; team = next; }
+            if (turnUp) tieSince = millis();
+          }
+        }
       }
       if (r == 1) { *cur = *work; follow = team; }
     } else if (nlive >= 2) {
       kind = "taking turns";
       r = refreshLive(*work, team);
       if (r == 1) { *cur = *work; follow = team; }
-      if (nlive < 2 && cur->state != ST_IN) lastFull = 0;   // all done: look at everyone
+      if (nlive < 2 && cur->state != ST_IN) { lastFull = 0; tieSince = millis(); }   // all done: look at everyone, this final first
     } else {
       kind = "board game";
       // nothing of yours live: take turns between all your teams
@@ -1275,6 +1287,17 @@ static void netTask(void*) {
       r = teamGame(team, *work);
       if (r == 1) { *cur = *work; noteSchedule(team, *cur); }
       if (r == 0) lastFull = 0;   // its game vanished: look at everyone next time
+      if (r == 1 && nlive > 0 && cur->state != ST_IN) {
+        // your one live game just ended: show its final for a turn, then take
+        // turns between all your teams again (it used to sit here until the
+        // next full look, up to 15 minutes)
+        sbLog("%s game over: taking turns again", TEAMS[team].abbr);
+        nlive = 0;
+        lastFull = 0;
+        tieSince = millis();
+      } else if (r == 1 && nlive == 0 && cur->state == ST_IN) {
+        lastFull = 0;   // it went live while taking turns (a late start): follow it as live
+      }
     }
     if (kicked || manualReq != -2) continue;
     // a picked team with no game (bye week, off-season) or no answer: Auto
@@ -1345,7 +1368,8 @@ static void netTask(void*) {
     }
 
     bool live = cur->valid && cur->state == ST_IN;
-    uint32_t wait = live ? LIVE_MS : (nearStart(time(nullptr)) ? NEAR_MS : IDLE_MS);
+    uint32_t nearEvery = nearStart(time(nullptr));
+    uint32_t wait = live ? LIVE_MS : (nearEvery == NEAR_MS ? NEAR_MS : IDLE_MS);
     if (tickerMode) {                                   // full ticker on screen: keep it fresh
       updateFullTicker(time(nullptr));
       if (wait > 15000UL) wait = 15000UL;

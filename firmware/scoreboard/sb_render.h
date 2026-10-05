@@ -36,9 +36,10 @@ struct ChanCard {
 void renderCard(Frame& fb, const ChanCard& c, int pos, int count);
 
 // Full ticker (wheel: ALL NFL / ALL COLLEGE): two games a page, both teams'
-// 16-dot logos (or their letters), the score between, clock / FINAL / start
-// time under it. games: array of n; page counts up every few seconds.
-static const int SMALL_LOGO = 16;   // logos on the full ticker
+// 24-dot logos (or their letters), each score under its logo, the clock /
+// FINAL / start time between them. games: array of n; page counts up every
+// few seconds.
+static const int SMALL_LOGO = 24;   // logos on the full ticker
 struct FullGame {
   Tick t;
   Logo la, lh;

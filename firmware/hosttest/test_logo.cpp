@@ -1,3 +1,4 @@
+#include "logo_dir.h"
 #include "../scoreboard/sb_png.h"
 #include "../scoreboard/sb_render.h"
 #include <stdio.h>
@@ -18,9 +19,9 @@ static void ppm(const char* path, const Frame& fb) {
   fclose(f);
 }
 int main(int argc, char** argv) {
-  const char* dir = "/mnt/user-data/uploads/Documents/Scoreboard/scoreboard_logos/";
-  const char* files[] = {"mlb_500-dark_scoreboard_tb.png", "mlb_500-dark_scoreboard_nyy.png", "nfl_500-dark_scoreboard_dal.png",
-    "nfl_500-dark_scoreboard_nyg.png", "ncaa_500-dark_99.png", "ncaa_500-dark_57.png", "nba_500-dark_scoreboard_ny.png"};
+  const char* dir = LOGO_DIR;
+  const char* files[] = {"mlb/tb.png", "mlb/nyy.png", "nfl/dal.png",
+    "nfl/nyg.png", "ncaa/99.png", "ncaa/57.png", "nba/ny.png"};
   Logo small[7], big[7];
   for (int i = 0; i < 7; i++) {
     auto d = slurp((std::string(dir) + files[i]).c_str());

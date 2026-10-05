@@ -1,13 +1,14 @@
+#include "logo_dir.h"
 #include "../scoreboard/sb_render.h"
 #include "../scoreboard/sb_png.h"
 #include <stdio.h>
 #include <stdlib.h>
 void* sbAlloc(size_t n){return malloc(n);} void sbFree(void*p){free(p);} void sbBreathe(){}
-static bool load(const char* name, int bw, int bh, Logo& L){ char path[300]; snprintf(path,300,"/mnt/user-data/uploads/Documents/Scoreboard/scoreboard_logos/%s",name);
+static bool load(const char* name, int bw, int bh, Logo& L){ char path[300]; snprintf(path,300,LOGO_DIR "%s",name);
  FILE* f=fopen(path,"rb"); if(!f) return false; fseek(f,0,2); long n=ftell(f); fseek(f,0,0); uint8_t* b=(uint8_t*)malloc(n); fread(b,1,n,f); fclose(f);
  int w,h,e; uint8_t* rgba=decodePngRGBA(b,n,w,h,&e); free(b); if(!rgba) return false; bool ok=shrinkLogo(rgba,w,h,bw,bh,L); free(rgba); return ok;}
 int main(){
- const char* f[]={"nfl_500-dark_scoreboard_nyg.png","nfl_500-dark_scoreboard_dal.png","nfl_500-dark_scoreboard_ari.png","nfl_500-dark_scoreboard_hou.png","ncaa_500-dark_57.png","ncaa_500-dark_99.png","ncaa_500-dark_142.png","ncaa_500-dark_2377.png","mlb_500-dark_scoreboard_nyy.png","nba_500-dark_scoreboard_ny.png"};
+ const char* f[]={"nfl/nyg.png","nfl/dal.png","nfl/ari.png","nfl/hou.png","ncaa/57.png","ncaa/99.png","ncaa/142.png","ncaa/2377.png","mlb/nyy.png","nba/ny.png"};
  int sizes[]={10,16,26}; const int N=10, cell=30;
  int WW=N*cell, HH=3*cell; static uint32_t img[300*90];
  for(int si=0;si<3;si++) for(int i=0;i<N;i++){ Logo L; if(!load(f[i],sizes[si],sizes[si],L)) continue; Frame fb; fb.clear(); drawLogo(fb,L,0,0,1);

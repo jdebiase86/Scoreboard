@@ -166,7 +166,7 @@ static bool liftColor(double r, double gg, double bb, uint8_t (&o)[3]) {
   return true;
 }
 
-static void smallPixels(const uint8_t* bd, int dw, int dh, Logo& out) {
+static void smallPixels(const uint8_t* bd, int dw, int dh, bool keyline, Logo& out) {
   std::vector<std::vector<double>> pal = logoPalette(bd, (size_t)dw * SS * dh * SS);
   int np = (int)pal.size();
   if (!np) return;
@@ -206,6 +206,53 @@ static void smallPixels(const uint8_t* bd, int dw, int dh, Logo& out) {
       uint8_t o[3];
       if (liftColor(pal[w][0], pal[w][1], pal[w][2], o)) { state[c] = 1; memcpy(col + c * 3, o, 3); }
     }
+  // Keyline (picked per team, sb_logofix.h): ESPN's dark-background logos
+  // often have a thin light outline round the mark, which breaks into
+  // specks when shrunk (the Cowboys' star). Draw it as one clean dot-wide
+  // edge and fill everything inside with the mark's own colours.
+  if (keyline) {
+    uint16_t* opq = (uint16_t*)sbAlloc(cells * sizeof(uint16_t));
+    uint8_t* edge = (uint8_t*)sbAlloc(cells);
+    if (opq && edge) {
+      for (size_t c = 0; c < cells; c++) {
+        uint16_t* v = vote + c * np;
+        int t = 0;
+        for (int j = 0; j < np; j++) t += v[j];
+        opq[c] = (uint16_t)t;
+      }
+      auto in = [&](int x, int y) { return x >= 0 && y >= 0 && x < dw && y < dh && opq[(size_t)y * dw + x] >= need; };
+      // the outline colour: the light colour that covers most of the mark's edge
+      std::vector<double> ev(np, 0);
+      double et = 0;
+      memset(edge, 0, cells);
+      for (int y = 0; y < dh; y++)
+        for (int x = 0; x < dw; x++) {
+          if (!in(x, y) || (in(x + 1, y) && in(x - 1, y) && in(x, y + 1) && in(x, y - 1))) continue;
+          size_t c = (size_t)y * dw + x;
+          edge[c] = 1;
+          uint16_t* v = vote + c * np;
+          for (int j = 0; j < np; j++) { ev[j] += v[j]; et += v[j]; }
+        }
+      int K = -1;
+      for (int j = 0; j < np; j++)
+        if (pal[j][0] + pal[j][1] + pal[j][2] > 560 && (K < 0 || ev[j] > ev[K])) K = j;
+      uint8_t ko[3];
+      if (K >= 0 && et > 0 && ev[K] / et >= 0.2 && liftColor(pal[K][0], pal[K][1], pal[K][2], ko))
+        for (size_t c = 0; c < cells; c++) {
+          if (edge[c]) { state[c] = 1; memcpy(col + c * 3, ko, 3); continue; }
+          if (opq[c] < need || state[c] != 1) continue;
+          uint16_t* v = vote + c * np;
+          int w = -1;
+          for (int j = 0; j < np; j++) if (j != K && v[j] && (w < 0 || v[j] > v[w])) w = j;
+          if (w < 0) continue;
+          if (dark[w]) { state[c] = 2; continue; }
+          uint8_t o[3];
+          if (liftColor(pal[w][0], pal[w][1], pal[w][2], o)) memcpy(col + c * 3, o, 3);
+        }
+    }
+    if (opq) sbFree(opq);
+    if (edge) sbFree(edge);
+  }
   auto lit = [&](int x, int y) { return x >= 0 && y >= 0 && x < dw && y < dh && state[(size_t)y * dw + x] == 1; };
   // bridge one-dot gaps in bright thin lines
   std::vector<std::pair<size_t, int>> bridge;
@@ -265,7 +312,7 @@ static void smallPixels(const uint8_t* bd, int dw, int dh, Logo& out) {
   sbFree(vote); sbFree(state); sbFree(col);
 }
 
-bool shrinkLogo(const uint8_t* rgba, int iw, int ih, int S, int SH, Logo& out) {
+bool shrinkLogo(const uint8_t* rgba, int iw, int ih, int S, int SH, Logo& out, bool keyline) {
   out = Logo();
   // crop to what's actually drawn
   int x0 = iw, y0 = ih, x1 = -1, y1 = -1;
@@ -286,7 +333,7 @@ bool shrinkLogo(const uint8_t* rgba, int iw, int ih, int S, int SH, Logo& out) {
   if (!big) return false;
   resample(rgba, iw, x0, y0, cw, ch, big, dw * SS, dh * SS);
   if (std::max(S, SH) >= 40) logoPixels(big, dw, dh, true, out);
-  else smallPixels(big, dw, dh, out);
+  else smallPixels(big, dw, dh, keyline, out);
   sbFree(big);
   return out.n > 0;
 }

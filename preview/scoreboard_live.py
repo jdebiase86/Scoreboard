@@ -397,15 +397,8 @@ function shortDown(dd,leftW){
   const c=s.replace(/(\d)[A-Z]{2}/,"$1");
   return fits(c)?c:"";
 }
-// score digits: a chunkier, stadium-style 1 (the font's 1 looks thin)
-const BOLD_ONE=["00110","01110","00110","00110","00110","00110","01111"];
-function scoreText(x,y,s,color,f,sc){sc=sc||1;
-  if(f!==F5){text(x,y,s,color,f,sc);return;}
-  for(const ch of String(s)){
-    if(ch==="1"){for(let ry=0;ry<7;ry++)for(let rx=0;rx<5;rx++)if(BOLD_ONE[ry][rx]==="1")
-      for(let sy=0;sy<sc;sy++)for(let sx=0;sx<sc;sx++)put(x+rx*sc+sx,y+ry*sc+sy,color);}
-    else text(x,y,ch,color,f,sc);
-    x+=5*sc+1;}}
+// score digits: the font's own (Joe preferred the plain 1 to 1.7's chunky one)
+function scoreText(x,y,s,color,f,sc){ text(x,y,s,color,f,sc||1); }
 
 // Postseason gold: the frame round your game, and the line under it
 const PLAYOFF_GOLD="rgb(230,170,0)";

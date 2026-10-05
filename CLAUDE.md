@@ -40,9 +40,16 @@ If the cloud session can't download the esp32 core, rely on the GitHub Action bu
 - Logo tests and mock-ups read real ESPN logos from a local logo folder (downloaded on Joe's Mac by get_logos.py); they skip or fall back to letters when the files aren't there.
 
 ## Wheel and modes (1.7)
-- Wheel stops: AUTO, a team mode per favourite (saved as settings.pin, survives restarts), ALL NFL, ALL COLLEGE (ranked + all SEC), then other live games (temporary). Short push = big / full-game screen. Hold 3 s = AUTO with ticker.
+- Wheel stops: AUTO, a team mode per favourite (saved as settings.pin, survives restarts), ALL NFL, ALL COLLEGE (ranked + all SEC), then other live games (temporary). Short push = big / full-game screen (no ticker). Hold 3 s = AUTO with ticker.
 - AUTO: live favourites take turns (football first); none live = cycle all favourites every rotation interval.
-- Unreadable logos show the team letters in team colour (lettersOnly list in sb_net.cpp).
+- AUTO when none of your teams is live takes turns between all of them (their final if they played today, else their next game), every rotation interval; the full-recheck path rotates the same way. When your one live game ends, its final shows for a turn and the rotation resumes (1.9). A game still waiting to start counts as "near" (checked every minute) for up to 3 hours past its listed time.
+
+## Logos (1.9)
+- Joe picked, per team, how each logo looks at small sizes (<40 px: kickoff 26x24, ticker 24, wheel cards, full-game screen): firmware/scoreboard/sb_logofix.h. FIX_LIGHT = ESPN's regular team-colour logo instead of the dark-background one; FIX_KEYLINE = a thin light outline drawn as one clean dot-wide edge (shrinkLogo keyline); FIX_CROP_TOP = drop the top 40% (76ers' stars); FIX_LETTERS = team letters (only Mississippi State now). Celebration logos (54 px) ignore the picks. The same table drives the mock-ups (hosttest/logo_dir.h loadTeamLogo).
+- To revisit a logo: draw contact sheets (1 today, 2 keyline, 3 light) and let Joe pick, then edit sb_logofix.h.
+
+## Full ticker (1.9)
+ALL NFL / ALL COLLEGE: two games a page, 24-dot logos along the top, each score small under its logo, clock / FINAL / start time bottom middle with the quarter or date just above in dim grey, the ball between the logos on the side with possession; red zone turns the quarter and clock red. Scores everywhere use the plain font 1 (the 1.7 chunky 1 is gone, preview matches).
 
 ## Football full-game screen (1.8, Option B)
 renderFootballFull in sb_render.cpp: both 26x24 logos side by side (away x=0, home x=38, y=8), scores under them, the ball between them for possession, timeout dots under the scores. Field: solid grass, faint midfield line, end zones in team colours (away left, home right), small football on its spot, yellow line to gain, red tint only on the 20 yards in front of the goal being attacked. Win bar: away share from the left; away goes white if the colours look alike. The net task now publishes the 26x24 logos for live football games too (the old 16-px live logos are gone). Mock-up: firmware/hosttest/mock_full2.cpp.
