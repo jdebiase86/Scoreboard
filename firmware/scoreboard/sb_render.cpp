@@ -139,25 +139,10 @@ static void shortDown(char (&out)[32], const char* dd, int leftW) {
   out[0] = 0;
 }
 
-// Score digits: the font's 1 is a thin stroke, so a 14 looks lighter than a
-// 6. Scores use a chunkier, stadium-style 1 (same width as the other digits).
-static const uint8_t BOLD_ONE[7] = {0b00110, 0b01110, 0b00110, 0b00110, 0b00110, 0b00110, 0b01111};
+// Scores: the font's own digits (Joe preferred the plain 1 to the chunkier
+// stadium-style one that 1.7 had).
 static void scoreText(Frame& fb, int x, int y, const char* s, RGB c, Font f, int sc) {
-  if (f != F5) { text(fb, x, y, s, c, f, sc); return; }
-  char one[2] = {0, 0};
-  for (; *s; s++) {
-    if (*s == '1') {
-      for (int ry = 0; ry < 7; ry++)
-        for (int rx = 0; rx < 5; rx++)
-          if (BOLD_ONE[ry] & (1 << (4 - rx)))
-            for (int sy = 0; sy < sc; sy++)
-              for (int sx = 0; sx < sc; sx++) fb.put(x + rx * sc + sx, y + ry * sc + sy, c);
-    } else {
-      one[0] = *s;
-      text(fb, x, y, one, c, f, sc);
-    }
-    x += 5 * sc + 1;
-  }
+  text(fb, x, y, s, c, f, sc);
 }
 
 // one of several messages, changing with the ticker; empties skipped
@@ -472,9 +457,14 @@ static void logoOrLetters(Frame& fb, const Logo& l, int x, int y, const char* ab
   if (l.n) { drawLogo(fb, l, x + ((SMALL_LOGO - l.w) >> 1), y + ((SMALL_LOGO - l.h) >> 1), 1); return; }
   char a[5]; fullAbbr(a, abbr);
   int w = tw(a, F3);
-  text(fb, x + ((SMALL_LOGO - w) >> 1), y + 5, a, ledColor(hasC, c), F3);
+  text(fb, x + ((SMALL_LOGO - w) >> 1), y + ((SMALL_LOGO - 5) >> 1), a, ledColor(hasC, c), F3);
 }
 
+// Two games a page, 32 rows each: both logos big along the top (away left,
+// home right), each score small under its logo, the clock / FINAL / start
+// time in the bottom middle with the quarter (or date) just above it in dim
+// grey. Between the logos: the ball on the side that has it, or AT before
+// the game. Red zone: the quarter and clock go red.
 void renderFullTicker(Frame& fb, const FullGame* games, int n, int page, const char* title) {
   fb.clear();
   if (n <= 0) {
@@ -482,6 +472,7 @@ void renderFullTicker(Frame& fb, const FullGame* games, int n, int page, const c
     text(fb, (W - tw("NO GAMES", F3)) >> 1, 34, "NO GAMES", DATEC, F3);
     return;
   }
+  const int L = SMALL_LOGO;
   int pages = (n + 1) / 2;
   int p = page % pages;
   for (int k = 0; k < 2; k++) {
@@ -490,31 +481,32 @@ void renderFullTicker(Frame& fb, const FullGame* games, int n, int page, const c
     const FullGame& g = games[i];
     const Tick& t = g.t;
     int y = k * 32;
-    logoOrLetters(fb, g.la, 1, y + 2, t.away, t.hasAwayColor, t.awayColor);
-    logoOrLetters(fb, g.lh, W - 1 - SMALL_LOGO, y + 2, t.home, t.hasHomeColor, t.homeColor);
+    logoOrLetters(fb, g.la, 0, y + 1, t.away, t.hasAwayColor, t.awayColor);
+    logoOrLetters(fb, g.lh, W - L, y + 1, t.home, t.hasHomeColor, t.homeColor);
     bool fin = !strcmp(t.status, "F"), sched = !t.score[0];
+    const char *top = "", *bot;
+    RGB tc = DATEC, bc = CLOCK;
+    if (fin) { bot = "FINAL"; bc = GREEN; }
+    else if (sched) { top = t.kickDate; bot = t.kickTime; }
+    else { top = t.status; bot = t.clock; if (t.redzone) tc = bc = RED; }
+    if (top[0]) text(fb, (W - tw(top, F3)) >> 1, y + 20, top, tc, F3);
+    text(fb, (W - tw(bot, F3)) >> 1, y + 26, bot, bc, F3);
     if (!sched) {
       char a[8] = "", h[8] = "";
       const char* d = strchr(t.score, '-');
       if (d) { size_t m = d - t.score; if (m > 7) m = 7; memcpy(a, t.score, m); a[m] = 0; scopy(h, d + 1); }
-      int wa = tw(a, F5), wh = tw(h, F5);
-      int mid = W / 2;
-      scoreText(fb, mid - 3 - wa, y + 6, a, WHITE, F5, 1);
-      for (int x = mid - 1; x <= mid; x++) fb.put(x, y + 9, GRAY);
-      scoreText(fb, mid + 3, y + 6, h, WHITE, F5, 1);
-      if (t.possession) sprite(fb, t.possession == 2 ? mid - 3 - wa : mid + 3 + wh - 7, y + 15, BALL, 5, BROWN);
-      (void)wh;
+      text(fb, L / 2 - (tw(a, F3) >> 1), y + 26, a, WHITE, F3);
+      text(fb, W - L / 2 - (tw(h, F3) >> 1), y + 26, h, WHITE, F3);
+      if (t.possession) {   // a small football between the logos, on the side with the ball
+        int cx = t.possession == 2 ? 28 : 35;
+        RGB br = rgb(200, 100, 35);
+        for (int dx = -1; dx <= 1; dx++) { fb.put(cx + dx, y + 10, br); fb.put(cx + dx, y + 12, br); }
+        for (int dx = -2; dx <= 2; dx++) fb.put(cx + dx, y + 11, br);
+        fb.put(cx, y + 11, WHITE);
+      }
     } else {
-      text(fb, (W - tw("AT", F3)) >> 1, y + 8, "AT", DATEC, F3);
+      text(fb, (W - tw("AT", F3)) >> 1, y + 9, "AT", DATEC, F3);
     }
-    char st[24];
-    RGB sc = CLOCK;
-    if (fin) { scopy(st, "FINAL"); sc = GREEN; }
-    else if (sched) snprintf(st, sizeof(st), "%s %s", t.kickDate, t.kickTime);
-    else snprintf(st, sizeof(st), "%s %s", t.status, t.clock);
-    text(fb, (W - tw(st, F3)) >> 1, y + 22, st, sc, F3);
-    if (t.redzone)
-      for (int yy = y + 1; yy < y + 30; yy++) { fb.put(0, yy, RED); fb.put(W - 1, yy, RED); }
     if (k == 0) for (int x = 2; x < W - 2; x++) fb.put(x, 31, rgb(50, 50, 50));
   }
 }

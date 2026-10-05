@@ -16,7 +16,8 @@ struct Logo {
 
 // rgba: iw x ih, 4 bytes per pixel. Fits the mark in a boxW x boxH box.
 // Returns false (and an empty logo) if nothing usable was left.
-bool shrinkLogo(const uint8_t* rgba, int iw, int ih, int boxW, int boxH, Logo& out);
+// keyline (small logos only): clean up a thin light outline (sb_logofix.h).
+bool shrinkLogo(const uint8_t* rgba, int iw, int ih, int boxW, int boxH, Logo& out, bool keyline = false);
 void freeLogo(Logo& l);
 void drawLogo(Frame& fb, const Logo& l, int ox, int oy, float bright);
 
