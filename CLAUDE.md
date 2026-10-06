@@ -5,7 +5,13 @@
 - Talk a design through before coding. For anything visual, render a mock-up picture first (firmware/hosttest mock_*.cpp programs write .ppm frames; scale up 6x with PIL and lay out side by side) and wait for Joe to pick. Don't code until he says go.
 - Joe isn't a programmer. Explain in plain words, keep steps short, and say exactly what to tap.
 - Never ask for or accept Joe's GitHub (or any) password.
-- A second board is for Joe's father-in-law (older, Windows PC, Central time). Setup must stay dead simple; a plain-language setup PDF comes last, after the code is settled.
+- A second board is a gift for a family member who isn't technical. Setup must stay dead simple; a plain-language setup PDF comes last, after the code is settled.
+
+## Privacy (this repo is public)
+- No personal details in anything committed or published: code, comments, test data, mock-ups, README, CLAUDE.md, commit messages, release notes or build files. That means no names of Joe's family ("Joe" alone is fine), no Wi-Fi names or passwords, no home address or home network addresses, no emails, keys or tokens, no spreadsheet or document links, no ages or health details. Use made-up placeholders ("Home Wi-Fi", "Swimmer 1").
+- Personal settings (Wi-Fi, teams, time zone) are entered on the board's setup page and stay on the board.
+- Before each release: search the changed files and commit messages for the above. If anything personal is found, including in old commits, show Joe what and where before changing anything; never quietly fix the history.
+- Other projects (swim PR board, Mini-Scoreboard) get their own repos; don't add their notes or personal data here.
 
 ## Hardware
 - Seengreat RGB Matrix HUB75 S3 (ESP32-S3, 16 MB flash, OPI PSRAM) driving a P3 64x64 HUB75 panel. Powered from the USB-C port that is NOT labeled power.
@@ -58,4 +64,4 @@ renderFootballFull in sb_render.cpp: both 26x24 logos side by side (away x=0, ho
 Separate repo jdebiase86/Mini-Scoreboard (design settled, no firmware yet). Never publish its releases here: boards install this repo's latest release.
 
 ## Later
-Full-game screens for baseball, hockey and basketball (need live data captures), night mode, all-teams countdown screen, QR code on the setup screen, father-in-law board setup (his teams Cowboys and LSU, Central time), then the setup PDF. Racing (NASCAR/F1) much later.
+Full-game screens for baseball, hockey and basketball (need live data captures), night mode, all-teams countdown screen, QR code on the setup screen, second (gift) board setup, then the setup PDF. Racing (NASCAR/F1) much later.
