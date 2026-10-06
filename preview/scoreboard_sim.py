@@ -4,7 +4,7 @@ Scoreboard panel simulator - runs right in your Terminal.
 
     python3 scoreboard_sim.py              demo game (fake Giants game)
     python3 scoreboard_sim.py --live       real live data from ESPN
-    python3 scoreboard_sim.py --team DAL   your father-in-law's board
+    python3 scoreboard_sim.py --team DAL   another team's board
     python3 scoreboard_sim.py --college    college Saturday mode
 
 Press Control-C to quit.

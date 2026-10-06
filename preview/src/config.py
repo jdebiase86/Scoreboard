@@ -1,8 +1,8 @@
 """
 Board configuration.
 
-This is the ONLY thing that differs between your board and your
-father-in-law's. Same code, same flashing procedure - you change these
+This is the ONLY thing that differs between your board and the second
+board. Same code, same flashing procedure - you change these
 two lines before flashing each board and that's it.
 
 In the real firmware this becomes a few #define lines at the top of the
@@ -17,9 +17,9 @@ BOARDS = {
         "nfl_team": "NYG",   # Giants - shown at the top every NFL gameday
         "cfb_team": "UF",    # Florida - shown at the top on college Saturdays
     },
-    "father_in_law": {
-        "nfl_team": "DAL",   # Cowboys
-        "cfb_team": "LSU",   # LSU
+    "second_board": {
+        "nfl_team": "DAL",   # Cowboys (example)
+        "cfb_team": "LSU",   # LSU (example)
     },
 }
 

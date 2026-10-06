@@ -128,10 +128,10 @@ document.querySelector('form').addEventListener('submit',e=>{if(!boxes.some(b=>b
 
 int main(int argc,char**argv){
   apOn = argc>1 && argv[1][0]=='a';
-  settings.ssid = apOn ? "" : "DeBiase Home";
+  settings.ssid = apOn ? "" : "Home Wi-Fi";
   settings.npicks=0; settings.pin=-1; settings.tz=0; settings.bright=1;
   if(!apOn){ const char* k[]={"NYG","FLA","NYY","NYR","NY"}; int lg[]={0,1,2,3,4};
     for(int j=0;j<5;j++) for(int i=0;i<NTEAMS;i++) if(TEAMS[i].league==lg[j]&&!strcmp(TEAMS[i].abbr,k[j])) settings.picks[settings.npicks++]=i; }
-  scanned = "<option value=\"DeBiase Home\"><option value=\"Neighbor 5G\">";
+  scanned = "<option value=\"Home Wi-Fi\"><option value=\"Neighbor 5G\">";
   handleRoot(); fputs(SENT.c_str(), stdout);
 }
