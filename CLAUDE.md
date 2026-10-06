@@ -54,5 +54,8 @@ ALL NFL / ALL COLLEGE: two games a page, 24-dot logos along the top, each score 
 ## Football full-game screen (1.8, Option B)
 renderFootballFull in sb_render.cpp: both 26x24 logos side by side (away x=0, home x=38, y=8), scores under them, the ball between them for possession, timeout dots under the scores. Field: solid grass, faint midfield line, end zones in team colours (away left, home right), small football on its spot, yellow line to gain, red tint only on the 20 yards in front of the goal being attacked. Win bar: away share from the left; away goes white if the colours look alike. The net task now publishes the 26x24 logos for live football games too (the old 16-px live logos are gone). Mock-up: firmware/hosttest/mock_full2.cpp.
 
+## Mini scoreboard
+Separate repo jdebiase86/Mini-Scoreboard (design settled, no firmware yet). Never publish its releases here: boards install this repo's latest release.
+
 ## Later
 Full-game screens for baseball, hockey and basketball (need live data captures), night mode, all-teams countdown screen, QR code on the setup screen, father-in-law board setup (his teams Cowboys and LSU, Central time), then the setup PDF. Racing (NASCAR/F1) much later.
