@@ -8,3 +8,5 @@ Updates install over Wi-Fi: each board checks this repository's latest release (
 - firmware/hosttest: tests and mock-up renderers that run on a computer
 - preview: the original browser preview the firmware's look is matched against
 - .github/workflows: builds the firmware and publishes a release whenever the version number changes on main
+
+Companion project: [Mini-Scoreboard](https://github.com/jdebiase86/Mini-Scoreboard), a desk-sized mini scoreboard on a 4.0" ESP32 touch screen that can also act as a remote for this board. It has its own repo so its updates never mix with this board's releases.
