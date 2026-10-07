@@ -1,6 +1,7 @@
 // Scoreboard case - 2 inch deep box, the screen is the front.
-// Prints open side up, no supports. Needs 4x M3 x 30 mm screws (screen) and
-// 4x M2 heat-set inserts + 4x M2 x 5 mm screws (board).
+// Prints open side up, no supports. Needs 4x M3 x 30 mm screws (screen, its
+// brass inserts are M3) and 4x M2 x 4 mm heat-set inserts + 4x M2 x 6 mm screws (board).
+// part = "case" (default), "test_screen" or "test_board" - see the bottom of the file.
 // Coordinates as seen from the FRONT: x right, y up, z from the back (0) to the front.
 // Screen held upright with its wires at the bottom.
 panel = 191.9; panel_t = 14.4; clr = 0.4; wall = 2.5;
@@ -17,8 +18,8 @@ pocket_h = panel_back_z - (screw_len - bite);
 // Seengreat board, USB/wheel edge against the right wall
 bw = 57.5; bl = 64.75; hx = 51.72; hy = 59.13;
 by0 = 34; standoff_h = 11; sd = 7.5;
-// M2 heat-set inserts (common M2 x 3 mm kits): 3.2 mm hole, 5 mm deep
-insert_d = 3.2; insert_depth = 5;
+// M2 x 4 mm heat-set inserts (kit: 3.0 mm top, 2.7 mm bottom): 2.9 mm hole, 6 mm deep
+insert_d = 2.9; insert_depth = 6;
 bx0 = outer - wall - 0.8 - bw;
 board_z = floor_t + standoff_h;
 $fn = 48;
@@ -61,6 +62,7 @@ module box() difference() {
   for (x = [outer/2 - 55, outer/2 + 55]) translate([x, outer - 30, 0]) keyhole();
 }
 
+part = "case";
 show_box = true; show_board = false; show_panel = false; cut = false;
 module all() {
   if (show_box) color("#3a3d42") box();
@@ -76,7 +78,31 @@ module all() {
     color("#555", 0.9) translate([0, 0, panel_t - 1.2]) cube([panel, panel, 1.2]);
   }
 }
-if (cut) difference() { all(); translate([-1, -1, -1]) cube([outer + 2, outer / 2 + 1, 100]); } else all();
+// Test piece 1: a thin frame that drops over the back of the screen; check that
+// all four screw holes land on the screen's brass inserts.
+module test_screen() {
+  t = 2; lip = 5; band = 30;
+  difference() {
+    union() {
+      difference() {   // edge band plus a lip that wraps the screen's edge
+        linear_extrude(t + lip) rsq([outer, outer], corner_r);
+        translate([wall, wall, t]) cube([inner, inner, lip + 1]);
+        translate([band, band, -1]) cube([outer - 2*band, outer - 2*band, t + lip + 2]);
+      }
+      for (p = ins) translate(concat(P(p), 0)) cylinder(d = post_d + 4, h = t);
+    }
+    for (p = ins) translate(concat(P(p), -1)) cylinder(d = screw_hole, h = t + 2);
+  }
+}
+// Test piece 2: the lower right corner of the case with the board posts and the
+// wheel/USB slot; press in the inserts, screw the board on, try the wheel and cable.
+module test_board() intersection() {
+  box();
+  translate([bx0 - 8, -1, -1]) cube([outer, by0 + bl + 10, board_z + 15]);
+}
+if (part == "test_screen") test_screen();
+else if (part == "test_board") test_board();
+else if (cut) difference() { all(); translate([-1, -1, -1]) cube([outer + 2, outer / 2 + 1, 100]); } else all();
 explode = 0;
 if (explode > 0) translate([0, 0, explode]) translate([wall + clr, wall + clr, panel_back_z]) {
   color("#222") cube([panel, panel, panel_t - 1.2]);
