@@ -105,9 +105,13 @@ module test_screen() {
 }
 // Test piece 2: the lower right corner of the case with the board posts and the
 // wheel/USB slot; press in the inserts, screw the board on, try the wheel and cable.
-module test_board() intersection() {
-  box();
-  translate([bx0 - 8, -1, -1]) cube([outer, by0 + bl + 10, board_z + 15]);
+module test_board() difference() {
+  intersection() {   // just the board's footprint, its posts and the slot wall
+    box();
+    translate([bx0 - 3, by0 - 3, -1]) cube([outer, bl + 6, board_z + 3 + slot_h/2 + 3 + 1]);
+  }
+  // open up the middle of the floor to save plastic
+  translate([bx0 + 8, by0 + 8, -1]) cube([bw - 18, bl - 16, floor_t + 2]);
 }
 if (part == "test_screen") test_screen();
 else if (part == "test_board") test_board();
