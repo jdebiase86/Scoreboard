@@ -9,10 +9,10 @@ inner = panel + 2*clr; outer = inner + 2*wall;
 depth = 50.8; floor_t = 3; recess = 1.0; corner_r = 4;
 panel_back_z = depth - recess - panel_t;   // posts stop the screen here
 
-// four corner brass inserts, panel coordinates: 11 mm in from the left/right sides,
-// 22 mm from the top/bottom (wires side = bottom). Checked on test frame 1 (was 10).
-ins = [[11, 22], [panel - 11, 22], [11, panel - 22], [panel - 11, panel - 22]];
-post_d = 11; screw_hole = 4.2;   // oversize M3 clearance for photo error
+// four corner brass inserts, panel coordinates (wires side = bottom): 10.5 mm in from the
+// left/right sides, 21.5 mm from the top/bottom. From ruler photos and test frame 1.
+ins = [[10.5, 21.5], [panel - 10.5, 21.5], [10.5, panel - 21.5], [panel - 10.5, panel - 21.5]];
+post_d = 11; screw_hole = 4.5;   // oversize M3 clearance for photo error
 head_d = 8; screw_len = 30; bite = 6;   // M3 x 30 mm, ~6 mm into the insert
 pocket_h = panel_back_z - (screw_len - bite);
 
