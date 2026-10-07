@@ -105,7 +105,7 @@ module all() {
 // Test piece 1: a thin frame that drops over the back of the screen; check that
 // all four screw holes land on the screen's brass inserts.
 module test_screen() {
-  t = 1.2; ring = 5.5; lip = 4; leg = 22; pad = 15;
+  t = 1.2; ring = 5.5; lip = panel_t; leg = 22; pad = 15;   // corner lips reach the LED face, like the case walls
   difference() {
     union() {
       difference() {   // thin outer ring
