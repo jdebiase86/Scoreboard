@@ -56,10 +56,19 @@ module keyhole() translate([0, 0, -1]) {
   translate([-2.25, 0, 0]) cube([4.5, 9, floor_t + 2]);
   translate([0, 9, 0]) cylinder(d = 4.5, h = floor_t + 2);
 }
-module box() difference() {
-  union() { shell(); posts(); standoffs(); }
-  post_holes(); side_slot(); vents();
-  for (x = [outer/2 - 55, outer/2 + 55]) translate([x, outer - 30, 0]) keyhole();
+// Snap-off bars across the slot so its top edge prints without supports
+// (short bridges between bars); clip them out with flush cutters after printing.
+slot_bars = 4; bar_w = 1.0; bar_t = 1.2;
+module bars() for (i = [1:slot_bars])
+  translate([outer - wall/2 - bar_t/2, by0 + 2 + i*(bl - 4)/(slot_bars + 1) - bar_w/2, board_z - 2.5])
+    cube([bar_t, bar_w, 15]);
+module box() {
+  difference() {
+    union() { shell(); posts(); standoffs(); }
+    post_holes(); side_slot(); vents();
+    for (x = [outer/2 - 55, outer/2 + 55]) translate([x, outer - 30, 0]) keyhole();
+  }
+  if (slot_bars > 0) bars();
 }
 
 part = "case";
