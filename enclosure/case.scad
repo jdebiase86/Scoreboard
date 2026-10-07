@@ -104,15 +104,23 @@ module all() {
 // Test piece 1: a thin frame that drops over the back of the screen; check that
 // all four screw holes land on the screen's brass inserts.
 module test_screen() {
-  t = 2; lip = 5; band = 30;
+  t = 1.2; ring = 5.5; lip = 4; leg = 22; pad = 15;
   difference() {
     union() {
-      difference() {   // edge band plus a lip that wraps the screen's edge
-        linear_extrude(t + lip) rsq([outer, outer], corner_r);
-        translate([wall, wall, t]) cube([inner, inner, lip + 1]);
-        translate([band, band, -1]) cube([outer - 2*band, outer - 2*band, t + lip + 2]);
+      difference() {   // thin outer ring
+        linear_extrude(t) rsq([outer, outer], corner_r);
+        translate([ring, ring, -1]) cube([outer - 2*ring, outer - 2*ring, t + 2]);
       }
-      for (p = ins) translate(concat(P(p), 0)) cylinder(d = post_d + 4, h = t);
+      for (p = ins) let(q = P(p)) {   // pads round the holes, tied to the side of the ring
+        translate(concat(q, 0)) cylinder(d = pad, h = t);
+        translate([q[0] < outer/2 ? 0 : q[0], q[1] - 4, 0]) cube([q[0] < outer/2 ? q[0] : outer - q[0], 8, t]);
+      }
+      // L-shaped lips at the corners so the screen drops in square
+      for (cx = [0, 1], cy = [0, 1]) translate([cx*outer, cy*outer, 0]) mirror([cx, 0, 0]) mirror([0, cy, 0])
+        linear_extrude(t + lip) difference() {
+          intersection() { square([leg, leg]); translate([0, 0]) offset(corner_r) offset(-corner_r) square([2*leg, 2*leg]); }
+          translate([wall, wall]) square([leg, leg]);
+        }
     }
     for (p = ins) translate(concat(P(p), -1)) cylinder(d = screw_hole, h = t + 2);
   }
