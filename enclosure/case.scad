@@ -16,7 +16,9 @@ head_d = 8; screw_len = 30; bite = 6;   // M3 x 30 mm, ~6 mm into the insert
 pocket_h = panel_back_z - (screw_len - bite);
 
 // Seengreat board, USB/wheel edge against the right wall
-bw = 57.5; bl = 64.75; hx = 51.72; hy = 59.13;
+// bw = depth into the case, bl = along the right wall (the USB/wheel edge is a short side).
+// Hole spacing measured on the board: 60 mm along the long side, 51.65 mm along the short side.
+bw = 64.75; bl = 57.5; hx = 60; hy = 51.65;
 by0 = 34; standoff_h = 11; sd = 7.5;
 // M2 x 4 mm heat-set inserts (kit: 3.0 mm top, 2.7 mm bottom): 2.9 mm hole, 6 mm deep
 insert_d = 2.9; insert_depth = 6;
@@ -42,7 +44,8 @@ module standoffs() for (h = bholes()) translate(concat(h, 0)) difference() {
   translate([0, 0, board_z - insert_depth]) cylinder(d = insert_d, h = insert_depth + 1);
 }
 module side_slot()   // wheel + USB-C, generous so exact spots don't matter
-  translate([outer - wall - 1, by0 + 2, board_z - 2]) cube([wall + 2, bl - 4, 14]);
+  translate([outer - wall - 1, by0 + bl/2 - slot_len/2, board_z]) cube([wall + 2, slot_len, slot_h]);
+slot_len = 48; slot_h = 6;   // measured on the board: both USB-C ports and the wheel
 module vents() {
   r = 5; g = 2.4; dx = 2*r*cos(30) + g; dy = 1.5*r + g*cos(30); c = [outer/2 - 22, outer/2 + 10];
   intersection() {
