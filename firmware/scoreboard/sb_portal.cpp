@@ -8,6 +8,7 @@
 #include <ESPmDNS.h>
 #include "sb_log.h"
 #include "sb_version.h"
+#include "sb_audio.h"
 
 static WebServer server(80);
 static CaptiveDns dns;
@@ -153,6 +154,8 @@ static void handleRoot() {
     h += "<section><h2>Software</h2><p class=hint>Version " FW_VERSION ". Updates install by themselves overnight. " +
          esc(otaStatus()) + "</p><form method=post action=/update><button type=submit>Check for updates now</button>"
          "</form></section>";
+    h += "<section><h2>Test the speaker</h2><p class=hint>Plays a short chime on the board at full volume. "
+         "<span id=spr></span></p><button type=button id=spk>Test speaker</button></section>";
     h += "<section><h2>Test the animations</h2><p class=hint>Plays one on the board now, with the game "
          "that's on it (or made-up teams). <span id=fxr></span></p><div class=fx>";
     static const char* const FX[][2] = {
@@ -175,6 +178,8 @@ function upd(){const on=boxes.filter(b=>b.checked);
 boxes.forEach(b=>b.addEventListener('change',upd));upd();
 document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const r=document.getElementById('fxr');
  fetch('/fxtest?k='+b.dataset.k,{method:'POST'}).then(x=>{r.textContent=x.ok?b.textContent+' sent.':'Not sent.';}).catch(()=>{r.textContent='Not sent.';});});
+const spk=document.getElementById('spk');if(spk)spk.onclick=()=>{const r=document.getElementById('spr');
+ fetch('/speaker',{method:'POST'}).then(x=>x.text()).then(t=>{r.textContent=t;}).catch(()=>{r.textContent='Not sent.';});};
 document.querySelector('form').addEventListener('submit',e=>{if(!boxes.some(b=>b.checked)){e.preventDefault();alert('Pick at least one team.');}});
 </script></main></body></html>)JS";
   server.send(200, "text/html; charset=utf-8", h);
@@ -282,6 +287,11 @@ static void routes() {
   server.on("/fxtest", HTTP_POST, [] {
     bool ok = !apOn && fxTest(server.arg("k").c_str());
     server.send(ok ? 200 : 400, "text/plain", ok ? "ok" : "no");
+  });
+  server.on("/speaker", HTTP_POST, [] {
+    if (!audioReady()) { server.send(200, "text/plain", "The sound chip didn't answer at start-up (see /log)."); return; }
+    audioChime();
+    server.send(200, "text/plain", "Chime sent - listen to the board.");
   });
   server.on("/log", HTTP_GET, [] { server.send(200, "text/plain; charset=utf-8", sbLogText()); });
   server.on("/favicon.ico", HTTP_GET, [] { server.send(404, "text/plain", ""); });

@@ -24,6 +24,7 @@
 #include "sb_portal.h"
 #include "sb_log.h"
 #include "sb_wheel.h"
+#include "sb_audio.h"
 #include "sb_main.h"
 #include <Preferences.h>
 
@@ -371,6 +372,7 @@ void setup() {
   tzset();
   if (!panelBegin(BRIGHTS[settings.bright].level, settings.clockA)) sbLog("panel failed to start");
   wheelBegin();
+  audioBegin();
   shown = new (sbAlloc(sizeof(Shown))) Shown();
   fb = new (sbAlloc(sizeof(Frame))) Frame();
   fxSpec = new (sbAlloc(sizeof(FxSpec))) FxSpec();
