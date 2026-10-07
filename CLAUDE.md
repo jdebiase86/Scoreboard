@@ -17,7 +17,7 @@
 - Seengreat RGB Matrix HUB75 S3 (ESP32-S3, 16 MB flash, OPI PSRAM) driving a P3 64x64 HUB75 panel. Powered from the USB-C port that is NOT labeled power.
 - HUB75: R1=5 G1=4 B1=6 R2=15 G2=7 B2=17 A=8 B=18 C=10 D=9 E=16 CLK=12 LAT=11 OE=13.
 - Thumbwheel on a PCA9557 I2C expander, SDA=IO1, SCL=IO2. UP=K1 (bit 1), DOWN=K3 (bit 2), PUSH=K2 (bit 3). At boot: unjam the bus (9 clocks + STOP), then take the first address in 0x19-0x1F, 0x18, 0x20-0x27, 0x38-0x3F whose config register 0x03 reads 0xFF (the ES8311 codec sits at 0x18).
-- SD: CS39 MOSI40 CLK41 MISO42. Audio: MCLK38 SCLK48 LRCK21 DSDIN14 SDOUT47, NS4150 amp enable IO3 (too quiet to be useful, unused).
+- SD: CS39 MOSI40 CLK41 MISO42. Audio: MCLK38 SCLK48 LRCK21 DSDIN14 SDOUT47, NS4150 amp enable IO3. sb_audio.cpp (1.10) sets up the ES8311 (I2C 0x18, slave, 16 kHz, MCLK 256 fs) and plays a test chime from the "Test speaker" button at scoreboard.local. How loud it really is hasn't been heard yet; nothing else uses sound.
 
 ## Firmware layout (firmware/scoreboard)
 - scoreboard.ino: loop on core 1 - modes, wheel, popups, animations, drawing.
