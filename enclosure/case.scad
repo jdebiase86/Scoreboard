@@ -46,12 +46,17 @@ module standoffs() for (h = bholes()) translate(concat(h, 0)) difference() {
   cylinder(d = sd, h = board_z);
   translate([0, 0, board_z - insert_depth]) cylinder(d = insert_d, h = insert_depth + 1);
 }
-module side_slot() {  // wheel + USB-C
-  translate([outer - wall - 0.01, by0 + bl/2 - slot_len/2, board_z + 3 - slot_h/2]) cube([wall + 1, slot_len, slot_h]);
+module side_slot() {  // wheel + USB-C: two openings with a bar between the wheel and the first USB-C
+  cy = by0 + bl/2;
+  translate([outer - wall - 0.01, cy - slot_len/2, slot_z0]) cube([wall + 1, slot_len/2 + bar_y - bar_w/2, slot_z1 - slot_z0]);
+  translate([outer - wall - 0.01, cy + bar_y + bar_w/2, slot_z0]) cube([wall + 1, slot_len/2 - bar_y - bar_w/2, slot_z1 - slot_z0]);
   // pocket on the inside of the wall for the board's edge
   translate([outer - wall - 0.01, by0 - 1, board_z]) cube([pocket + 0.01, bl + 2, 6.75]);
 }
-slot_len = 48; slot_h = 7.5;   // measured 6 x 48 on the board, + 1.5 mm wiggle room in height
+// Fitted on test print 3: opening from 1.35 to 5.75 mm above the board's underside, 48 mm long,
+// with an 8 mm bar centred 2.75 mm below the board's middle (wheel side), filling the gap
+// between the wheel and the first USB-C port.
+slot_len = 48; slot_z0 = board_z + 1.35; slot_z1 = board_z + 5.75; bar_w = 8; bar_y = -2.75;
 module vents() {
   r = 5; g = 2.4; dx = 2*r*cos(30) + g; dy = 1.5*r + g*cos(30); c = [outer/2 - 22, outer/2 + 10];
   intersection() {
@@ -108,7 +113,7 @@ module test_screen() {
 module test_board() difference() {
   intersection() {   // just the board's footprint, its posts and the slot wall
     box();
-    translate([bx0 - 3, by0 - 3, -1]) cube([outer, bl + 6, board_z + 3 + slot_h/2 + 3 + 1]);
+    translate([bx0 - 3, by0 - 3, -1]) cube([outer, bl + 6, board_z + 6.75 + 3 + 1]);
   }
   // open up the middle of the floor to save plastic
   translate([bx0 + 8, by0 + 8, -1]) cube([bw - 18, bl - 16, floor_t + 2]);
