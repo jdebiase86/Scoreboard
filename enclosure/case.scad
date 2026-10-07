@@ -9,8 +9,9 @@ inner = panel + 2*clr; outer = inner + 2*wall;
 depth = 50.8; floor_t = 3; recess = 1.0; corner_r = 4;
 panel_back_z = depth - recess - panel_t;   // posts stop the screen here
 
-// four corner brass inserts, panel coordinates (from photos, +/- 2 mm)
-ins = [[10, 22], [panel - 10, 22], [10, panel - 22], [panel - 10, panel - 22]];
+// four corner brass inserts, panel coordinates: 11 mm in from the left/right sides,
+// 22 mm from the top/bottom (wires side = bottom). Checked on test frame 1 (was 10).
+ins = [[11, 22], [panel - 11, 22], [11, panel - 22], [panel - 11, panel - 22]];
 post_d = 11; screw_hole = 4.2;   // oversize M3 clearance for photo error
 head_d = 8; screw_len = 30; bite = 6;   // M3 x 30 mm, ~6 mm into the insert
 pocket_h = panel_back_z - (screw_len - bite);
@@ -123,6 +124,8 @@ module test_screen() {
         }
     }
     for (p = ins) translate(concat(P(p), -1)) cylinder(d = screw_hole, h = t + 2);
+    // marks the screen's wires side, so the frame can't be put on turned round
+    translate([outer/2, 2.75, t - 0.6]) linear_extrude(1) text("WIRES SIDE", size = 3.6, font = "DejaVu Sans:style=Bold", halign = "center", valign = "center");
   }
 }
 // Test piece 2: the lower right corner of the case with the board posts and the
