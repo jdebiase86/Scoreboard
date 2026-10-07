@@ -22,7 +22,10 @@ bw = 64.75; bl = 57.5; hx = 60; hy = 51.65;
 by0 = 34; standoff_h = 11; sd = 7.5;
 // M2 x 4 mm heat-set inserts (kit: 3.0 mm top, 2.7 mm bottom): 2.9 mm hole, 6 mm deep
 insert_d = 2.9; insert_depth = 6;
-bx0 = outer - wall - 0.8 - bw;
+// The board's USB/wheel edge sits edge_in mm into a pocket in the wall, so the
+// wheel sticks out further (was 0.8 mm short of the wall).
+edge_in = 0.7; pocket = 1.0;
+bx0 = outer - wall + edge_in - bw;
 board_z = floor_t + standoff_h;
 $fn = 48;
 
@@ -43,9 +46,12 @@ module standoffs() for (h = bholes()) translate(concat(h, 0)) difference() {
   cylinder(d = sd, h = board_z);
   translate([0, 0, board_z - insert_depth]) cylinder(d = insert_d, h = insert_depth + 1);
 }
-module side_slot()   // wheel + USB-C, generous so exact spots don't matter
-  translate([outer - wall - 1, by0 + bl/2 - slot_len/2, board_z]) cube([wall + 2, slot_len, slot_h]);
-slot_len = 48; slot_h = 6;   // measured on the board: both USB-C ports and the wheel
+module side_slot() {  // wheel + USB-C
+  translate([outer - wall - 0.01, by0 + bl/2 - slot_len/2, board_z + 3 - slot_h/2]) cube([wall + 1, slot_len, slot_h]);
+  // pocket on the inside of the wall for the board's edge
+  translate([outer - wall - 0.01, by0 - 1, board_z]) cube([pocket + 0.01, bl + 2, 6.75]);
+}
+slot_len = 48; slot_h = 7.5;   // measured 6 x 48 on the board, + 1.5 mm wiggle room in height
 module vents() {
   r = 5; g = 2.4; dx = 2*r*cos(30) + g; dy = 1.5*r + g*cos(30); c = [outer/2 - 22, outer/2 + 10];
   intersection() {
