@@ -20,6 +20,9 @@ pocket_h = panel_back_z - (screw_len - bite);
 // Hole spacing measured on the board: 60 mm along the long side, 51.65 mm along the short side.
 bw = 64.75; bl = 57.5; hx = 60; hy = 51.65;
 by0 = 34; standoff_h = 11; sd = 7.5;
+// Everything about the board is drawn against the RIGHT wall and then turned 180 degrees
+// onto the LEFT wall (bottom left seen from the front) when board_left is true.
+board_left = true;
 // M2 x 4 mm heat-set inserts (kit: 3.0 mm top, 2.7 mm bottom): 2.9 mm hole, 6 mm deep
 insert_d = 2.9; insert_depth = 6;
 // The board's USB/wheel edge sits edge_in mm into a pocket in the wall, so the
@@ -46,6 +49,9 @@ module standoffs() for (h = bholes()) translate(concat(h, 0)) difference() {
   cylinder(d = sd, h = board_z);
   translate([0, 0, board_z - insert_depth]) cylinder(d = insert_d, h = insert_depth + 1);
 }
+module place() if (board_left)
+    translate([outer/2, by0 + bl/2, 0]) rotate(180) translate([-outer/2, -(by0 + bl/2), 0]) children();
+  else children();
 module side_slot() {  // wheel + USB-C: two openings with a bar between the wheel and the first USB-C
   cy = by0 + bl/2;
   translate([outer - wall - 0.01, cy - slot_len/2, slot_z0]) cube([wall + 1, slot_len/2 + bar_y - bar_w/2, slot_z1 - slot_z0]);
@@ -58,7 +64,7 @@ module side_slot() {  // wheel + USB-C: two openings with a bar between the whee
 // between the wheel and the first USB-C port.
 slot_len = 48; slot_z0 = board_z + 1.35; slot_z1 = board_z + 5.75; bar_w = 8; bar_y = -4.2;
 module vents() {
-  r = 5; g = 2.4; dx = 2*r*cos(30) + g; dy = 1.5*r + g*cos(30); c = [outer/2 - 22, outer/2 + 10];
+  r = 5; g = 2.4; dx = 2*r*cos(30) + g; dy = 1.5*r + g*cos(30); c = [outer/2 + (board_left ? 22 : -22), outer/2 + 10];
   intersection() {
     translate(concat(c, -1)) cylinder(r = 42, h = floor_t + 2);
     for (i = [-8:8], j = [-8:8]) translate([c[0] + i*dx + (j % 2)*dx/2, c[1] + j*dy, -1])
@@ -71,22 +77,25 @@ module keyhole() translate([0, 0, -1]) {
   translate([0, 9, 0]) cylinder(d = 4.5, h = floor_t + 2);
 }
 module box() difference() {
-  union() { shell(); posts(); standoffs(); }
-  post_holes(); side_slot(); vents();
+  union() { shell(); posts(); place() standoffs(); }
+  post_holes(); place() side_slot(); vents();
   for (x = [outer/2 - 55, outer/2 + 55]) translate([x, outer - 30, 0]) keyhole();
 }
 
 part = "case";
 show_box = true; show_board = false; show_panel = false; cut = false;
+module board_model() {   // rough stand-in for pictures only
+  cy = by0 + bl/2; ex = bx0 + bw; top = board_z + 1.6;
+  color("#24324a") translate([bx0, by0, board_z]) cube([bw, bl, 1.6]);
+  color("#111") translate([bx0 + 18, cy - 10, top]) cube([26, 34, 9]);                  // speaker
+  color("#222") translate([bx0 + 1, cy - 25, top]) cube([9, 26, 9]);                    // HUB75 socket
+  color("silver") translate([bx0 + 30, by0 + 4, top]) cube([14, 15, 2]);                // microSD
+  color("#c0c0c0") for (dy = [7.5, 19.3]) translate([ex - 7.3, cy + dy - 4.5, top]) cube([7.5, 9, 3.2]); // USB-C x2
+  color("#e07b00") translate([ex - 1.4, cy - 15, top + 1.8]) cylinder(d = 14, h = 3.4, center = true, $fn = 64); // wheel
+}
 module all() {
   if (show_box) color("#3a3d42") box();
-  if (show_board) {
-    color("darkgreen") translate([bx0, by0, board_z]) cube([bw, bl, 1.6]);
-    color("dimgray") translate([bx0 + 10, by0 + 12, board_z - 9.2]) cube([30, 40, 9.2]);   // speaker side
-    color("silver") translate([bx0 + 8, by0 + 30, board_z + 1.6]) cube([22, 20, 9]);       // ribbon plug
-    color("orange") translate([outer - wall + 1.5, by0 + 45, board_z + 5]) rotate([0, 90, 0]) cylinder(d = 12, h = 3, center = true);
-    color("gold") translate([outer - wall - 7, by0 + 22, board_z + 1.6]) cube([7.5, 9, 3.3]);
-  }
+  if (show_board) place() board_model();
   if (show_panel) translate([wall + clr, wall + clr, panel_back_z]) {
     color("#222") cube([panel, panel, panel_t - 1.2]);
     color("#555", 0.9) translate([0, 0, panel_t - 1.2]) cube([panel, panel, 1.2]);
@@ -113,10 +122,10 @@ module test_screen() {
 module test_board() difference() {
   intersection() {   // just the board's footprint, its posts and the slot wall
     box();
-    translate([bx0 - 3, by0 - 3, -1]) cube([outer, bl + 6, board_z + 6.75 + 3 + 1]);
+    place() translate([bx0 - 3, by0 - 3, -1]) cube([outer, bl + 6, board_z + 6.75 + 3 + 1]);
   }
   // open up the middle of the floor to save plastic
-  translate([bx0 + 8, by0 + 8, -1]) cube([bw - 18, bl - 16, floor_t + 2]);
+  place() translate([bx0 + 8, by0 + 8, -1]) cube([bw - 18, bl - 16, floor_t + 2]);
 }
 if (part == "test_screen") test_screen();
 else if (part == "test_board") test_board();
