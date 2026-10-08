@@ -30,9 +30,9 @@ int main(){
   static Game g; parseGame(doc.as<JsonObjectConst>(),*min,false,now,g);
   printf("MIN %d-%d yl %d d %d dist %d to %d/%d win %d sdd %s poss %d\n",g.home.score,g.away.score,g.yardLine,g.down,g.distance,g.toHome,g.toAway,g.winHome,g.shortDD,g.possession);
   Logo la,lh; loadLogo("nfl","MIA",SMALL_LOGO,la); loadLogo("nfl","MIN",SMALL_LOGO,lh);
-  renderScoreColors(WHITE,WHITE); renderFootballFull(fb,g,&la,&lh,2400); ppm("/tmp/fg1.ppm",fb);
+  renderScoreColors(WHITE,WHITE); renderFull(fb,g,&la,&lh,2400); ppm("/tmp/fg1.ppm",fb);
   const TeamDef* kc=nullptr; for(int i=0;i<NTEAMS;i++) if(TEAMS[i].league==L_NFL && !strcmp(TEAMS[i].abbr,"LV")) kc=&TEAMS[i];
   parseGame(doc.as<JsonObjectConst>(),*kc,false,now,g); printf("LV yl %d rz %d\n",g.yardLine,g.redzone);
   la=Logo(); lh=Logo(); loadLogo("nfl","KC",SMALL_LOGO,la); loadLogo("nfl","LV",SMALL_LOGO,lh);
-  renderFootballFull(fb,g,&la,&lh,0); ppm("/tmp/fg2.ppm",fb);
+  renderFull(fb,g,&la,&lh,0); ppm("/tmp/fg2.ppm",fb);
 }

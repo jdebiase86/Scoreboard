@@ -346,15 +346,21 @@ const RANKC="rgb(190,190,190)";
 // row was hidden under the playoff frame, so it now starts a row lower).
 const ARROW_UP=["00100","01110","11111"], ARROW_DN=["11111","01110","00100"];
 function drawBaseDiamond(x,y,bases){
-  const base=(cx,cy,on)=>{
-    const c=on?"rgb(255,200,0)":"rgb(70,70,70)";
-    put(cx,cy-1,c);put(cx-1,cy,c);put(cx+1,cy,c);put(cx,cy+1,c);
-    if(on) put(cx,cy,"rgb(255,255,255)");
+  // the infield as a thin green outline (Joe's pick B, 1.11), bases on it
+  const cx=x+5, cy=y+3;
+  for(let dy=-4;dy<=4;dy++) for(let dx=-6;dx<=6;dx++){
+    const d=Math.abs(dx)*2+Math.abs(dy)*3;
+    if(d>=10&&d<=12) put(cx+dx,cy+dy,"rgb(40,140,60)");
+  }
+  const base=(bx,by,on)=>{
+    const c=on?"rgb(255,200,0)":"rgb(170,170,170)";
+    put(bx,by-1,c);put(bx-1,by,c);put(bx+1,by,c);put(bx,by+1,c);
+    put(bx,by,on?"rgb(255,255,255)":c);
   };
-  base(x+5,y+1,bases&&bases[1]);   // 2nd
-  base(x+1,y+4,bases&&bases[2]);   // 3rd
-  base(x+9,y+4,bases&&bases[0]);   // 1st
-  put(x+5,y+6,"rgb(90,90,90)");    // home plate
+  base(cx,cy-3,bases&&bases[1]);   // 2nd
+  base(cx-5,cy,bases&&bases[2]);   // 3rd
+  base(cx+5,cy,bases&&bases[0]);   // 1st
+  put(cx,cy+4,"rgb(255,255,255)");  // home plate
 }
 
 // The team at bat gets a baseball beside its score - the same spot

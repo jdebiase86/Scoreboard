@@ -17,7 +17,7 @@
 - Seengreat RGB Matrix HUB75 S3 (ESP32-S3, 16 MB flash, OPI PSRAM) driving a P3 64x64 HUB75 panel. Powered from the USB-C port that is NOT labeled power.
 - HUB75: R1=5 G1=4 B1=6 R2=15 G2=7 B2=17 A=8 B=18 C=10 D=9 E=16 CLK=12 LAT=11 OE=13.
 - Thumbwheel on a PCA9557 I2C expander, SDA=IO1, SCL=IO2. UP=K1 (bit 1), DOWN=K3 (bit 2), PUSH=K2 (bit 3). At boot: unjam the bus (9 clocks + STOP), then take the first address in 0x19-0x1F, 0x18, 0x20-0x27, 0x38-0x3F whose config register 0x03 reads 0xFF (the ES8311 codec sits at 0x18).
-- SD: CS39 MOSI40 CLK41 MISO42. Audio: MCLK38 SCLK48 LRCK21 DSDIN14 SDOUT47, NS4150 amp enable IO3. sb_audio.cpp (1.10) sets up the ES8311 (I2C 0x18, slave, 16 kHz, MCLK 256 fs) and plays a test chime from the "Test speaker" button at scoreboard.local. How loud it really is hasn't been heard yet; nothing else uses sound.
+- SD: CS39 MOSI40 CLK41 MISO42. Audio: MCLK38 SCLK48 LRCK21 DSDIN14 SDOUT47, NS4150 amp enable IO3. sb_audio.cpp sets up the ES8311 (I2C 0x18, slave, 16 kHz, MCLK 256 fs); Joe says the little speaker sounds great.
 
 ## Firmware layout (firmware/scoreboard)
 - scoreboard.ino: loop on core 1 - modes, wheel, popups, animations, drawing.
@@ -45,10 +45,17 @@ If the cloud session can't download the esp32 core, rely on the GitHub Action bu
 - Whenever render rules change, update preview/scoreboard_live.py to match so test_render stays at 0 differ.
 - Logo tests and mock-ups read real ESPN logos from a local logo folder (downloaded on Joe's Mac by get_logos.py); they skip or fall back to letters when the files aren't there.
 
-## Wheel and modes (1.7)
-- Wheel stops: AUTO, a team mode per favourite (saved as settings.pin, survives restarts), ALL NFL, ALL COLLEGE (ranked + all SEC), then other live games (temporary). Short push = big / full-game screen (no ticker). Hold 3 s = AUTO with ticker.
-- AUTO: live favourites take turns (football first); none live = cycle all favourites every rotation interval.
-- AUTO when none of your teams is live takes turns between all of them (their final if they played today, else their next game), every rotation interval; the full-recheck path rotates the same way. When your one live game ends, its final shows for a turn and the rotation resumes (1.9). A game still waiting to start counts as "near" (checked every minute) for up to 3 hours past its listed time.
+## Wheel and modes (1.11)
+- Wheel stops: AUTO, a team mode per favourite (saved as settings.pin, survives restarts), ALL NFL, ALL COLLEGE (ranked + all SEC), then other live games (temporary).
+- AUTO shows the full screens (no ticker). A team mode shows the normal screen with that team's league in the ticker (straight from the feed its game came from; college merges the ranked FBS feed). A short push swaps to the other view (bigMode, reset on every stop change). Hold 3 s = sound off / on (settings.sound, also the Sound button at the top of scoreboard.local).
+- AUTO: none of your teams live = take turns between all of them (their final if they played today, else their next game) every rotation interval; exactly one live = stay on it; two or more live (any sport) = take turns between the live ones, football first in line. When your one live game ends, its final shows for a turn and the rotation resumes. A game still waiting to start counts as "near" (checked every minute) for up to 3 hours past its listed time.
+- Picking a stop: the card stays up with LOADING until that team's game is published (no flash of the previous game).
+
+## Full screens (1.11, Mini-Scoreboard style)
+renderFull in sb_render.cpp (mock-ups: firmware/hosttest/mock_full5.cpp, checked with mock_real.cpp): plain period + clock on top (no LIVE tag), both 26x24 logos (away x=0, home x=38) with the scores under them. Football: possession ball between the logos, timeout dashes, thin 5-row field (end zones in team colours, red zone tinted and outlined), win bar, ball spot ("AT PHI 34"). Baseball: team-colour edge stripes, logos at x=2/36, a field strip with the big diamond, B/S dots left, outs right. Hockey: records, a period tracker and "2ND PERIOD"; our power play = a banner in our colour with the half-size logo, time left and a draining gold bar; theirs = PENALTY KILL on caution tape. Basketball: BONUS (or record) under each score, quarter tracker, "3RD QUARTER". Final: grey FINAL tag, loser's score dimmed, green WIN under your team, "NEXT TUE 7:05P" box (sb_net fillNext, looked up 8 days ahead, kept 3 h). Upcoming: blue TODAY / TOMORROW / weekday tag, records, big start time, series box in the playoffs. Close game (closeGame in sb_events: last 2 min, within 8 / 3 / 1) turns the clock gold and shows CLOSE GAME. Playoffs: thin gold frame. Your team's new score flashes in its colour, then stays gold for a minute. The normal screen's small diamond is a green outline (Joe's pick B; preview matches).
+
+## Sounds (1.11)
+Joe's picks are made by tools/sounds (make*.py drafts, build_sounds.py writes firmware/scoreboard/sb_sounds.h + sb_sound_data.h as 8-bit mu-law, 16 kHz). touchdown fanfare, field goal, whistle (kickoff, flag), goal horn, buzzer (end of quarter / period / intermission), swish + ding (3-pointer), organ Charge (home run), Charge twice + chord (grand slam), sad trombone (they scored; never basketball), organ chord win song, game-start organ (non-football start), heartbeat (close game, then every minute). Animations play theirs as they start (fxSound); the sound-only ones come from sb_net checkEvents (soundEvent, closeGame). Your teams only. No crowd sounds: synthesised crowds sounded like a noise machine. scoreboard.local has a button per sound.
 
 ## Logos (1.9)
 - Joe picked, per team, how each logo looks at small sizes (<40 px: kickoff 26x24, ticker 24, wheel cards, full-game screen): firmware/scoreboard/sb_logofix.h. FIX_LIGHT = ESPN's regular team-colour logo instead of the dark-background one; FIX_KEYLINE = a thin light outline drawn as one clean dot-wide edge (shrinkLogo keyline); FIX_CROP_TOP = drop the top 40% (76ers' stars); FIX_LETTERS = team letters (only Mississippi State now). Celebration logos (54 px) ignore the picks. The same table drives the mock-ups (hosttest/logo_dir.h loadTeamLogo).
@@ -57,11 +64,14 @@ If the cloud session can't download the esp32 core, rely on the GitHub Action bu
 ## Full ticker (1.9)
 ALL NFL / ALL COLLEGE: two games a page, 24-dot logos along the top, each score small under its logo, clock / FINAL / start time bottom middle with the quarter or date just above in dim grey, the ball between the logos on the side with possession; red zone turns the quarter and clock red. Scores everywhere use the plain font 1 (the 1.7 chunky 1 is gone, preview matches).
 
-## Football full-game screen (1.8, Option B)
-renderFootballFull in sb_render.cpp: both 26x24 logos side by side (away x=0, home x=38, y=8), scores under them, the ball between them for possession, timeout dots under the scores. Field: solid grass, faint midfield line, end zones in team colours (away left, home right), small football on its spot, yellow line to gain, red tint only on the 20 yards in front of the goal being attacked. Win bar: away share from the left; away goes white if the colours look alike. The net task now publishes the 26x24 logos for live football games too (the old 16-px live logos are gone). Mock-up: firmware/hosttest/mock_full2.cpp.
+## Logos on the board
+The net task publishes the two 26x24 logos for every game (the full screens use them).
 
 ## Mini scoreboard
 Separate repo jdebiase86/Mini-Scoreboard (design settled, no firmware yet). Never publish its releases here: boards install this repo's latest release.
 
+## Case
+enclosure/case.scad (OpenSCAD, part = case / test_screen / test_board): 2 inch deep box, the screen is the front. Screen screws M3 x 30 into its corner inserts at 10 mm from the sides and 20.2 mm from top/bottom (Joe measured). Board bottom-left (seen from the front) on M2 x 4 heat-set insert posts (2.9 mm holes), its edge in a 1 mm wall pocket; wheel/USB openings fitted on test prints (4.4 mm tall, 48 mm long, 8 mm bar between wheel and USB-C). Test pieces were printed and fit.
+
 ## Later
-Full-game screens for baseball, hockey and basketball (need live data captures), night mode, all-teams countdown screen, QR code on the setup screen, second (gift) board setup, then the setup PDF. Racing (NASCAR/F1) much later.
+Check the new full screens against live games (no live captures for baseball, hockey and basketball yet), night mode, all-teams countdown screen, QR code on the setup screen, second (gift) board setup, then the setup PDF. Racing (NASCAR/F1) much later.

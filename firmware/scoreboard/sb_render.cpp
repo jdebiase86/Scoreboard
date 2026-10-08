@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <initializer_list>
 
 // Row positions (LAY in the preview)
 static const int L_STATUS = 1, L_ROW1 = 7, L_ROW2 = 22, L_DIVIDER = 37,
@@ -18,6 +19,8 @@ static const char* const AT_BAT[] = {"000333000", "003111300", "042111240", "312
 static int ROW_INSET = 0;   // 1 while the playoff / preseason frame is up
 static void scoreText(Frame& fb, int x, int y, const char* s, RGB c, Font f, int sc);
 static RGB scoreTop = WHITE, scoreBot = WHITE;   // score glow / flash (renderScoreColors)
+static bool renderCloseGame = false, closeGameNow = false;   // renderCloseGameFlag
+void renderCloseGameFlag(bool on) { renderCloseGame = on; }
 void renderScoreColors(RGB top, RGB bot) { scoreTop = top; scoreBot = bot; }
 
 static void fullAbbr(char (&out)[5], const char* a) {
@@ -91,18 +94,25 @@ static void chip(Frame& fb, int xr, const char* label, RGB c) {
   text(fb, xl + 1, L_STATUS, label, BLACK, F3);
 }
 
-// A runner: solid gold base, white centre. Empty: faint grey outline.
-// (Same as the preview's drawBaseDiamond.)
+// The infield as a thin green outline (Joe's pick B, 1.11) with the bases on
+// it: a runner = solid gold base, white centre; empty = light grey; home
+// plate white. (Same as the preview's drawBaseDiamond.)
 static void drawBaseDiamond(Frame& fb, int x, int y, const bool* bases) {
-  auto base = [&](int cx, int cy, bool on) {
-    RGB c = on ? rgb(255, 200, 0) : rgb(70, 70, 70);
-    fb.put(cx, cy - 1, c); fb.put(cx - 1, cy, c); fb.put(cx + 1, cy, c); fb.put(cx, cy + 1, c);
-    if (on) fb.put(cx, cy, WHITE);
+  int cx = x + 5, cy = y + 3;
+  for (int dy = -4; dy <= 4; dy++)
+    for (int dx = -6; dx <= 6; dx++) {
+      int d = abs(dx) * 2 + abs(dy) * 3;
+      if (d >= 10 && d <= 12) fb.put(cx + dx, cy + dy, rgb(40, 140, 60));
+    }
+  auto base = [&](int bx, int by, bool on) {
+    RGB c = on ? rgb(255, 200, 0) : rgb(170, 170, 170);
+    fb.put(bx, by - 1, c); fb.put(bx - 1, by, c); fb.put(bx + 1, by, c); fb.put(bx, by + 1, c);
+    fb.put(bx, by, on ? WHITE : c);
   };
-  base(x + 5, y + 1, bases[1]);   // 2nd
-  base(x + 1, y + 4, bases[2]);   // 3rd
-  base(x + 9, y + 4, bases[0]);   // 1st
-  fb.put(x + 5, y + 6, rgb(90, 90, 90));   // home plate
+  base(cx, cy - 3, bases[1]);       // 2nd
+  base(cx - 5, cy, bases[2]);       // 3rd
+  base(cx + 5, cy, bases[0]);       // 1st
+  fb.put(cx, cy + 4, WHITE);        // home plate
 }
 
 static int drawInning(Frame& fb, int x, int y, bool top, const char* num, RGB c) {
@@ -300,44 +310,6 @@ static void drawMain(Frame& fb, const Game& g, int pair, const Logo* la, const L
           botRec, bot.rank, condensed, big, scoreBot);
 }
 
-// No-ticker mode (the wheel's push): the game fills the panel - bigger
-// scores, and underneath the last play scrolling past (or, before the game,
-// when it starts).
-static const int B_DIVIDER = 55, B_LINE = 58;
-
-static void renderBig(Frame& fb, const Game& g, int pair, const Logo* la, const Logo* lh, uint32_t ms) {
-  bool matchup = g.state == ST_PRE && la && lh && la->n && lh->n;
-  drawMain(fb, g, pair, la, lh, !matchup);
-  RGB frame = g.po.on ? PLAYOFF_GOLD : (g.preseason ? PRESEASON_SILVER : 0);
-  bool hasFrame = g.po.on || g.preseason;
-  bool dotted = !g.po.on && g.preseason;
-  auto on = [&](int i) { return !dotted || i % 2 == 0; };
-  for (int x = 0; x < W; x++) fb.put(x, B_DIVIDER, hasFrame && on(x) ? frame : LINE);
-  if (hasFrame) {
-    for (int x = 0; x < W; x++) if (on(x)) fb.put(x, 0, frame);
-    for (int y = 0; y < B_DIVIDER; y++) if (on(y)) { fb.put(0, y, frame); fb.put(W - 1, y, frame); }
-  }
-  if (matchup && g.kickoff[0]) {
-    // date and time big under the logos
-    text(fb, (W - tw(g.kickoff, F3)) >> 1, 44, g.kickoff, CLOCK, F3);
-  }
-  const char* line = "";
-  RGB lc = DATEC;
-  if (g.state == ST_PRE) { if (!matchup) { line = g.kickoff; lc = CLOCK; } }
-  else if (g.state == ST_IN) line = g.lastPlay;
-  if (!line[0]) return;
-  char up[200];
-  int i = 0;
-  for (; line[i] && i < (int)sizeof(up) - 1; i++) up[i] = toupper((unsigned char)line[i]);
-  up[i] = 0;
-  int w = tw(up, F3);
-  if (w <= W - 4) { text(fb, (W - w) >> 1, B_LINE, up, lc, F3); return; }
-  // scroll right to left, about 25 dots a second, with a gap before it repeats
-  int span = w + W;
-  int x = W - (int)((ms / 40) % (uint32_t)span);
-  text(fb, x, B_LINE, up, lc, F3);
-}
-
 static void tickerBlock(Frame& fb, int y, const Tick& t, bool ranked) {
   char aS[8] = "", hS[8] = "";
   bool hasS = t.score[0] != 0;
@@ -393,7 +365,7 @@ static void tickerBlock(Frame& fb, int y, const Tick& t, bool ranked) {
 void renderGame(Frame& fb, const Game& g, int pair, const Logo* la, const Logo* lh, bool big, uint32_t ms) {
   fb.clear();
   if (!g.valid) return;
-  if (big) { renderBig(fb, g, pair, la, lh, ms); return; }
+  if (big) { renderFull(fb, g, la, lh, ms); return; }
   drawMain(fb, g, pair, la, lh);
   RGB frame = g.po.on ? PLAYOFF_GOLD : (g.preseason ? PRESEASON_SILVER : 0);
   bool hasFrame = g.po.on || g.preseason;
@@ -413,9 +385,6 @@ void renderGame(Frame& fb, const Game& g, int pair, const Logo* la, const Logo* 
   }
 }
 
-bool renderBigScrolls(const Game& g) {
-  return g.valid && g.state == ST_IN && g.lastPlay[0] && tw(g.lastPlay, F3) > W - 4;
-}
 
 void renderCard(Frame& fb, const ChanCard& c, int pos, int count) {
   fb.clear();
@@ -517,10 +486,14 @@ void renderFullTicker(Frame& fb, const FullGame* games, int n, int page, const c
   }
 }
 
-// --------------------------------------------------- football full-game
-// Option B: both logos full size side by side (away left, home right), each
-// score under its logo, the ball between them for possession, timeout dots
-// under the scores, then the field, the win bar and the last play.
+// ------------------------------------------------------------- full screens
+// The wheel's full screen and Auto (Mini-Scoreboard style, Joe's pick, 1.11):
+// the period and clock along the top, both logos big (away left, home
+// right) with the score under each, then a strip for the sport along the
+// bottom - football a thin field + win chance + ball spot, baseball a field
+// with the diamond and the count, hockey records + a period tracker (power
+// play banner / penalty kill tape), basketball bonus + a quarter tracker. Finals
+// and upcoming games get a coloured tag (FINAL grey, TODAY / TOMORROW blue).
 
 // a logo centred in a box, or the team's letters if there's no logo
 static void logoBox(Frame& fb, const Logo* l, int x, int y, int bw, int bh, const char* abbr, bool hasC, uint32_t c) {
@@ -530,15 +503,42 @@ static void logoBox(Frame& fb, const Logo* l, int x, int y, int bw, int bh, cons
   text(fb, x + ((bw - w) >> 1), y + ((bh - 7) >> 1), a, ledColor(hasC, c), F5);
 }
 
+// a logo at half size (the power play banner)
+static void logoHalf(Frame& fb, const Logo* l, int x, int y) {
+  if (!l || !l->n) return;
+  for (int i = 0; i < l->n; i++) {
+    const LogoPix& p = l->pix[i];
+    if ((p.x & 1) || (p.y & 1)) continue;
+    fb.put(x + p.x / 2, y + p.y / 2, rgb(p.r, p.g, p.b));
+  }
+}
+
 static int colorGap(RGB a, RGB b) {
   return abs((int)((a >> 16) & 255) - (int)((b >> 16) & 255)) + abs((int)((a >> 8) & 255) - (int)((b >> 8) & 255)) +
          abs((int)(a & 255) - (int)(b & 255));
 }
 
+static void fillRect(Frame& fb, int x0, int y0, int x1, int y1, RGB c) {
+  for (int y = y0; y <= y1; y++) for (int x = x0; x <= x1; x++) fb.put(x, y, c);
+}
+static RGB dimRgb(RGB c, int pct) {
+  return rgb(((c >> 16) & 255) * pct / 100, ((c >> 8) & 255) * pct / 100, (c & 255) * pct / 100);
+}
+static void centerText(Frame& fb, int y, const char* s, RGB c, Font f = F3) { text(fb, (W - tw(s, f)) >> 1, y, s, c, f); }
+
+// a filled tag with the corners knocked off (FINAL, TODAY, TOMORROW)
+static int tag(Frame& fb, int x, const char* s, RGB bg) {
+  int w = tw(s, F3) + 3;
+  fillRect(fb, x, 0, x + w, 6, bg);
+  for (int yy : {0, 6}) for (int xx : {x, x + w}) fb.unput(xx, yy);
+  text(fb, x + 2, 1, s, WHITE, F3);
+  return x + w + 3;
+}
+
 // The mini field, TV style: solid grass, a faint midfield line, end zones in
 // team colours (away on the left, home on the right, matching the logos),
 // the ball on its spot and the yellow line to gain. In the red zone only the
-// 20 yards in front of the goal being attacked turn red.
+// 20 yards in front of the goal being attacked turn red, outlined in red.
 // ESPN's yard line 0 is the home goal line, so the home team attacks left.
 static void drawField(Frame& fb, const Game& g, int FY, int FH) {
   const int X0 = 6, LEN = 52;
@@ -548,16 +548,18 @@ static void drawField(Frame& fb, const Game& g, int FY, int FH) {
   bool homeBall = g.possession == 1;
   if (g.redzone && g.possession) {
     int from = homeBall ? 100 : 20, to = homeBall ? 80 : 0;
-    for (int x = X(from); x <= X(to); x++)
+    for (int x = X(from); x <= X(to); x++) {
       for (int yy = FY; yy < FY + FH; yy++) fb.put(x, yy, rz);
+      fb.put(x, FY - 1, RED); fb.put(x, FY + FH, RED);
+    }
   }
   for (int yy = FY; yy < FY + FH; yy++) fb.put(X0 + LEN / 2, yy, rgb(45, 90, 55));   // midfield
   auto ez = [&](int x0, int x1, bool has, uint32_t c) {
     RGB l = ledColor(has, c);
     for (int x = x0; x <= x1; x++) for (int yy = FY; yy < FY + FH; yy++) fb.put(x, yy, l);
   };
-  ez(1, X0 - 1, g.away.hasColor, g.away.color);
-  ez(X0 + LEN + 1, 62, g.home.hasColor, g.home.color);
+  ez(0, X0 - 1, g.away.hasColor, g.away.color);
+  ez(X0 + LEN + 1, 63, g.home.hasColor, g.home.color);
   if (g.yardLine < 0 || g.yardLine > 100 || !g.possession) return;
   int dir = homeBall ? -1 : 1;   // on screen: home drives left, away drives right
   int bx = X(g.yardLine);
@@ -581,51 +583,288 @@ static void drawField(Frame& fb, const Game& g, int FY, int FH) {
 // two colours look alike the away side goes white so the split still shows
 static void drawWinBar(Frame& fb, const Game& g, int y) {
   if (g.winHome < 0) return;
-  int split = 2 + (100 - g.winHome) * 60 / 100;
+  int split = 1 + (100 - g.winHome) * 62 / 100;
   RGB ch = ledColor(g.home.hasColor, g.home.color), ca = ledColor(g.away.hasColor, g.away.color);
   if (colorGap(ch, ca) < 120) ca = rgb(200, 200, 200);
-  for (int x = 2; x <= 61; x++) fb.put(x, y, x < split ? ca : ch);
+  for (int x = 1; x <= 62; x++) fb.put(x, y, x < split ? ca : ch);
 }
 
-static void timeoutDots(Frame& fb, int x, int y, int left) {
+// timeouts left: three gold dashes under a score (grey once used)
+static void timeoutDashes(Frame& fb, int cx, int y, int left) {
   if (left < 0) return;
   for (int i = 0; i < 3; i++)
-    for (int xx = 0; xx < 2; xx++) fb.put(x + i * 3 + xx, y, i < left ? rgb(255, 200, 0) : rgb(45, 45, 45));
+    for (int xx = 0; xx < 3; xx++) fb.put(cx - 7 + i * 5 + xx, y, i < left ? GOLD : rgb(50, 50, 50));
 }
 
-void renderFootballFull(Frame& fb, const Game& g, const Logo* la, const Logo* lh, uint32_t ms) {
-  fb.clear();
-  char left[20];
-  snprintf(left, sizeof(left), "%s %s", g.periodLabel[0] ? g.periodLabel : "", g.clock);
-  text(fb, 2, 1, left, CLOCK, F3);
-  char r[32];
-  shortDown(r, g.shortDD[0] ? g.shortDD : g.downDistance, tw(left, F3));
-  if (r[0]) text(fb, W - 2 - tw(r, F3), 1, r, g.redzone ? RED : DATEC, F3);
+// one block per period: done grey, now gold, still to come dark
+static void periodTracker(Frame& fb, int y, int n, int cur) {
+  int w = (60 - (n - 1) * 2) / n;
+  for (int i = 0; i < n; i++) {
+    RGB c = i + 1 < cur ? rgb(110, 110, 110) : i + 1 == cur ? GOLD : rgb(35, 35, 35);
+    fillRect(fb, 2 + i * (w + 2), y, 2 + i * (w + 2) + w - 1, y + 1, c);
+  }
+}
+
+// both logos, each score under its logo (your team's in scoreTop: gold after
+// it scores; theirs in scoreBot)
+static void teamsTop(Frame& fb, const Game& g, const Logo* la, const Logo* lh, int ax = 0, int hx = 38, RGB lose = 0) {
   const Side* sides[2] = {&g.away, &g.home};
   const Logo* lg[2] = {la, lh};
   for (int k = 0; k < 2; k++) {
     const Side& sd = *sides[k];
     bool homeSide = k == 1;
-    int x = homeSide ? 38 : 0;
+    int x = homeSide ? hx : ax;
     logoBox(fb, lg[k], x, 8, MATCHUP_W, MATCHUP_H, sd.abbr, sd.hasColor, sd.color);
+    if (!sd.hasScore) continue;
     char s[6]; snprintf(s, sizeof(s), "%d", sd.score);
-    RGB sc = homeSide == g.pinnedHome ? scoreTop : scoreBot;   // scoreTop is your team's
+    RGB sc = homeSide == g.pinnedHome ? scoreTop : scoreBot;
+    if (lose) {   // a final: the loser's score dimmed
+      const Side& o = homeSide ? g.away : g.home;
+      if (o.hasScore && o.score > sd.score) sc = lose;
+    }
     scoreText(fb, x + 13 - (tw(s, F5, 2) >> 1), 32, s, sc, F5, 2);
-    timeoutDots(fb, x + 9, 47, homeSide ? g.toHome : g.toAway);
   }
+}
+
+static void underScore(Frame& fb, bool homeSide, const char* s, RGB c, int ax = 0, int hx = 38) {
+  int x = (homeSide ? hx : ax) + 13;
+  text(fb, x - (tw(s, F3) >> 1), 47, s, c, F3);
+}
+
+static void upperCopy(char* out, size_t n, const char* in) {
+  size_t i = 0;
+  for (; in[i] && i < n - 1; i++) out[i] = toupper((unsigned char)in[i]);
+  out[i] = 0;
+}
+
+// "2nd & 6 at PHI 34" -> "AT PHI 34"
+static void ballSpot(char (&out)[16], const char* dd) {
+  out[0] = 0;
+  const char* at = nullptr;
+  for (const char* p = dd; *p; p++) if (tolower((unsigned char)p[0]) == 'a' && tolower((unsigned char)p[1]) == 't' && p[2] == ' ' && (p == dd || p[-1] == ' ')) at = p;
+  if (at) upperCopy(out, sizeof(out), at);
+}
+
+static void footballFull(Frame& fb, const Game& g, const Logo* la, const Logo* lh, uint32_t ms) {
+  bool close = closeGameNow;
+  RGB clk = g.redzone ? RED : close ? GOLD : CLOCK;
+  char left[20];
+  snprintf(left, sizeof(left), "%s %s", g.periodLabel[0] ? g.periodLabel : "", g.clock);
+  text(fb, 2, 1, left, clk, F3);
+  char r[32];
+  shortDown(r, g.shortDD[0] ? g.shortDD : g.downDistance, tw(left, F3));
+  if (r[0]) text(fb, W - 2 - tw(r, F3), 1, r, g.redzone ? RED : GOLD, F3);
+  teamsTop(fb, g, la, lh);
   if (g.possession) sprite(fb, g.possession == 2 ? 27 : 31, 18, BALL, 5, BROWN);
-  drawField(fb, g, 49, 5);
-  drawWinBar(fb, g, 55);
-  // last play, gold when it scored
-  if (g.lastPlay[0]) {
-    char up[200]; int i = 0;
-    for (; g.lastPlay[i] && i < (int)sizeof(up) - 1; i++) up[i] = toupper((unsigned char)g.lastPlay[i]);
-    up[i] = 0;
-    const char* s = up;
-    while (*s == ' ') s++;
-    RGB c = g.playScore > 0 ? GOLD : DATEC;
-    int w = tw(s, F3);
-    if (w <= W - 4) text(fb, (W - w) >> 1, 58, s, c, F3);
-    else text(fb, W - (int)((ms / 40) % (uint32_t)(w + W)), 58, s, c, F3);
+  timeoutDashes(fb, 13, 47, g.toAway);
+  timeoutDashes(fb, 51, 47, g.toHome);
+  drawField(fb, g, 50, 5);
+  drawWinBar(fb, g, 57);
+  char spot[16];
+  ballSpot(spot, g.downDistance);
+  if (close && (ms / 2000) % 2) centerText(fb, 59, "CLOSE GAME", GOLD);
+  else if (spot[0]) centerText(fb, 59, spot, g.redzone ? RED : DATEC);
+}
+
+// baseball: the field along the bottom - a big diamond with the runners in
+// gold, balls and strikes on the left, outs on the right
+static void baseballField(Frame& fb, const Game& g, bool count) {
+  RGB grass = rgb(15, 75, 25), dirt = rgb(120, 72, 32), line = rgb(220, 220, 220);
+  fillRect(fb, 0, 46, 63, 63, grass);
+  int cx = 32, cy = 55;
+  for (int dy = -8; dy <= 8; dy++) for (int dx = -9; dx <= 9; dx++) {
+    int d = abs(dx) * 8 / 9 + abs(dy);
+    if (d <= 8) fb.put(cx + dx, cy + dy, d >= 6 ? dirt : rgb(25, 105, 35));
+  }
+  auto base = [&](int x, int y, bool on) {
+    fillRect(fb, x - 1, y - 1, x + 1, y + 1, on ? rgb(255, 200, 0) : line);
+    if (on) fb.put(x, y, WHITE);
+  };
+  base(cx, cy - 7, g.bases[1]); base(cx - 8, cy, g.bases[2]); base(cx + 8, cy, g.bases[0]);
+  fillRect(fb, cx - 1, cy + 7, cx + 1, cy + 7, WHITE); fb.put(cx, cy + 8, WHITE);   // home plate
+  fillRect(fb, cx - 1, cy - 1, cx + 1, cy + 1, dirt);   // the mound
+  if (!count) return;
+  RGB off = rgb(10, 40, 15);
+  auto dots = [&](int x, int y, const char* lab, int n, int on, RGB c) {
+    text(fb, x, y, lab, CLOCK, F3);
+    int sx = x + tw(lab, F3) + 2;
+    for (int i = 0; i < n; i++) fillRect(fb, sx + i * 4, y + 1, sx + i * 4 + 2, y + 3, i < on ? c : off);
+  };
+  dots(2, 49, "B", 3, g.balls, GREEN);
+  dots(2, 56, "S", 2, g.strikes, GOLD);
+  text(fb, 62 - tw("OUT", F3), 49, "OUT", CLOCK, F3);
+  for (int i = 0; i < 2; i++) fillRect(fb, 50 + i * 5, 56, 52 + i * 5, 58, i < g.outs ? RED : off);
+}
+
+static void baseballFull(Frame& fb, const Game& g, const Logo* la, const Logo* lh) {
+  bool atBat = !strcmp(g.half, "TOP") || !strcmp(g.half, "BOT");
+  if (atBat) {
+    char num[8];
+    const char* is = g.inningShort;
+    if (is[0] >= 'A' && is[0] <= 'Z') is++;
+    if (*is) scopy(num, is);
+    else if (g.period) snprintf(num, sizeof(num), "%d", g.period);
+    else num[0] = 0;
+    sprite(fb, 2, 2, !strcmp(g.half, "TOP") ? ARROW_UP : ARROW_DN, 3, CLOCK);
+    char inn[12];
+    int n = atoi(num);
+    const char* suf = (n % 100 >= 11 && n % 100 <= 13) ? "TH" : n % 10 == 1 ? "ST" : n % 10 == 2 ? "ND" : n % 10 == 3 ? "RD" : "TH";
+    snprintf(inn, sizeof(inn), "%s%s", num, n ? suf : "");
+    text(fb, 8, 1, inn, CLOCK, F3);
+    if (g.balls >= 0 && g.strikes >= 0) {
+      char c[12]; snprintf(c, sizeof(c), "%d-%d", g.balls, g.strikes);
+      text(fb, W - 2 - tw(c, F3), 1, c, DATEC, F3);
+    }
+  } else {
+    text(fb, 2, 1, g.inningText[0] ? g.inningText : g.periodLabel, CLOCK, F3);
+  }
+  // team-colour stripes down the edges, logos a little further in
+  fillRect(fb, 0, 7, 0, 44, ledColor(g.away.hasColor, g.away.color));
+  fillRect(fb, 63, 7, 63, 44, ledColor(g.home.hasColor, g.home.color));
+  teamsTop(fb, g, la, lh, 2, 36);
+  baseballField(fb, g, atBat);
+}
+
+// hockey: your power play = a banner in your colours with the time left
+// draining; theirs = a PENALTY KILL warning on caution tape
+static void hockeyPowerPlay(Frame& fb, const Game& g, const Logo* la, const Logo* lh) {
+  const Side& pp = g.ppHome ? g.home : g.away;
+  const Logo* lg = g.ppHome ? lh : la;
+  bool ours = g.ppHome == g.pinnedHome;
+  int secs = -1;
+  if (g.ppTime[0]) { const char* c = strchr(g.ppTime, ':'); secs = c ? atoi(g.ppTime) * 60 + atoi(c + 1) : atoi(g.ppTime); }
+  if (ours) {
+    RGB bg = ledColor(pp.hasColor, pp.color);
+    fillRect(fb, 0, 46, 63, 63, bg);
+    if (lg && lg->n) logoHalf(fb, lg, 2, 48);
+    else { char a[5]; fullAbbr(a, pp.abbr); text(fb, 2, 50, a, WHITE, F3); }
+    text(fb, 18, 47, "POWER", WHITE, F3);
+    text(fb, 18, 53, "PLAY", WHITE, F3);
+    if (g.ppTime[0]) text(fb, 62 - tw(g.ppTime, F5), 48, g.ppTime, GOLD, F5);
+    if (secs >= 0) {
+      int full = secs > 120 ? 300 : 120;
+      fillRect(fb, 2, 60, 61, 61, dimRgb(bg, 40));
+      fillRect(fb, 2, 60, 2 + 59 * secs / full, 61, GOLD);
+    }
+  } else {
+    for (int y : {46, 47, 62, 63})
+      for (int x = 0; x < W; x++) fb.put(x, y, ((x + y) / 3) % 2 ? rgb(230, 190, 0) : rgb(10, 10, 10));
+    centerText(fb, 49, "PENALTY KILL", GOLD);
+    char who[12]; char a[5]; fullAbbr(a, pp.abbr);
+    snprintf(who, sizeof(who), "%s PP", a);
+    text(fb, 2, 55, who, DATEC, F3);
+    if (g.ppTime[0]) text(fb, 62 - tw(g.ppTime, F3), 55, g.ppTime, CLOCK, F3);
+  }
+}
+
+static void hockeyFull(Frame& fb, const Game& g, const Logo* la, const Logo* lh) {
+  bool close = closeGameNow;
+  if (g.intermission) {
+    char l[12]; snprintf(l, sizeof(l), "%s INT", g.periodLabel);
+    text(fb, 2, 1, l, CLOCK, F3);
+    if (g.intermissionLeft[0]) text(fb, W - 2 - tw(g.intermissionLeft, F3), 1, g.intermissionLeft, DATEC, F3);
+  } else {
+    char l[20]; snprintf(l, sizeof(l), "%s %s", g.periodLabel, g.clock);
+    text(fb, 2, 1, l, close ? GOLD : CLOCK, F3);
+  }
+  teamsTop(fb, g, la, lh);
+  static const char* const PUCK[] = {"0111110", "1111111", "0111110"};
+  sprite(fb, 28, 19, PUCK, 3, WHITE);
+  if (g.pp && !g.intermission) { hockeyPowerPlay(fb, g, la, lh); return; }
+  if (g.away.record[0]) underScore(fb, false, g.away.record, DATEC);
+  if (g.home.record[0]) underScore(fb, true, g.home.record, DATEC);
+  periodTracker(fb, 54, g.period > 3 ? 4 : 3, g.period);
+  const char* lab;
+  char buf[16];
+  if (close) lab = "CLOSE GAME";
+  else if (g.intermission) lab = "INTERMISSION";
+  else if (g.period > 4 || !strcmp(g.periodLabel, "SO")) lab = "SHOOTOUT";
+  else if (g.period == 4) lab = "OVERTIME";
+  else { snprintf(buf, sizeof(buf), "%s PERIOD", g.periodLabel); lab = buf; }
+  centerText(fb, 57, lab, close ? GOLD : DATEC);
+}
+
+static void basketballFull(Frame& fb, const Game& g, const Logo* la, const Logo* lh) {
+  bool close = closeGameNow;
+  char l[20]; snprintf(l, sizeof(l), "%s %s", g.periodLabel, g.clock);
+  text(fb, 2, 1, l, close ? GOLD : CLOCK, F3);
+  teamsTop(fb, g, la, lh);
+  for (int k = 0; k < 2; k++) {
+    bool home = k == 1;
+    bool bonus = g.hasBonus && (home ? g.bonusHome : g.bonusAway);
+    const Side& sd = home ? g.home : g.away;
+    if (bonus) underScore(fb, home, "BONUS", GOLD);
+    else if (sd.record[0]) underScore(fb, home, sd.record, DATEC);
+  }
+  periodTracker(fb, 54, g.period > 4 ? 5 : 4, g.period);
+  static const char* const Q[] = {"", "1ST QUARTER", "2ND QUARTER", "3RD QUARTER", "4TH QUARTER"};
+  const char* lab = close ? "CLOSE GAME" : g.period >= 1 && g.period <= 4 ? Q[g.period] : "OVERTIME";
+  centerText(fb, 57, lab, close ? GOLD : DATEC);
+}
+
+static void finalFull(Frame& fb, const Game& g, const Logo* la, const Logo* lh) {
+  int x = tag(fb, 1, "FINAL", rgb(80, 80, 90));
+  const char* when = g.day[0] && strcmp(g.day, "TODAY") ? g.day : "";
+  if (when[0]) text(fb, x, 1, when, DATEC, F3);
+  bool base = g.sport == BASEBALL;
+  if (base) {
+    fillRect(fb, 0, 7, 0, 44, ledColor(g.away.hasColor, g.away.color));
+    fillRect(fb, 63, 7, 63, 44, ledColor(g.home.hasColor, g.home.color));
+  }
+  int ax = base ? 2 : 0, hx = base ? 36 : 38;
+  teamsTop(fb, g, la, lh, ax, hx, DATEC);
+  const Side& m = g.pinned();
+  const Side& o = g.other();
+  if (m.hasScore && o.hasScore && m.score > o.score) underScore(fb, g.pinnedHome, "WIN", GREEN, ax, hx);
+  fillRect(fb, 2, 53, 61, 63, rgb(25, 25, 32));
+  if (g.nextText[0]) {
+    text(fb, 5, 56, "NEXT", DATEC, F3);
+    text(fb, 60 - tw(g.nextText, F3), 56, g.nextText, CLOCK, F3);
+  } else if (g.po.on && g.po.summary[0]) {
+    char up[20]; upperCopy(up, sizeof(up), g.po.summary);
+    centerText(fb, 56, up, CLOCK);
+  } else {
+    char recs[28] = "";
+    if (g.away.record[0] && g.home.record[0]) snprintf(recs, sizeof(recs), "%s  %s", g.away.record, g.home.record);
+    centerText(fb, 56, recs, DATEC);
+  }
+}
+
+static void upcomingFull(Frame& fb, const Game& g, const Logo* la, const Logo* lh) {
+  tag(fb, 1, g.day[0] ? g.day : "NEXT", rgb(32, 80, 192));
+  if (g.po.on && g.po.round[0]) {
+    // the round's short name on the right, if it fits ("ALDS GAME 2" -> "ALDS")
+    char r[16]; upperCopy(r, sizeof(r), g.po.round);
+    char* sp = strchr(r, ' ');
+    if (tw(r, F3) > 24 && sp) *sp = 0;
+    if (tw(r, F3) <= 24) text(fb, W - 2 - tw(r, F3), 1, r, DATEC, F3);
+  }
+  logoBox(fb, la, 0, 8, MATCHUP_W, MATCHUP_H, g.away.abbr, g.away.hasColor, g.away.color);
+  logoBox(fb, lh, 38, 8, MATCHUP_W, MATCHUP_H, g.home.abbr, g.home.hasColor, g.home.color);
+  text(fb, 32 - (tw("AT", F3) >> 1), 17, "AT", DATEC, F3);
+  if (g.away.record[0]) text(fb, 13 - (tw(g.away.record, F3) >> 1), 33, g.away.record, DATEC, F3);
+  if (g.home.record[0]) text(fb, 51 - (tw(g.home.record, F3) >> 1), 33, g.home.record, DATEC, F3);
+  centerText(fb, 40, g.startTime[0] ? g.startTime : "TBD", CLOCK, F5);
+  fillRect(fb, 2, 52, 61, 63, rgb(25, 25, 32));
+  char line[24] = "";
+  if (g.po.on && g.po.summary[0]) upperCopy(line, sizeof(line), g.po.summary);
+  else if (g.gameDate[0]) snprintf(line, sizeof(line), "%s %s", strcmp(g.day, "TODAY") && strcmp(g.day, "TOMORROW") && strchr(g.day, '/') == nullptr ? g.day : "", g.gameDate);
+  char* t = line; while (*t == ' ') t++;
+  centerText(fb, 55, t, CLOCK);
+}
+
+void renderFull(Frame& fb, const Game& g, const Logo* la, const Logo* lh, uint32_t ms) {
+  fb.clear();
+  if (!g.valid) return;
+  closeGameNow = renderCloseGame;
+  if (g.state == ST_PRE) upcomingFull(fb, g, la, lh);
+  else if (g.state == ST_POST) finalFull(fb, g, la, lh);
+  else if (g.sport == FOOTBALL) footballFull(fb, g, la, lh, ms);
+  else if (g.sport == BASEBALL) baseballFull(fb, g, la, lh);
+  else if (g.sport == HOCKEY) hockeyFull(fb, g, la, lh);
+  else basketballFull(fb, g, la, lh);
+  // playoff games: a thin gold frame round the whole screen
+  if (g.po.on) {
+    for (int i = 0; i < W; i++) { fb.put(i, 0, PLAYOFF_GOLD); fb.put(i, H - 1, PLAYOFF_GOLD); fb.put(0, i, PLAYOFF_GOLD); fb.put(W - 1, i, PLAYOFF_GOLD); }
   }
 }

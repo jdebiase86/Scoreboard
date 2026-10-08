@@ -104,7 +104,14 @@ static void handleRoot() {
   h += "<h1>Scoreboard</h1><p class=sub>";
   h += home ? "Settings. Changes show up on the board within a few seconds."
             : "Two quick steps and the board starts showing scores.";
-  h += "</p><form method=post action=/save>";
+  h += "</p>";
+  // sound on / off, right at the top (same as holding the wheel in for 3 s)
+  if (home)
+    h += String("<section><h2>Sound</h2><p class=hint>Touchdowns, goals, home runs and more. "
+                "Holding the wheel in for 3 seconds does the same.</p><button type=button id=snd style=\"background:") +
+         (settings.sound ? "var(--acc)" : "#666") + "\">" + (settings.sound ? "Sound is ON - tap to turn off" : "Sound is OFF - tap to turn on") +
+         "</button></section>";
+  h += "<form method=post action=/save>";
 
   // Wi-Fi
   if (!home) {
@@ -154,8 +161,12 @@ static void handleRoot() {
     h += "<section><h2>Software</h2><p class=hint>Version " FW_VERSION ". Updates install by themselves overnight. " +
          esc(otaStatus()) + "</p><form method=post action=/update><button type=submit>Check for updates now</button>"
          "</form></section>";
-    h += "<section><h2>Test the speaker</h2><p class=hint>Plays a short chime on the board at full volume. "
-         "<span id=spr></span></p><button type=button id=spk>Test speaker</button></section>";
+    h += "<section><h2>Hear the sounds</h2><p class=hint>Plays one on the board now (even with sound off). "
+         "<span id=spr></span></p><div class=fx>";
+    static const char* const SND[] = {"", "Touchdown", "Field goal", "Whistle", "Goal horn", "Buzzer", "3-pointer",
+                                      "Home run", "Grand slam", "They scored", "Win", "Game starting", "Close game"};
+    for (int i = 1; i < SND_COUNT; i++) h += "<button type=button data-s=" + String(i) + ">" + SND[i] + "</button>";
+    h += "<button type=button data-s=0>Test chime</button></div></section>";
     h += "<section><h2>Test the animations</h2><p class=hint>Plays one on the board now, with the game "
          "that's on it (or made-up teams). <span id=fxr></span></p><div class=fx>";
     static const char* const FX[][2] = {
@@ -178,8 +189,10 @@ function upd(){const on=boxes.filter(b=>b.checked);
 boxes.forEach(b=>b.addEventListener('change',upd));upd();
 document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const r=document.getElementById('fxr');
  fetch('/fxtest?k='+b.dataset.k,{method:'POST'}).then(x=>{r.textContent=x.ok?b.textContent+' sent.':'Not sent.';}).catch(()=>{r.textContent='Not sent.';});});
-const spk=document.getElementById('spk');if(spk)spk.onclick=()=>{const r=document.getElementById('spr');
- fetch('/speaker',{method:'POST'}).then(x=>x.text()).then(t=>{r.textContent=t;}).catch(()=>{r.textContent='Not sent.';});};
+document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const r=document.getElementById('spr');
+ fetch('/speaker?s='+b.dataset.s,{method:'POST'}).then(x=>x.text()).then(t=>{r.textContent=t;}).catch(()=>{r.textContent='Not sent.';});});
+const snd=document.getElementById('snd');if(snd)snd.onclick=()=>fetch('/sound',{method:'POST'}).then(x=>x.text()).then(t=>{
+ const on=t==='on';snd.textContent=on?'Sound is ON - tap to turn off':'Sound is OFF - tap to turn on';snd.style.background=on?'var(--acc)':'#666';});
 document.querySelector('form').addEventListener('submit',e=>{if(!boxes.some(b=>b.checked)){e.preventDefault();alert('Pick at least one team.');}});
 </script></main></body></html>)JS";
   server.send(200, "text/html; charset=utf-8", h);
@@ -290,8 +303,16 @@ static void routes() {
   });
   server.on("/speaker", HTTP_POST, [] {
     if (!audioReady()) { server.send(200, "text/plain", "The sound chip didn't answer at start-up (see /log)."); return; }
-    audioChime();
-    server.send(200, "text/plain", "Chime sent - listen to the board.");
+    int id = server.arg("s").toInt();
+    if (id > 0 && id < SND_COUNT) audioPlayAlways((SoundId)id);
+    else audioChime();
+    server.send(200, "text/plain", "Sent - listen to the board.");
+  });
+  server.on("/sound", HTTP_POST, [] {
+    settings.sound = !settings.sound;
+    settings.save();
+    sbLog("settings page: sound %s", settings.sound ? "on" : "off");
+    server.send(200, "text/plain", settings.sound ? "on" : "off");
   });
   server.on("/log", HTTP_GET, [] { server.send(200, "text/plain; charset=utf-8", sbLogText()); });
   server.on("/favicon.ico", HTTP_GET, [] { server.send(404, "text/plain", ""); });

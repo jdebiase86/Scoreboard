@@ -5,6 +5,7 @@
 #include "sb_log.h"
 #include "sb_events.h"
 #include "sb_logofix.h"
+#include "sb_audio.h"
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
@@ -490,6 +491,48 @@ static int teamGame(int ti, Game& g) {
   return 0;
 }
 
+// A final's "NEXT TUE 7:05P": the team's next game, looked up once (the
+// next 8 days, a day at a time) and remembered for 3 hours per final.
+struct NextGame { int team = -1; char eventId[16] = ""; char text[20] = ""; uint32_t at = 0; };
+static NextGame nextGames[MAX_PICKS + 1];
+
+static void fillNext(int ti, Game& g) {
+  NextGame* n = nullptr;
+  for (auto& e : nextGames) if (e.team == ti && !strcmp(e.eventId, g.eventId) && millis() - e.at < 3 * 3600000UL) n = &e;
+  if (!n) {
+    n = &nextGames[0];
+    for (auto& e : nextGames) if (e.at < n->at) n = &e;
+    *n = NextGame();
+    n->team = ti;
+    scopy(n->eventId, g.eventId);
+    n->at = millis() | 1;
+    static Game* nx = nullptr;
+    if (!nx) nx = new (sbAlloc(sizeof(Game))) Game();
+    const TeamDef& t = TEAMS[ti];
+    time_t now = time(nullptr);
+    for (int d = 1; d <= 8; d++) {
+      if (kicked || manualReq != -2) { n->at = 0; break; }   // try again next time
+      char day[9];
+      dayOffset(now, d, day);
+      if (!fetchJson(feedUrl(t.league, day, 0), *doc, *filterSb)) continue;
+      if (!parseGame(doc->as<JsonObjectConst>(), t, false, now, *nx) || nx->state != ST_PRE ||
+          !strcmp(nx->eventId, g.eventId)) continue;
+      // "TUE 7:05P" (the weekday, even for tomorrow), or "10/14 7:05P" a week out
+      time_t ts = parseIso(nx->eventDate);
+      struct tm lt;
+      localtime_r(&ts, &lt);
+      static const char* const WD[] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
+      char when[8];
+      if (d < 7) scopy(when, WD[lt.tm_wday]);
+      else snprintf(when, sizeof(when), "%d/%d", lt.tm_mon + 1, lt.tm_mday);
+      snprintf(n->text, sizeof(n->text), "%s %s", when, nx->startTime[0] ? nx->startTime : "TBD");
+      sbLog("%s next game: %s", t.abbr, n->text);
+      break;
+    }
+  }
+  scopy(g.nextText, n->text);
+}
+
 // What the last full check learned about each team's game, so the board
 // knows when to look harder (just before a start time) and when it can relax.
 struct Sched { int team; time_t start; GState st; };
@@ -517,9 +560,9 @@ static uint32_t nearStart(time_t now) {
   return every;
 }
 
-// Live games of your teams right now, all in the same sport (the highest
-// one live: football first). Two or more and the board takes turns.
-static const int MAX_LIVE = 4;
+// Live games of your teams right now, any sport, football first. Two or
+// more and the board takes turns.
+static const int MAX_LIVE = MAX_PICKS;
 static int liveTeam[MAX_LIVE];
 static Game* liveGame[MAX_LIVE];
 static int liveScore[MAX_LIVE];   // your team's score at the last look (-1 none)
@@ -538,9 +581,9 @@ static int pinnedScore(const Game& g) {
   return s.hasScore ? s.score : -1;
 }
 
-// Football always wins if it's live; then the first sport with a live game
-// in pick order (every live game of that sport, to take turns); else
-// whoever plays next; else the most recent result.
+// Every live game of yours, any sport, in pick order (football first): one
+// live = it stays on that game, two or more = they take turns. None live:
+// whoever plays next (the board then takes turns between all your teams).
 static int autoPick(Game& out, int& chosen) {
   bool haveUp = false, haveRecent = false, anyOk = false;
   int upTeam = -1, recTeam = -1;
@@ -551,12 +594,9 @@ static int autoPick(Game& out, int& chosen) {
   nsched = 0;
   nlive = 0;
   nUpTies = 0;
-  int liveSport = -1;
   for (int i = 0; i < settings.npicks; i++) {
     if (kicked || manualReq != -2) return -1;
     int ti = settings.picks[i];
-    int sp = leagueSport(TEAMS[ti].league);
-    if (liveSport >= 0 && sp != liveSport) break;   // picks are in sport order
     int r = teamGame(ti, *recent);
     if (r >= 0) anyOk = true;
     if (r != 1) continue;
@@ -564,7 +604,6 @@ static int autoPick(Game& out, int& chosen) {
     noteLook(ti, *recent);
     if (nUpTies < MAX_PICKS + 1) upTies[nUpTies++] = ti;
     if (recent->state == ST_IN) {
-      liveSport = sp;
       if (nlive < MAX_LIVE) {
         *liveGame[nlive] = *recent;
         liveTeam[nlive] = ti;
@@ -813,7 +852,7 @@ static void serviceFxTest() {
 // What each team's game looked like at the last look, to spot what changed.
 // Only a recent look counts: comparing with one from hours (or a long
 // rotation) ago would set off a touchdown for points scored long since.
-struct Seen { int team = -1; Game* g = nullptr; uint32_t used = 0; };
+struct Seen { int team = -1; Game* g = nullptr; uint32_t used = 0; uint32_t beatAt = 0; };
 static Seen seen[6];
 
 static void checkEvents(int team, const Game& g) {
@@ -835,13 +874,28 @@ static void checkEvents(int team, const Game& g) {
       sbLog("%s: win", TEAMS[team].abbr);
       fxQueue(*fxBuild, g);
     }
+    // moments that only make a sound: the other team scored, the game started
+    SoundId snd = soundEvent(*s->g, g);
+    if (snd != SND_NONE) {
+      sbLog("%s: %s", TEAMS[team].abbr, snd == SND_GAMESTART ? "game starting (sound)" : "they scored (sound)");
+      audioPlay(snd);
+    }
   }
   if (!s) {
     s = &seen[0];
     for (auto& e : seen) if (e.used < s->used) s = &e;
     s->team = team;
+    s->beatAt = 0;
   }
   s->used = millis();
+  // close game, last two minutes: a heartbeat as it starts, then every minute
+  if (closeGame(g)) {
+    if (!s->beatAt || millis() - s->beatAt >= 60000UL) {
+      s->beatAt = millis() | 1;
+      sbLog("%s: close game (heartbeat)", TEAMS[team].abbr);
+      audioPlay(SND_HEARTBEAT);
+    }
+  } else s->beatAt = 0;
   // ESPN sometimes drops the last play for a poll; keep the one we had so
   // the same penalty coming back doesn't count as a new one
   char keep[sizeof(g.lastPlay)];
@@ -1311,29 +1365,21 @@ static void netTask(void*) {
     if (r == 1) {
       failures = 0;
       const TeamDef& td = TEAMS[team];
-      // The ticker. College on top: every ranked game in the country, not
-      // just the conference feed the game came from. Anything else on top:
-      // if football is being played anywhere, football scores underneath.
-      if (td.league == L_CFB) {
+      // The ticker (team modes only - Auto shows the full screen): that
+      // team's league, straight from the feed its game came from. College on
+      // top: every ranked game in the country, not just its conference feed.
+      if (pin >= 0 && td.league == L_CFB) {
         updateFoot(footCfb, now);
         if (footCfb.at) mergeTicker(*cur, footCfb.tick, nullptr, true);
-      } else if (td.league != L_NFL) {
-        updateFoot(footCfb, now);
-        updateFoot(footNfl, now);
-        bool nfl = footNfl.at && footNfl.live, cfb = footCfb.at && footCfb.live;
-        if (nfl || cfb) mergeTicker(*cur, nfl ? footNfl.tick : nullptr, cfb ? footCfb.tick : nullptr, cfb);
       }
       if (cur->state == ST_IN && cur->sport == HOCKEY && fetchJson(NHL_LIVE, *doc, *filterNhl))
         enrichHockey(doc->as<JsonObjectConst>(), *cur);
       if (cur->state == ST_IN && cur->sport == BASKETBALL && fetchJson(NBA_LIVE, *doc, *filterNba))
         enrichBasketball(doc->as<JsonObjectConst>(), *cur);
-      const Logo *la = nullptr, *lh = nullptr;
-      // full-size logos: the pregame matchup, and the football full-game
-      // screen once the game is under way
-      if (cur->state == ST_PRE || (cur->state == ST_IN && cur->sport == FOOTBALL)) {
-        la = cachedLogo(cur->away.logo, 0);
-        lh = cachedLogo(cur->home.logo, 0);
-      }
+      if (cur->state == ST_POST) fillNext(team, *cur);
+      // full-size logos: the full screens show them for every game
+      const Logo* la = cachedLogo(cur->away.logo, 0);
+      const Logo* lh = cachedLogo(cur->home.logo, 0);
       // a live game's celebration logo, loaded ahead so a touchdown isn't
       // held up downloading it
       if (cur->state == ST_IN) cachedLogo(cur->pinned().logo, 54);

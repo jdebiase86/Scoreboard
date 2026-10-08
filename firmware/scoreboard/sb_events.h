@@ -24,3 +24,15 @@ bool detectWin(const Game& prev, const Game& now, FxSpec& spec);
 void winWords(const char* teamName, bool college, char (&out)[20]);
 // Does this animation show the team's logo?
 bool fxUsesLogo(FxKind k);
+
+// Sounds (sb_audio): the one that goes with an animation (SND_NONE = none),
+// and the moments that only make a sound
+#include "sb_sounds.h"
+SoundId fxSound(const FxSpec& f);
+// The last 2 minutes of the last period (or overtime), within one score:
+// football 8 points, basketball 3, hockey 1 goal. Baseball has no clock: never.
+bool closeGame(const Game& g);
+// Comparing two looks at your team's game: the other team scored (never in
+// basketball - too often), or the game just started (football has its
+// kickoff animation and whistle instead). SND_NONE = nothing.
+SoundId soundEvent(const Game& prev, const Game& now);

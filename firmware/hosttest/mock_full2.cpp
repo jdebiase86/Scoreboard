@@ -27,7 +27,7 @@ int main(){
     if(gi==1){ g.redzone=true; }
     static Logo la,lh; la=Logo(); lh=Logo();
     loadLogoWH("nfl",g.away.abbr,MATCHUP_W,MATCHUP_H,la); loadLogoWH("nfl",g.home.abbr,MATCHUP_W,MATCHUP_H,lh);
-    renderFootballFull(fb,g,&la,&lh,2400); char p[64]; snprintf(p,64,"/tmp/fx2_%d.ppm",gi); ppm(p,fb);
+    renderFull(fb,g,&la,&lh,2400); char p[64]; snprintf(p,64,"/tmp/fx2_%d.ppm",gi); ppm(p,fb);
     printf("%s v %s logos %dx%d %dx%d\n",g.away.abbr,g.home.abbr,la.w,la.h,lh.w,lh.h);
   }
 }

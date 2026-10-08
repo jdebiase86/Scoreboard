@@ -64,6 +64,7 @@ void Settings::load() {
   bright = p.getInt("bright", 1);
   if (bright < 0 || bright >= NBRIGHT) bright = 1;
   clockA = p.getBool("clkA", true);
+  sound = p.getBool("sound", true);
   rot = p.getInt("rot", 0);
   if (rot < 0 || rot >= NROTATE) rot = 0;
   p.end();
@@ -79,6 +80,7 @@ void Settings::save() {
   p.putInt("tz", tz);
   p.putInt("bright", bright);
   p.putBool("clkA", clockA);
+  p.putBool("sound", sound);
   p.putInt("rot", rot);
   p.end();
 }
