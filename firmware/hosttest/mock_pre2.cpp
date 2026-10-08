@@ -81,12 +81,34 @@ static void finalA(Frame& fb, const Game& g, const Logo* la, const Logo* lh) {
   fillRect(fb, 0, 57, 63, 63, rgb(25, 25, 32));
   text(fb, 3, 58, "NEXT", DATEC, F3); text(fb, 61 - tw(g.nextText, F3), 58, g.nextText, CLOCK, F3);
 }
+// Header styles for the upcoming screen's day bar (drawn over renderFull's bar)
+static void textShadow(Frame& fb, int y, const char* s, RGB c, RGB sh) {
+  int x = (W - tw(s, F5)) >> 1; text(fb, x + 1, y + 1, s, sh, F5); text(fb, x, y, s, c, F5);
+}
+static void textOutline(Frame& fb, int y, const char* s, RGB c, RGB o) {
+  int x = (W - tw(s, F5)) >> 1;
+  for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) if (dx || dy) text(fb, x + dx, y + dy, s, o, F5);
+  text(fb, x, y, s, c, F5);
+}
+static void header(Frame& fb, const Game& g, int style, const char* d) {
+  fillRect(fb, 0, 0, W - 1, 10, 0); for (int x = 0; x < W; x++) for (int y = 0; y <= 10; y++) fb.unput(x, y);
+  const Side& m = g.pinned(); RGB tc = ledColor(m.hasColor, m.color);
+  bool today = !strcmp(g.day, "TODAY");
+  switch (style) {
+    case 0: fillRect(fb, 0, 0, W - 1, 9, rgb(32, 80, 192)); centerText(fb, 1, d, WHITE, F5); break;     // blue (now)
+    case 1: fillRect(fb, 0, 0, W - 1, 9, tc); centerText(fb, 1, d, WHITE, F5); break;                   // your team's colour
+    case 2: fillRect(fb, 0, 0, W - 1, 9, rgb(30, 30, 38)); centerText(fb, 1, d, WHITE, F5); break;      // dark grey
+    case 3: fillRect(fb, 0, 0, W - 1, 9, today ? rgb(20, 120, 50) : rgb(32, 80, 192)); centerText(fb, 1, d, WHITE, F5); break; // green today
+    case 4: textShadow(fb, 1, d, GOLD, rgb(120, 60, 0)); for (int x = 4; x < 60; x++) fb.put(x, 10, rgb(60, 60, 70)); break;  // gold, 3D shadow, no bar
+    case 5: textOutline(fb, 1, d, WHITE, tc); break;                                                     // white with team-colour outline
+  }
+}
 int main() {
   static Frame fb; static Game g[3]; static Logo la[3], lh[3];
   g[0].valid = true; g[0].sport = BASKETBALL; g[0].state = ST_PRE; scopy(g[0].day, "TODAY"); scopy(g[0].startTime, "7:30P"); scopy(g[0].gameDate, "10/8");
-  side(g[0].away, "WSH", 0x002B5C, "0-0"); side(g[0].home, "NY", 0x006BB6, "0-1"); la[0] = L("nba", "WSH"); lh[0] = L("nba", "NY");
+  side(g[0].away, "WSH", 0x002B5C, "0-0"); side(g[0].home, "NY", 0x006BB6, "0-1"); g[0].pinnedHome = true; la[0] = L("nba", "WSH"); lh[0] = L("nba", "NY");
   g[1].valid = true; g[1].sport = FOOTBALL; g[1].state = ST_PRE; scopy(g[1].day, "SAT"); scopy(g[1].startTime, "1:00P"); scopy(g[1].gameDate, "10/11");
-  side(g[1].away, "PHI", 0x004C54, "4-1"); side(g[1].home, "NYG", 0x0B2265, "2-3"); la[1] = L("nfl", "PHI"); lh[1] = L("nfl", "NYG");
+  side(g[1].away, "PHI", 0x004C54, "4-1"); side(g[1].home, "NYG", 0x0B2265, "2-3"); g[1].pinnedHome = true; la[1] = L("nfl", "PHI"); lh[1] = L("nfl", "NYG");
   g[2].valid = true; g[2].sport = BASEBALL; g[2].state = ST_PRE; scopy(g[2].day, "TOMORROW"); scopy(g[2].startTime, "7:08P"); scopy(g[2].gameDate, "10/9");
   side(g[2].away, "BOS", 0xBD3039, "92-70"); side(g[2].home, "NYY", 0x132448, "96-66"); g[2].po.on = true; scopy(g[2].po.summary, "NYY lead 1-0");
   la[2] = L("mlb", "BOS"); lh[2] = L("mlb", "NYY");
@@ -105,6 +127,11 @@ int main() {
   for (int i = 0; i < 2; i++) {
     fb.clear(); renderScoreColors(WHITE, WHITE); renderFull(fb, f[i], &fa[i], &fh[i], 0); snprintf(p, sizeof(p), "%s/fin_now%d.ppm", getenv("OUT"), i); ppm(p, fb);
     fb.clear(); finalA(fb, f[i], &fa[i], &fh[i]); snprintf(p, sizeof(p), "%s/fin_a%d.ppm", getenv("OUT"), i); ppm(p, fb);
+  }
+  static const char* dn[2] = {"TODAY", "SATURDAY"};
+  for (int st = 0; st < 6; st++) for (int i = 0; i < 2; i++) {
+    fb.clear(); renderFull(fb, g[i], &la[i], &lh[i], 0); header(fb, g[i], st, dn[i]);
+    snprintf(p, sizeof(p), "%s/hdr_%d%d.ppm", getenv("OUT"), st, i); ppm(p, fb);
   }
   for (int i = 0; i < 3; i++) { fb.clear(); renderFull(fb, g[i], &la[i], &lh[i], 0); snprintf(p, sizeof(p), "%s/pre_now%d.ppm", getenv("OUT"), i); ppm(p, fb); }
 }
