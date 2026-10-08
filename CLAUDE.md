@@ -75,4 +75,5 @@ enclosure/case.scad (OpenSCAD, part = case / test_screen / test_board): 2 inch d
 
 ## Later
 - Joe (after 1.11): the basketball close-game heartbeat is wrong - within 3 points with 2 minutes left is nothing in basketball. Joe's idea for the fix: in basketball the heartbeat beats more often when the score swings back and forth quickly in the last minute or so (a tight, lead-changing finish), instead of just any game within 3. Talk it through with Joe before coding; leave 1.11 as is.
+- Joe likes a heartbeat that speeds up as the tension rises, for other sports too (ideas to talk through: football speeding up as the clock runs down with the game within one score, hockey in the last minute of a one-goal game, baseball from the 9th with the tying or winning run on base or at the plate). Mock up / talk it through first.
 - Check the new full screens against live games (no live captures for baseball, hockey and basketball yet), night mode, all-teams countdown screen, QR code on the setup screen, second (gift) board setup, then the setup PDF. Racing (NASCAR/F1) much later.
