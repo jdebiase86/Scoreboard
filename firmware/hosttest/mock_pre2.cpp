@@ -137,5 +137,5 @@ int main() {
     fb.clear(); renderFull(fb, g[i], &la[i], &lh[i], 0); header(fb, g[i], st, dn[i]);
     snprintf(p, sizeof(p), "%s/hdr_%d%d.ppm", getenv("OUT"), st, j); ppm(p, fb);
   }
-  for (int i = 0; i < 3; i++) { fb.clear(); renderFull(fb, g[i], &la[i], &lh[i], 0); snprintf(p, sizeof(p), "%s/pre_now%d.ppm", getenv("OUT"), i); ppm(p, fb); }
+  for (int i = 0; i < 4; i++) { fb.clear(); renderFull(fb, g[i], &la[i], &lh[i], 0); snprintf(p, sizeof(p), "%s/pre_now%d.ppm", getenv("OUT"), i); ppm(p, fb); }
 }

@@ -830,8 +830,8 @@ static void finalFull(Frame& fb, const Game& g, const Logo* la, const Logo* lh) 
   }
 }
 
-// Upcoming game (Joe's pick A, 1.12): a full-width blue bar with the day in
-// big letters (TODAY, TOMORROW, SATURDAY...), the logos with their records,
+// Upcoming game (Joe's pick A, 1.12): the day in big gold letters along the
+// top (TODAY, TOMORROW, SATURDAY...), the logos with their records,
 // and the start time big with the date small beside it along the bottom.
 // Without a playoff series line underneath, everything sits a little lower.
 static void upcomingFull(Frame& fb, const Game& g, const Logo* la, const Logo* lh) {
@@ -840,8 +840,11 @@ static void upcomingFull(Frame& fb, const Game& g, const Logo* la, const Logo* l
   const char* d = g.day[0] ? g.day : "NEXT";
   for (auto& n : DAYS)
     if (!strcmp(d, n[0])) { d = n[1]; break; }
-  fillRect(fb, 0, 0, W - 1, 9, rgb(32, 80, 192));
-  centerText(fb, 1, d, WHITE, F5);
+  // the day in gold with a dark orange shadow (a little 3D), a thin grey line under it (Joe's style 5)
+  int dx = (W - tw(d, F5)) >> 1;
+  text(fb, dx + 1, 2, d, rgb(120, 60, 0), F5);
+  text(fb, dx, 1, d, GOLD, F5);
+  for (int x = 4; x < W - 4; x++) fb.put(x, 10, rgb(60, 60, 70));
   bool series = g.po.on && g.po.summary[0];
   int ly = series ? 12 : 14;
   logoBox(fb, la, 0, ly, MATCHUP_W, MATCHUP_H, g.away.abbr, g.away.hasColor, g.away.color);
