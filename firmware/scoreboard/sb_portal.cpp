@@ -164,7 +164,8 @@ static void handleRoot() {
     h += "<section><h2>Hear the sounds</h2><p class=hint>Plays one on the board now (even with sound off). "
          "<span id=spr></span></p><div class=fx>";
     static const char* const SND[] = {"", "Touchdown", "Field goal", "Whistle", "Goal horn", "Buzzer", "3-pointer",
-                                      "Home run", "Grand slam", "They scored", "Win", "Game starting", "Close game"};
+                                      "Home run", "Grand slam", "They scored", "Win", "Game starting", "Close game",
+                                      "Gators fight song"};
     for (int i = 1; i < SND_COUNT; i++) h += "<button type=button data-s=" + String(i) + ">" + SND[i] + "</button>";
     h += "<button type=button data-s=0>Test chime</button></div></section>";
     h += "<section><h2>Test the animations</h2><p class=hint>Plays one on the board now, with the game "

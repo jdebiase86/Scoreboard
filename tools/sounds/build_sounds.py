@@ -25,6 +25,7 @@ PICKS = [
     ('SND_WIN', 'make3.py', 'v3_10b_win_song_organ_chords.wav'),
     ('SND_GAMESTART', 'make.py', '11_game_starting_organ.wav'),
     ('SND_HEARTBEAT', 'make.py', '12_close_game_heartbeat.wav'),
+    ('SND_GATORS', 'make6.py', 'v6_3_orange_blue_horns_only.wav'),
 ]
 
 def mulaw(samples):
