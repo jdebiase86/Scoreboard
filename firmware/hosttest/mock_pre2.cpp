@@ -104,14 +104,16 @@ static void header(Frame& fb, const Game& g, int style, const char* d) {
   }
 }
 int main() {
-  static Frame fb; static Game g[3]; static Logo la[3], lh[3];
+  static Frame fb; static Game g[4]; static Logo la[4], lh[4];
   g[0].valid = true; g[0].sport = BASKETBALL; g[0].state = ST_PRE; scopy(g[0].day, "TODAY"); scopy(g[0].startTime, "7:30P"); scopy(g[0].gameDate, "10/8");
   side(g[0].away, "WSH", 0x002B5C, "0-0"); side(g[0].home, "NY", 0x006BB6, "0-1"); g[0].pinnedHome = true; la[0] = L("nba", "WSH"); lh[0] = L("nba", "NY");
-  g[1].valid = true; g[1].sport = FOOTBALL; g[1].state = ST_PRE; scopy(g[1].day, "SAT"); scopy(g[1].startTime, "1:00P"); scopy(g[1].gameDate, "10/11");
+  g[1].valid = true; g[1].sport = FOOTBALL; g[1].state = ST_PRE; scopy(g[1].day, "SUN"); scopy(g[1].startTime, "1:00P"); scopy(g[1].gameDate, "10/12");
   side(g[1].away, "PHI", 0x004C54, "4-1"); side(g[1].home, "NYG", 0x0B2265, "2-3"); g[1].pinnedHome = true; la[1] = L("nfl", "PHI"); lh[1] = L("nfl", "NYG");
   g[2].valid = true; g[2].sport = BASEBALL; g[2].state = ST_PRE; scopy(g[2].day, "TOMORROW"); scopy(g[2].startTime, "7:08P"); scopy(g[2].gameDate, "10/9");
   side(g[2].away, "BOS", 0xBD3039, "92-70"); side(g[2].home, "NYY", 0x132448, "96-66"); g[2].po.on = true; scopy(g[2].po.summary, "NYY lead 1-0");
   la[2] = L("mlb", "BOS"); lh[2] = L("mlb", "NYY");
+  g[3].valid = true; g[3].sport = FOOTBALL; g[3].state = ST_PRE; scopy(g[3].day, "SAT"); scopy(g[3].startTime, "7:30P"); scopy(g[3].gameDate, "10/11");
+  side(g[3].away, "LSU", 0x461D7C, "5-0"); side(g[3].home, "FLA", 0x0021A5, "3-2"); g[3].pinnedHome = true; la[3] = L("ncaa", "LSU"); lh[3] = L("ncaa", "FLA");
   void (*lay[3])(Frame&, const Game&, const Logo*, const Logo*) = {layA, layB, layC};
   char p[256];
   for (int k = 0; k < 3; k++) for (int i = 0; i < 3; i++) {
@@ -128,10 +130,12 @@ int main() {
     fb.clear(); renderScoreColors(WHITE, WHITE); renderFull(fb, f[i], &fa[i], &fh[i], 0); snprintf(p, sizeof(p), "%s/fin_now%d.ppm", getenv("OUT"), i); ppm(p, fb);
     fb.clear(); finalA(fb, f[i], &fa[i], &fh[i]); snprintf(p, sizeof(p), "%s/fin_a%d.ppm", getenv("OUT"), i); ppm(p, fb);
   }
-  static const char* dn[2] = {"TODAY", "SATURDAY"};
-  for (int st = 0; st < 6; st++) for (int i = 0; i < 2; i++) {
+  static const char* dn[4] = {"TODAY", "SUNDAY", "", "SATURDAY"};
+  static const int pick[3] = {0, 3, 1};   // Knicks today, Gators Saturday, Giants Sunday
+  for (int st = 0; st < 6; st++) for (int j = 0; j < 3; j++) {
+    int i = pick[j];
     fb.clear(); renderFull(fb, g[i], &la[i], &lh[i], 0); header(fb, g[i], st, dn[i]);
-    snprintf(p, sizeof(p), "%s/hdr_%d%d.ppm", getenv("OUT"), st, i); ppm(p, fb);
+    snprintf(p, sizeof(p), "%s/hdr_%d%d.ppm", getenv("OUT"), st, j); ppm(p, fb);
   }
   for (int i = 0; i < 3; i++) { fb.clear(); renderFull(fb, g[i], &la[i], &lh[i], 0); snprintf(p, sizeof(p), "%s/pre_now%d.ppm", getenv("OUT"), i); ppm(p, fb); }
 }
