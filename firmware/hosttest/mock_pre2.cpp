@@ -63,6 +63,24 @@ static void layC(Frame& fb, const Game& g, const Logo* la, const Logo* lh) {
   fillRect(fb, 0, 51, 63, 63, rgb(25, 25, 32));
   timeDate(fb, g, 54);
 }
+// The final screen in option A's style: a full-width grey FINAL bar (the day
+// after it if it wasn't today), logos and big scores lower, WIN, NEXT strip.
+static void finalA(Frame& fb, const Game& g, const Logo* la, const Logo* lh) {
+  char top[20]; snprintf(top, sizeof(top), g.day[0] && strcmp(g.day, "TODAY") ? "FINAL %s" : "FINAL", g.day);
+  fillRect(fb, 0, 0, 63, 9, rgb(80, 80, 90)); centerText(fb, 1, top, WHITE, F5);
+  const Side* sides[2] = {&g.away, &g.home}; const Logo* lg[2] = {la, lh};
+  for (int k = 0; k < 2; k++) {
+    const Side& sd = *sides[k]; const Side& o = *sides[1 - k]; int x = k ? 38 : 0;
+    logoBox(fb, lg[k], x, 11, MATCHUP_W, MATCHUP_H, sd.abbr, sd.hasColor, sd.color);
+    char sc[6]; snprintf(sc, sizeof(sc), "%d", sd.score);
+    scoreText(fb, x + 13 - (tw(sc, F5, 2) >> 1), 36, sc, o.score > sd.score ? DATEC : WHITE, F5, 2);
+  }
+  text(fb, 32 - (tw("AT", F3) >> 1), 20, "AT", DATEC, F3);
+  const Side& m = g.pinned(); const Side& o = g.other();
+  if (m.score > o.score) { int x = (g.pinnedHome ? 38 : 0) + 13; text(fb, x - (tw("WIN", F3) >> 1), 51, "WIN", GREEN, F3); }
+  fillRect(fb, 0, 57, 63, 63, rgb(25, 25, 32));
+  text(fb, 3, 58, "NEXT", DATEC, F3); text(fb, 61 - tw(g.nextText, F3), 58, g.nextText, CLOCK, F3);
+}
 int main() {
   static Frame fb; static Game g[3]; static Logo la[3], lh[3];
   g[0].valid = true; g[0].sport = BASKETBALL; g[0].state = ST_PRE; scopy(g[0].day, "TODAY"); scopy(g[0].startTime, "7:30P"); scopy(g[0].gameDate, "10/8");
@@ -78,6 +96,15 @@ int main() {
     fb.clear(); lay[k](fb, g[i], &la[i], &lh[i]);
     if (g[i].po.on) for (int j = 0; j < W; j++) { fb.put(j, 0, PLAYOFF_GOLD); fb.put(j, H - 1, PLAYOFF_GOLD); fb.put(0, j, PLAYOFF_GOLD); fb.put(W - 1, j, PLAYOFF_GOLD); }
     snprintf(p, sizeof(p), "%s/pre_%c%d.ppm", getenv("OUT"), 'a' + k, i); ppm(p, fb);
+  }
+  static Game f[2]; static Logo fa[2], fh[2];
+  f[0].valid = true; f[0].sport = BASEBALL; f[0].state = ST_POST; scopy(f[0].day, "TODAY"); side(f[0].away, "TB", 0x092C5C, "80-75"); side(f[0].home, "NYY", 0x132448, "88-67");
+  f[0].away.hasScore = f[0].home.hasScore = true; f[0].away.score = 3; f[0].home.score = 5; f[0].pinnedHome = true; scopy(f[0].nextText, "TUE 7:05P"); fa[0] = L("mlb", "TB"); fh[0] = L("mlb", "NYY");
+  f[1].valid = true; f[1].sport = FOOTBALL; f[1].state = ST_POST; scopy(f[1].day, "SUN"); side(f[1].away, "PHI", 0x004C54, "4-2"); side(f[1].home, "NYG", 0x0B2265, "2-4");
+  f[1].away.hasScore = f[1].home.hasScore = true; f[1].away.score = 24; f[1].home.score = 17; f[1].pinnedHome = true; scopy(f[1].nextText, "SUN 1:00P"); fa[1] = L("nfl", "PHI"); fh[1] = L("nfl", "NYG");
+  for (int i = 0; i < 2; i++) {
+    fb.clear(); renderScoreColors(WHITE, WHITE); renderFull(fb, f[i], &fa[i], &fh[i], 0); snprintf(p, sizeof(p), "%s/fin_now%d.ppm", getenv("OUT"), i); ppm(p, fb);
+    fb.clear(); finalA(fb, f[i], &fa[i], &fh[i]); snprintf(p, sizeof(p), "%s/fin_a%d.ppm", getenv("OUT"), i); ppm(p, fb);
   }
   for (int i = 0; i < 3; i++) { fb.clear(); renderFull(fb, g[i], &la[i], &lh[i], 0); snprintf(p, sizeof(p), "%s/pre_now%d.ppm", getenv("OUT"), i); ppm(p, fb); }
 }
