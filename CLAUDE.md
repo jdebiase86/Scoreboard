@@ -74,4 +74,5 @@ Separate repo jdebiase86/Mini-Scoreboard (design settled, no firmware yet). Neve
 enclosure/case.scad (OpenSCAD, part = case / test_screen / test_board): 2 inch deep box, the screen is the front. Screen screws M3 x 30 into its corner inserts at 10 mm from the sides and 20.2 mm from top/bottom (Joe measured). Board bottom-left (seen from the front) on M2 x 4 heat-set insert posts (2.9 mm holes), its edge in a 1 mm wall pocket; wheel/USB openings fitted on test prints (4.4 mm tall, 48 mm long, 8 mm bar between wheel and USB-C). Test pieces were printed and fit.
 
 ## Later
-Check the new full screens against live games (no live captures for baseball, hockey and basketball yet), night mode, all-teams countdown screen, QR code on the setup screen, second (gift) board setup, then the setup PDF. Racing (NASCAR/F1) much later.
+- Joe (after 1.11): the basketball close-game heartbeat is wrong - within 3 points with 2 minutes left is nothing in basketball. Rethink the basketball rule (or drop the heartbeat for basketball) next time we code; leave 1.11 as is.
+- Check the new full screens against live games (no live captures for baseball, hockey and basketball yet), night mode, all-teams countdown screen, QR code on the setup screen, second (gift) board setup, then the setup PDF. Racing (NASCAR/F1) much later.
