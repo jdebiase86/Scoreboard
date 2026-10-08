@@ -1,6 +1,6 @@
 Sound drafts for the board's speaker (16 kHz mono WAV), made from scratch so
 they are free to use. Run: python3 make.py (round 1), make2.py, make3.py,
-make4.py (later rounds; they import lib.py). Picks so far:
+make4.py, make5.py, make6.py (later rounds; they import lib.py). Picks so far:
   home run     make3 v3_1 (lower organ Charge!)
   grand slam   make4 v4_2 (organ only, no crowd)
   touchdown    make2 v2_3
@@ -13,4 +13,6 @@ make4.py (later rounds; they import lib.py). Picks so far:
   win          make3 v3_10b (organ chords)
   game start   make  11
   close game   make  12
+  Gators kickoff  make6 v6_3 (Orange and Blue from the band chart, horns only;
+                  only for the Gators - other football kickoffs keep the whistle)
 No crowd sounds (synthesised crowds sounded like a noise machine).

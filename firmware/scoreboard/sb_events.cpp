@@ -210,7 +210,9 @@ SoundId fxSound(const FxSpec& f) {
   switch (f.kind) {
     case FX_TOUCHDOWN: return SND_TOUCHDOWN;
     case FX_FIELDGOAL: return SND_FIELDGOAL;
-    case FX_KICKOFF: case FX_FLAG: return SND_WHISTLE;
+    // kickoff: the Gators get their fight song (Orange and Blue), everyone else the whistle
+    case FX_KICKOFF: return strcmp(f.label, "FLA") ? SND_WHISTLE : SND_GATORS;   // no NFL team is FLA
+    case FX_FLAG: return SND_WHISTLE;
     case FX_QUARTER: return SND_BUZZER;
     case FX_GOAL: return SND_GOALHORN;
     case FX_HOMERUN: return f.grand ? SND_GRANDSLAM : SND_HOMERUN;

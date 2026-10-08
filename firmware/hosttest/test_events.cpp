@@ -59,6 +59,8 @@ int main() {
   testEvent("grandslam", nullptr, f); snd("grand slam sound", fxSound(f), SND_GRANDSLAM);
   testEvent("homerun", nullptr, f); snd("home run sound", fxSound(f), SND_HOMERUN);
   testEvent("firstdown", nullptr, f); snd("first down: no sound", fxSound(f), SND_NONE);
+  testEvent("kickoff", nullptr, f); scopy(f.label, "NYG"); snd("kickoff sound: whistle", fxSound(f), SND_WHISTLE);
+  scopy(f.label, "FLA"); snd("Gators kickoff: fight song", fxSound(f), SND_GATORS);
   Game t1 = mk(FOOTBALL, ST_IN, 14, 10), t2 = t1; t2.away.score = 17;   // NYG (home) is yours
   snd("they scored (football)", soundEvent(t1, t2), SND_THEYSCORED);
   Game b1 = mk(BASKETBALL, ST_IN, 50, 48), b2 = b1; b2.away.score = 51;
