@@ -9,14 +9,12 @@ static const int MATCHUP_W = 26, MATCHUP_H = 24;
 
 // logoAway / logoHome: pregame matchup logos (26x24), or null if not loaded.
 // pair: advances every 4 s - pages the ticker and the status-line messages.
-// big: the wheel's no-ticker mode (ms drives the scrolling last play)
+// big: the full screen instead (renderFull)
 void renderGame(Frame& fb, const Game& g, int pair, const Logo* logoAway, const Logo* logoHome,
                 bool big = false, uint32_t ms = 0);
 // Colours for the two scores on the next renderGame (your team's on top):
 // gold after your team scores, their colour flashing after they score
 void renderScoreColors(RGB top, RGB bot);
-// true if the big screen is scrolling text (redraw it often)
-bool renderBigScrolls(const Game& g);
 
 // The wheel's pop-up for one game: both logos like the pregame screen (or
 // the names if a logo isn't loaded), the score or start time under them,
@@ -47,10 +45,11 @@ struct FullGame {
 };
 void renderFullTicker(Frame& fb, const FullGame* games, int n, int page, const char* title);
 
-// The football full-game screen (wheel push during a live football game):
-// both logos side by side (away left, home right) with the scores under
-// them, the ball between them for possession, timeouts, a mini field (end
-// zones in team colours, the ball, the line to gain, red in front of the
-// goal in the red zone), win chance, and the last play scrolling (gold when
-// it scored). la/lh: away/home 26x24 logos (may be empty: letters instead).
-void renderFootballFull(Frame& fb, const Game& g, const Logo* la, const Logo* lh, uint32_t ms);
+// The full screens (the wheel's push, and Auto): the period and clock on
+// top, both logos big with the scores under them, and a strip for the sport
+// along the bottom; finals and upcoming games their own layout (see
+// sb_render.cpp). la/lh: away/home 26x24 logos (may be empty: letters).
+void renderFull(Frame& fb, const Game& g, const Logo* la, const Logo* lh, uint32_t ms);
+// The close-game look (gold clock, CLOSE GAME) on the next renderFull
+// (closeGame() in sb_events decides; sb_render doesn't know the rules)
+void renderCloseGameFlag(bool on);

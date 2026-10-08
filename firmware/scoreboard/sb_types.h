@@ -61,6 +61,9 @@ struct Game {
   Side home, away;
   bool pinnedHome = true;
   char kickoff[20] = "";     // "10/4 3:30P"
+  char day[10] = "";         // "TODAY", "TOMORROW", "WED" or "10/14" (the game's date, for the full screens)
+  char startTime[8] = "";    // "7:05P" ("" = not set yet)
+  char nextText[20] = "";    // a final's team's next game: "TUE 7:05P" (filled by sb_net, "" = unknown)
   char clock[10] = "";
   int period = 0;
   char periodLabel[6] = "";

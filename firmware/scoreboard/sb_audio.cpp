@@ -4,6 +4,8 @@
 #include <driver/i2s.h>
 #include <math.h>
 #include "sb_log.h"
+#include "sb_settings.h"
+#include "sb_sound_data.h"
 
 // Pins (Seengreat RGB Matrix HUB75 S3)
 static const int MCLK = 38, SCLK = 48, LRCK = 21, DOUT = 14, AMP_EN = 3;
@@ -12,7 +14,8 @@ static const int RATE = 16000;   // MCLK = 256 x RATE = 4.096 MHz
 static const i2s_port_t PORT = I2S_NUM_0;
 
 static bool ready = false;
-static TaskHandle_t task = nullptr;
+static QueueHandle_t queue = nullptr;
+static const uint8_t CHIME = 0xFF;
 
 static bool wr(uint8_t reg, uint8_t v) {
   Wire.beginTransmission(CODEC);
@@ -113,10 +116,40 @@ static void playChime() {
   digitalWrite(AMP_EN, LOW);
 }
 
+// mu-law byte -> 16-bit sample (G.711)
+static int16_t ulaw(uint8_t b) {
+  b = ~b;
+  int e = (b >> 4) & 7, m = b & 15;
+  int x = (((m << 3) + 132) << e) - 132;
+  return (b & 0x80) ? -x : x;
+}
+
+static void playClip(SoundId id) {
+  const SoundClip& c = SOUNDS[id];
+  static int16_t buf[256 * 2];
+  digitalWrite(AMP_EN, HIGH);
+  delay(30);
+  for (uint32_t i = 0; i < c.samples;) {
+    int k = 0;
+    for (; k < 256 && i < c.samples; k++, i++) {
+      int16_t v = ulaw(pgm_read_byte(c.data + i));
+      buf[2 * k] = v;
+      buf[2 * k + 1] = v;
+    }
+    size_t done;
+    i2s_write(PORT, buf, k * 4, &done, portMAX_DELAY);
+  }
+  delay(120);
+  i2s_zero_dma_buffer(PORT);
+  digitalWrite(AMP_EN, LOW);
+}
+
 static void audioTask(void*) {
   for (;;) {
-    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-    playChime();
+    uint8_t id;
+    if (xQueueReceive(queue, &id, portMAX_DELAY) != pdTRUE) continue;
+    if (id == CHIME) playChime();
+    else if (id > SND_NONE && id < SND_COUNT) playClip((SoundId)id);
   }
 }
 
@@ -126,7 +159,8 @@ bool audioBegin() {
   if (!i2sInit()) { sbLog("audio: I2S didn't start"); return false; }
   delay(10);   // MCLK running before the codec is set up
   if (!codecInit()) { sbLog("audio: sound chip (0x18) didn't answer"); return false; }
-  xTaskCreatePinnedToCore(audioTask, "audio", 4096, nullptr, 2, &task, 0);
+  queue = xQueueCreate(2, 1);
+  xTaskCreatePinnedToCore(audioTask, "audio", 4096, nullptr, 2, nullptr, 0);
   ready = true;
   sbLog("audio: ready");
   return true;
@@ -134,6 +168,11 @@ bool audioBegin() {
 
 bool audioReady() { return ready; }
 
-void audioChime() {
-  if (task) xTaskNotifyGive(task);
+static void send(uint8_t id) {
+  if (queue) xQueueSend(queue, &id, 0);   // full (two waiting): this one is dropped
+}
+void audioChime() { send(CHIME); }
+void audioPlayAlways(SoundId id) { if (id != SND_NONE) send(id); }
+void audioPlay(SoundId id) {
+  if (settings.sound && id != SND_NONE) send(id);
 }

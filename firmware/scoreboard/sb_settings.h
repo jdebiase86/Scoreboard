@@ -1,5 +1,5 @@
 // What the board remembers between power-ups (ESP32 "Preferences" flash):
-// Wi-Fi, the teams, time zone, brightness, and Auto or one team.
+// Wi-Fi, the teams, time zone, brightness, sound on/off, and Auto or one team.
 #pragma once
 #include <Arduino.h>
 #include "sb_teams.h"
@@ -34,6 +34,7 @@ struct Settings {
   int bright = 1;
   int rot = 0;             // index into ROTATE_SECS
   bool clockA = true;    // panel timing: true = falling edge (this panel), false = the library default
+  bool sound = true;     // game sounds on (hold the wheel in 3 s, or the button at scoreboard.local)
 
   void load();
   void save();

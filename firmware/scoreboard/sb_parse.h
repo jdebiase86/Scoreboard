@@ -47,3 +47,5 @@ bool versionFromAsset(const char* name, char (&out)[16]);
 std::string shortRound(const char* txt);
 std::string shortSummary(const char* txt, int total);
 time_t parseIso(const char* iso);
+// a game's date as the full screens show it: "TODAY", "TOMORROW", "WED" or "10/14"
+void dayWord(const char* iso, time_t now, char (&out)[10]);

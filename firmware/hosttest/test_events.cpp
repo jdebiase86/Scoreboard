@@ -50,6 +50,28 @@ int main() {
   const char* names[] = {"touchdown","fieldgoal","kickoff","quarter","halftime","flag","firstdown","goal","intermission","run","homerun","grandslam","three"};
   for (const char* n : names) { bool ok = testEvent(n, nullptr, f); if (!ok || f.kind == FX_NONE) bad++; printf("test %-12s kind %d label '%s' grand %d\n", n, f.kind, f.label, f.grand); }
   if (testEvent("nonsense", nullptr, f)) bad++;
+  // sounds (1.11): which sound goes with each animation, close games, they scored, game start
+  auto snd = [&](const char* what, SoundId got, SoundId want) {
+    printf("%-34s sound %d %s\n", what, got, got == want ? "ok" : "WRONG");
+    if (got != want) bad++;
+  };
+  testEvent("touchdown", nullptr, f); snd("touchdown sound", fxSound(f), SND_TOUCHDOWN);
+  testEvent("grandslam", nullptr, f); snd("grand slam sound", fxSound(f), SND_GRANDSLAM);
+  testEvent("homerun", nullptr, f); snd("home run sound", fxSound(f), SND_HOMERUN);
+  testEvent("firstdown", nullptr, f); snd("first down: no sound", fxSound(f), SND_NONE);
+  Game t1 = mk(FOOTBALL, ST_IN, 14, 10), t2 = t1; t2.away.score = 17;   // NYG (home) is yours
+  snd("they scored (football)", soundEvent(t1, t2), SND_THEYSCORED);
+  Game b1 = mk(BASKETBALL, ST_IN, 50, 48), b2 = b1; b2.away.score = 51;
+  snd("they scored (basketball): nothing", soundEvent(b1, b2), SND_NONE);
+  Game s1 = mk(HOCKEY, ST_PRE, 0, 0), s2 = mk(HOCKEY, ST_IN, 0, 0);
+  snd("game starting (hockey)", soundEvent(s1, s2), SND_GAMESTART);
+  Game f1 = mk(FOOTBALL, ST_PRE, 0, 0), f2 = mk(FOOTBALL, ST_IN, 0, 0);
+  snd("game starting (football): kickoff", soundEvent(f1, f2), SND_NONE);
+  Game cg = mk(FOOTBALL, ST_IN, 21, 17); cg.period = 4; scopy(cg.clock, "1:45");
+  bool c1 = closeGame(cg); cg.home.score = 31; bool c2 = closeGame(cg); cg.home.score = 21; scopy(cg.clock, "2:30"); bool c3 = closeGame(cg);
+  Game ch = mk(HOCKEY, ST_IN, 2, 2); ch.period = 3; scopy(ch.clock, "0:58"); bool c4 = closeGame(ch);
+  printf("close game: 4th 1:45 by 4 %d, by 14 %d, 2:30 %d, hockey tied 0:58 %d\n", c1, c2, c3, c4);
+  if (!c1 || c2 || c3 || !c4) bad++;
   printf("%s\n", bad ? "EVENTS: FAILURES" : "events: all ok");
   return bad != 0;
 }

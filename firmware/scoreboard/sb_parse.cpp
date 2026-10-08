@@ -120,6 +120,25 @@ static bool localWhen(const char* iso, time_t now, char (&md)[8], char (&hm)[8])
   return !strcmp(a, b);
 }
 
+// "TODAY", "TOMORROW", the weekday within a week ("WED"), else "10/14"
+void dayWord(const char* iso, time_t now, char (&out)[10]) {
+  out[0] = 0;
+  time_t t = parseIso(iso);
+  if (!t) return;
+  struct tm a, b;
+  localtime_r(&t, &a);
+  localtime_r(&now, &b);
+  // whole days between the two dates (noon to noon, so clock changes don't matter)
+  struct tm na = a, nb = b;
+  na.tm_hour = nb.tm_hour = 12; na.tm_min = nb.tm_min = na.tm_sec = nb.tm_sec = 0;
+  long days = lround(difftime(mktime(&na), mktime(&nb)) / 86400.0);
+  static const char* const WD[] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
+  if (days == 0) scopy(out, "TODAY");
+  else if (days == 1) scopy(out, "TOMORROW");
+  else if (days > 1 && days < 7) scopy(out, WD[a.tm_wday]);
+  else snprintf(out, sizeof(out), "%d/%d", a.tm_mon + 1, a.tm_mday);
+}
+
 // ------------------------------------------------------------------ helpers
 static std::string upper(const char* s) {
   std::string o;
@@ -489,6 +508,8 @@ bool parseGame(JsonObjectConst feed, const TeamDef& team, bool top25, time_t now
   bool today = localWhen(mine["date"] | "", now, md, hm);
   bool timeValid = c["timeValid"] | true;
   snprintf(g.kickoff, sizeof(g.kickoff), "%s %s", md, timeValid ? hm : "TBD");
+  if (timeValid) scopy(g.startTime, hm);
+  dayWord(mine["date"] | "", now, g.day);
   scopy(g.clock, stt["displayClock"] | "");
   g.period = stt["period"] | 0;
   periodLabel(sport, g.period, post, g.periodLabel);

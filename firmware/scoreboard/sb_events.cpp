@@ -205,3 +205,52 @@ bool testEvent(const char* name, const Game* g, FxSpec& f) {
   }
   return true;
 }
+
+SoundId fxSound(const FxSpec& f) {
+  switch (f.kind) {
+    case FX_TOUCHDOWN: return SND_TOUCHDOWN;
+    case FX_FIELDGOAL: return SND_FIELDGOAL;
+    case FX_KICKOFF: case FX_FLAG: return SND_WHISTLE;
+    case FX_QUARTER: return SND_BUZZER;
+    case FX_GOAL: return SND_GOALHORN;
+    case FX_HOMERUN: return f.grand ? SND_GRANDSLAM : SND_HOMERUN;
+    case FX_THREE: return SND_SWISH;
+    case FX_WIN: return SND_WIN;
+    default: return SND_NONE;
+  }
+}
+
+// "1:32" -> 92, "45.2" -> 45, "" -> -1
+static int clockSecs(const char* c) {
+  if (!c || !*c) return -1;
+  const char* colon = strchr(c, ':');
+  if (colon) return atoi(c) * 60 + atoi(colon + 1);
+  return atoi(c);
+}
+
+bool closeGame(const Game& g) {
+  if (!g.valid || g.state != ST_IN || !g.home.hasScore || !g.away.hasScore) return false;
+  int lastPeriod, margin;
+  if (g.sport == FOOTBALL) { lastPeriod = 4; margin = 8; }
+  else if (g.sport == BASKETBALL) { lastPeriod = 4; margin = 3; }
+  else if (g.sport == HOCKEY) { lastPeriod = 3; margin = 1; }
+  else return false;
+  if (g.period < lastPeriod) return false;
+  if (g.sport == HOCKEY && g.intermission) return false;
+  int s = clockSecs(g.clock);
+  return s >= 0 && s <= 120 && abs(g.home.score - g.away.score) <= margin;
+}
+
+SoundId soundEvent(const Game& prev, const Game& now) {
+  if (!prev.valid || !now.valid || strcmp(prev.eventId, now.eventId) || prev.pinnedHome != now.pinnedHome) return SND_NONE;
+  if (prev.state == ST_PRE && now.state == ST_IN && now.sport != FOOTBALL) return SND_GAMESTART;
+  const Side& wasO = prev.other();
+  const Side& o = now.other();
+  const Side& wasM = prev.pinned();
+  const Side& m = now.pinned();
+  bool live = prev.state == ST_IN && now.state == ST_IN;
+  bool theyScored = live && wasO.hasScore && o.hasScore && o.score > wasO.score;
+  bool weScored = wasM.hasScore && m.hasScore && m.score > wasM.score;
+  if (theyScored && !weScored && now.sport != BASKETBALL) return SND_THEYSCORED;
+  return SND_NONE;
+}

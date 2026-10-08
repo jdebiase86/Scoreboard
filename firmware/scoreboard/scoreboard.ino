@@ -25,6 +25,7 @@
 #include "sb_log.h"
 #include "sb_wheel.h"
 #include "sb_audio.h"
+#include "sb_events.h"
 #include "sb_main.h"
 #include <Preferences.h>
 
@@ -46,7 +47,8 @@ static uint32_t shownVersion = 0;
 static int pairN = 0;
 static bool dirty = true;
 
-// Score glow: after your team scores its number stays gold for a minute;
+// Score glow: after your team scores its number flashes in its colour for a
+// few seconds, then stays gold for a minute;
 // after the other team scores theirs flashes in their colour a few times.
 // Remembered per game, so taking turns between two games keeps each one's
 // (ScoreMemo is in sb_main.h).
@@ -89,7 +91,14 @@ static bool scoreColors(const Game& g) {
   if (g.valid) {
     ScoreMemo* m = nullptr;
     for (auto& x : memos) if (!strcmp(x.eventId, g.eventId)) m = &x;
-    if (m && m->glowAt && millis() - m->glowAt < GLOW_MS) { top = GOLD; moving = true; }
+    if (m && m->glowAt && millis() - m->glowAt < GLOW_MS) {
+      // your team just scored: its score flashes in its colour for a few
+      // seconds, then stays gold
+      top = GOLD;
+      const Side& me = g.pinned();
+      if (millis() - m->glowAt < FLASH_MS && ((millis() - m->glowAt) / 300) % 2 == 0) top = ledColor(me.hasColor, me.color);
+      moving = true;
+    }
     if (m && m->flashAt && millis() - m->flashAt < FLASH_MS) {
       const Side& them = g.other();
       if (((millis() - m->flashAt) / 300) % 2 == 0) bot = ledColor(them.hasColor, them.color);
@@ -107,9 +116,17 @@ static uint32_t fxStart = 0;
 // The little thumbwheel on the controller (it sits on an I2C expander, see
 // sb_wheel): flick UP (K1) / DOWN (K3) = change game - Auto, your teams,
 // then other live football games; it settles on your choice a moment after
-// the last flick. PUSH (K2) = no-ticker mode on/off. Hold PUSH 3 s = back to
-// normal (Auto, ticker on).
+// the last flick. PUSH (K2) = full screen on/off. Hold PUSH 3 s = sound
+// off / on.
+// bigMode = the other view from the usual one: Auto is normally the full
+// screen (no ticker) and a team mode the normal screen with its league's
+// ticker; a short push swaps (reset when the wheel changes stop).
 static bool bigMode = false;
+// a wheel pick waiting for its game: its card stays up with LOADING until
+// that team's game arrives (so the last game doesn't flash up meanwhile)
+static int waitTeam = -1;
+static uint32_t waitSince = 0;
+static int waitCode = 0;
 static uint32_t popAt = 0, popFor = 0;      // a wheel message owns the screen until popAt + popFor
 static bool pending = false;                // a flick not yet sent
 static int pendTeam = -1;                   // ...and the stop it picked (netSetStop code)
@@ -156,6 +173,23 @@ static int buildStops(int* out, int max) {
   return n;
 }
 
+// A team's card (both logos, the score or start time). bottom: what to say
+// along the bottom instead of "3 OF 9" (a team mode says "NYY MODE")
+static void drawCard(int team, bool yours, int pos, int count, const char* bottom) {
+  if (!netCard(team, *card)) {
+    new (card) ChanCard();
+    scopy(card->home, TEAMS[team].abbr);
+  }
+  card->yours = yours;
+  renderCard(*fb, *card, pos, count);
+  char m[20];
+  if (!bottom && yours) { snprintf(m, sizeof(m), "%s MODE", TEAMS[team].abbr); bottom = m; }
+  if (bottom) {
+    for (int y = 56; y < 63; y++) for (int x = 0; x < W; x++) fb->unput(x, y);
+    text(*fb, (W - tw(bottom, F3)) >> 1, 57, bottom, GOLD, F3);
+  }
+}
+
 static void showChoice(int code, int pos, int count) {
   if (code == -1) {
     Line l[] = {{"AUTO", GOLD, true}, {"YOUR TEAMS", DATEC, false}};
@@ -170,19 +204,7 @@ static void showChoice(int code, int pos, int count) {
     return;
   }
   int team = code >= STOP_TEAM ? code - STOP_TEAM : code;
-  if (!netCard(team, *card)) {
-    new (card) ChanCard();
-    scopy(card->home, TEAMS[team].abbr);
-  }
-  card->yours = code >= STOP_TEAM;
-  renderCard(*fb, *card, pos, count);
-  if (code >= STOP_TEAM) {
-    // a team's mode: say so along the bottom
-    char m[20];
-    snprintf(m, sizeof(m), "%s MODE", TEAMS[team].abbr);
-    for (int y = 56; y < 63; y++) for (int x = 0; x < W; x++) fb->unput(x, y);
-    text(*fb, (W - tw(m, F3)) >> 1, 57, m, GOLD, F3);
-  }
+  drawCard(team, code >= STOP_TEAM, pos, count, nullptr);
   panelShow(*fb);
   popAt = millis();
   popFor = 1800;
@@ -224,21 +246,20 @@ static bool wheelPoll() {
         if (pressed & WK_K2) { pushAt = millis(); pushFired = false; }
         if ((released & WK_K2) && !pushFired && millis() - pushAt < 1500) {
           bigMode = !bigMode;
-          sbLog("wheel: %s", bigMode ? "no-ticker mode" : "ticker back");
-          bool fullGame = shown->game.valid && shown->game.sport == FOOTBALL && shown->game.state == ST_IN;
-          Line l[] = {{bigMode ? (fullGame ? "FULL" : "BIG") : "TICKER", GOLD, true},
-                      {bigMode ? (fullGame ? "GAME" : "NO TICKER") : "BACK ON", DATEC, false}};
+          bool full = fullScreenNow();
+          sbLog("wheel: %s", full ? "full screen" : "normal screen");
+          Line l[] = {{full ? "FULL" : "SCORES", GOLD, true}, {full ? "SCREEN" : "+ TICKER", DATEC, false}};
           popup(l, 2, 1000);
         }
       }
     }
-    // held in: back to normal
+    // held in for 3 seconds: sound off / on
     if ((lastKeys & WK_K2) && !pushFired && millis() - pushAt >= 3000) {
       pushFired = true;
-      bigMode = false;
-      pending = false;
-      netSetStop(-1);
-      Line l[] = {{"AUTO", GOLD, true}, {"TICKER ON", DATEC, false}};
+      settings.sound = !settings.sound;
+      settings.save();
+      sbLog("wheel: sound %s", settings.sound ? "on" : "off");
+      Line l[] = {{"SOUND", GOLD, true}, {settings.sound ? "ON" : "OFF", settings.sound ? GREEN : RED, true}};
       popup(l, 2, 1500);
     }
   }
@@ -246,6 +267,11 @@ static bool wheelPoll() {
   if (pending && millis() - pendAt >= 1200) {
     netSetStop(pendTeam);
     pending = false;
+    bigMode = false;   // each stop starts in its usual view
+    waitCode = pendTeam;
+    waitTeam = pendTeam >= STOP_ALL || pendTeam < 0 ? -1 : pendTeam >= STOP_TEAM ? pendTeam - STOP_TEAM : pendTeam;
+    waitSince = millis();
+    dirty = true;
   }
   if (popAt && millis() - popAt < popFor) return true;
   if (popAt) { popAt = 0; dirty = true; }
@@ -253,6 +279,14 @@ static bool wheelPoll() {
 }
 
 static void setMode(Mode m) { mode = m; modeAt = millis(); dirty = true; }
+
+// Auto (and the other live games the wheel visits) shows the full screen;
+// a team mode the normal screen with the ticker. A push swaps them.
+static bool fullScreenNow() {
+  int stop = netStop();
+  bool usualFull = !(stop >= STOP_TEAM && stop < STOP_ALL);
+  return usualFull != bigMode;
+}
 
 static const RGB CYAN = 0x00C8FF;
 
@@ -512,6 +546,7 @@ void loop() {
         player.start(fxSpec, esp_random());
         fxStart = millis();
         sbLog("animation starts");
+        audioPlay(fxSound(*fxSpec));   // its sound (touchdown fanfare, goal horn, ...)
       }
       if (player.active()) {
         if (player.show(*fb, millis() - fxStart)) {
@@ -521,14 +556,19 @@ void loop() {
         }
         dirty = true;   // done: back to the scores
       }
-      if (netSnapshot(*shown, shownVersion)) { dirty = true; noteScores(shown->game); }
+      if (netSnapshot(*shown, shownVersion)) {
+        dirty = true;
+        noteScores(shown->game);
+        if (waitTeam >= 0 && shown->team == waitTeam) waitTeam = -1;   // the picked game is here
+      }
+      if (waitTeam >= 0 && (millis() - waitSince > 20000 || netStop() != waitCode)) { waitTeam = -1; dirty = true; }
       if (netFullTicker(*fullTick, fullTickVersion)) dirty = true;
       static uint32_t lastPage = 0;
       if (netTickerMode() && millis() / 5000 != lastPage) { lastPage = millis() / 5000; dirty = true; }
-      // the full-game screen scrolls its last play too
-      static uint32_t lastFullScroll = 0;
-      if (bigMode && shown->game.sport == FOOTBALL && shown->game.state == ST_IN && shown->game.lastPlay[0] &&
-          millis() - lastFullScroll >= 40) { lastFullScroll = millis(); dirty = true; }
+      // the full screen's close-game line takes turns with the ball spot; the
+      // LOADING dots move
+      static uint32_t lastBlink = 0;
+      if ((waitTeam >= 0 || fullScreenNow()) && millis() / 500 != lastBlink) { lastBlink = millis() / 500; if (waitTeam >= 0 || closeGame(shown->game)) dirty = true; }
       if (millis() - lastPairAt >= 4000) { lastPairAt = millis(); pairN++; dirty = true; }
       static uint32_t downSince = 0;
       if (WiFi.status() == WL_CONNECTED) downSince = 0;
@@ -548,12 +588,6 @@ void loop() {
       bool moving = scoreColors(shown->game);
       if ((moving && millis() - lastFlash >= 150) || (wasMoving && !moving)) { lastFlash = millis(); dirty = true; }
       wasMoving = moving;
-      // no-ticker mode scrolls the last play: redraw about 25 times a second
-      static uint32_t lastScroll = 0;
-      if (bigMode && !wifiDown && renderBigScrolls(shown->game) && millis() - lastScroll >= 40) {
-        lastScroll = millis();
-        dirty = true;
-      }
       if (dirty || animatedStatus) {
         if (wifiDown) statusScreen(NS_OFFLINE);
         else if (netTickerMode()) {
@@ -564,10 +598,14 @@ void loop() {
             Line l[] = {{tm == 1 ? "ALL NFL" : "COLLEGE", GOLD, true}, {"LOADING", DATEC, false}};
             drawMessage(*fb, l, 2);
           }
-        } else if (shown->game.valid && bigMode && shown->game.sport == FOOTBALL && shown->game.state == ST_IN)
-          renderFootballFull(*fb, shown->game, &shown->away, &shown->home, millis());
-        else if (shown->game.valid)
-          renderGame(*fb, shown->game, pairN, &shown->away, &shown->home, bigMode, millis());
+        } else if (waitTeam >= 0) {
+          static const char* dots[] = {"LOADING", "LOADING.", "LOADING..", "LOADING..."};
+          drawCard(waitTeam, waitCode >= STOP_TEAM, 0, 0, dots[(millis() / 500) % 4]);
+        } else if (shown->game.valid && fullScreenNow()) {
+          renderCloseGameFlag(closeGame(shown->game));
+          renderFull(*fb, shown->game, &shown->away, &shown->home, millis());
+        } else if (shown->game.valid)
+          renderGame(*fb, shown->game, pairN, &shown->away, &shown->home);
         else statusScreen(shown->status);
         panelShow(*fb);
         dirty = false;
