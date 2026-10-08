@@ -830,27 +830,31 @@ static void finalFull(Frame& fb, const Game& g, const Logo* la, const Logo* lh) 
   }
 }
 
+// Upcoming game (Joe's pick B, 1.12): a big blue day tag top left (TODAY,
+// TOMORROW, SUNDAY...) with the date top right, the logos with their records,
+// and the start time big along the bottom (the series under it in the playoffs).
 static void upcomingFull(Frame& fb, const Game& g, const Logo* la, const Logo* lh) {
-  tag(fb, 1, g.day[0] ? g.day : "NEXT", rgb(32, 80, 192));
-  if (g.po.on && g.po.round[0]) {
-    // the round's short name on the right, if it fits ("ALDS GAME 2" -> "ALDS")
-    char r[16]; upperCopy(r, sizeof(r), g.po.round);
-    char* sp = strchr(r, ' ');
-    if (tw(r, F3) > 24 && sp) *sp = 0;
-    if (tw(r, F3) <= 24) text(fb, W - 2 - tw(r, F3), 1, r, DATEC, F3);
-  }
-  logoBox(fb, la, 0, 8, MATCHUP_W, MATCHUP_H, g.away.abbr, g.away.hasColor, g.away.color);
-  logoBox(fb, lh, 38, 8, MATCHUP_W, MATCHUP_H, g.home.abbr, g.home.hasColor, g.home.color);
-  text(fb, 32 - (tw("AT", F3) >> 1), 17, "AT", DATEC, F3);
-  if (g.away.record[0]) text(fb, 13 - (tw(g.away.record, F3) >> 1), 33, g.away.record, DATEC, F3);
-  if (g.home.record[0]) text(fb, 51 - (tw(g.home.record, F3) >> 1), 33, g.home.record, DATEC, F3);
-  centerText(fb, 40, g.startTime[0] ? g.startTime : "TBD", CLOCK, F5);
-  fillRect(fb, 2, 52, 61, 63, rgb(25, 25, 32));
-  char line[24] = "";
-  if (g.po.on && g.po.summary[0]) upperCopy(line, sizeof(line), g.po.summary);
-  else if (g.gameDate[0]) snprintf(line, sizeof(line), "%s %s", strcmp(g.day, "TODAY") && strcmp(g.day, "TOMORROW") && strchr(g.day, '/') == nullptr ? g.day : "", g.gameDate);
-  char* t = line; while (*t == ' ') t++;
-  centerText(fb, 55, t, CLOCK);
+  static const char* const DAYS[][2] = {{"SUN", "SUNDAY"}, {"MON", "MONDAY"}, {"TUE", "TUESDAY"}, {"WED", "WEDNESDAY"},
+                                        {"THU", "THURSDAY"}, {"FRI", "FRIDAY"}, {"SAT", "SATURDAY"}};
+  const char* d = g.day[0] ? g.day : "NEXT";
+  const char* date = strchr(d, '/') ? "" : g.gameDate;   // a day like "10/14" is the date already
+  int dw = date[0] ? tw(date, F3) + 4 : 0;
+  for (auto& n : DAYS)
+    if (!strcmp(d, n[0])) { d = tw(n[1], F5) + 4 + dw <= 62 ? n[1] : n[0]; break; }
+  int w = tw(d, F5) + 4;
+  if (w + dw > 62) date = "";   // no room next to TOMORROW: tomorrow is clear enough
+  fillRect(fb, 1, 0, w, 8, rgb(32, 80, 192));
+  for (int yy : {0, 8}) for (int xx : {1, w}) fb.unput(xx, yy);
+  text(fb, 3, 1, d, WHITE, F5);
+  if (date[0]) text(fb, 62 - tw(date, F3), 2, date, DATEC, F3);
+  logoBox(fb, la, 0, 12, MATCHUP_W, MATCHUP_H, g.away.abbr, g.away.hasColor, g.away.color);
+  logoBox(fb, lh, 38, 12, MATCHUP_W, MATCHUP_H, g.home.abbr, g.home.hasColor, g.home.color);
+  text(fb, 32 - (tw("AT", F3) >> 1), 21, "AT", DATEC, F3);
+  if (g.away.record[0]) text(fb, 13 - (tw(g.away.record, F3) >> 1), 38, g.away.record, DATEC, F3);
+  if (g.home.record[0]) text(fb, 51 - (tw(g.home.record, F3) >> 1), 38, g.home.record, DATEC, F3);
+  bool series = g.po.on && g.po.summary[0];
+  centerText(fb, series ? 46 : 50, g.startTime[0] ? g.startTime : "TBD", CLOCK, F5);
+  if (series) { char up[24]; upperCopy(up, sizeof(up), g.po.summary); centerText(fb, 56, up, GOLD); }
 }
 
 void renderFull(Frame& fb, const Game& g, const Logo* la, const Logo* lh, uint32_t ms) {
