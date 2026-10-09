@@ -30,9 +30,14 @@ bool fxUsesLogo(FxKind k);
 #include "sb_sounds.h"
 SoundId fxSound(const FxSpec& f);
 // The last 2 minutes of the last period (or overtime), within one score:
-// football 8 points, basketball 3, hockey 1 goal. Baseball has no clock: never.
+// football 8 points, hockey 1 goal. Basketball: the last 3 minutes within
+// three possessions (9 points). Baseball has no clock: never.
 bool closeGame(const Game& g);
+// How often the close-game heartbeat comes back (ms): every minute, but in
+// basketball faster as the clock runs down (45 s, then 25 s, then 12 s).
+uint32_t heartbeatGap(const Game& g);
 // Comparing two looks at your team's game: the other team scored (never in
-// basketball - too often), or the game just started (football has its
-// kickoff animation and whistle instead). SND_NONE = nothing.
+// basketball - too often), the game just started (football has its
+// kickoff animation and whistle instead), or a clock sport just ended (the
+// final buzzer, win or lose). SND_NONE = nothing.
 SoundId soundEvent(const Game& prev, const Game& now);

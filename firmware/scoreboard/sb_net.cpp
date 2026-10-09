@@ -877,7 +877,7 @@ static void checkEvents(int team, const Game& g) {
     // moments that only make a sound: the other team scored, the game started
     SoundId snd = soundEvent(*s->g, g);
     if (snd != SND_NONE) {
-      sbLog("%s: %s", TEAMS[team].abbr, snd == SND_GAMESTART ? "game starting (sound)" : "they scored (sound)");
+      sbLog("%s: %s", TEAMS[team].abbr, snd == SND_GAMESTART ? "game starting (sound)" : snd == SND_BUZZER ? "final buzzer (sound)" : "they scored (sound)");
       audioPlay(snd);
     }
   }
@@ -888,9 +888,9 @@ static void checkEvents(int team, const Game& g) {
     s->beatAt = 0;
   }
   s->used = millis();
-  // close game, last two minutes: a heartbeat as it starts, then every minute
+  // close game, last minutes: a heartbeat as it starts, then again (faster near the end in basketball)
   if (closeGame(g)) {
-    if (!s->beatAt || millis() - s->beatAt >= 60000UL) {
+    if (!s->beatAt || millis() - s->beatAt >= heartbeatGap(g)) {
       s->beatAt = millis() | 1;
       sbLog("%s: close game (heartbeat)", TEAMS[team].abbr);
       audioPlay(SND_HEARTBEAT);
@@ -1374,8 +1374,13 @@ static void netTask(void*) {
       }
       if (cur->state == ST_IN && cur->sport == HOCKEY && fetchJson(NHL_LIVE, *doc, *filterNhl))
         enrichHockey(doc->as<JsonObjectConst>(), *cur);
-      if (cur->state == ST_IN && cur->sport == BASKETBALL && fetchJson(NBA_LIVE, *doc, *filterNba))
-        enrichBasketball(doc->as<JsonObjectConst>(), *cur);
+      // the NBA's own feed (bonus) - it can refuse the board (HTTP 403); then leave it
+      // alone for 15 minutes instead of losing half a second on every look
+      static uint32_t nbaRestUntil = 0;
+      if (cur->state == ST_IN && cur->sport == BASKETBALL && (int32_t)(millis() - nbaRestUntil) >= 0) {
+        if (fetchJson(NBA_LIVE, *doc, *filterNba)) enrichBasketball(doc->as<JsonObjectConst>(), *cur);
+        else nbaRestUntil = millis() + 900000UL;
+      }
       if (cur->state == ST_POST) fillNext(team, *cur);
       // full-size logos: the full screens show them for every game
       const Logo* la = cachedLogo(cur->away.logo, 0);

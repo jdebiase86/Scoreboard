@@ -45,7 +45,11 @@ int main() {
   Game k = mk(BASKETBALL, ST_IN, 50, 48), k2 = k; k2.home.score = 53; expect("three (no text)", k, k2, FX_THREE);
   k2 = k; k2.home.score = 52; expect("two: nothing", k, k2, FX_NONE);
   k2 = k; k2.home.score = 53; scopy(k2.lastPlay, "Brunson makes 26-foot three point jumper"); expect("three (text)", k, k2, FX_THREE);
-  scopy(k2.lastPlay, "Brunson makes driving layup (and one)"); expect("and-one: nothing", k, k2, FX_NONE);
+  scopy(k2.lastPlay, "Brunson makes free throw 1 of 1"); k2.playScore = 1; expect("and-one: nothing", k, k2, FX_NONE);
+  // 1.13: ESPN's last play has moved on by the time the board looks
+  k2 = k; k2.home.score = 53; scopy(k2.lastPlay, "Hart defensive rebound"); k2.playScore = 0; expect("three (last play moved on)", k, k2, FX_THREE);
+  k2 = k; k2.home.score = 55; scopy(k2.lastPlay, "Bridges makes 25-foot jumper"); k2.playScore = 3; expect("three (worth 3, more scored)", k, k2, FX_THREE);
+  k2 = k; k2.home.score = 55; scopy(k2.lastPlay, "Towns makes layup"); k2.playScore = 2; expect("five, last a layup: nothing", k, k2, FX_NONE);
   k2 = k; k2.period = 2; expect("end 1st (hoops)", k, k2, FX_QUARTER, "END 1ST");
   const char* names[] = {"touchdown","fieldgoal","kickoff","quarter","halftime","flag","firstdown","goal","intermission","run","homerun","grandslam","three"};
   for (const char* n : names) { bool ok = testEvent(n, nullptr, f); if (!ok || f.kind == FX_NONE) bad++; printf("test %-12s kind %d label '%s' grand %d\n", n, f.kind, f.label, f.grand); }
@@ -74,6 +78,17 @@ int main() {
   Game ch = mk(HOCKEY, ST_IN, 2, 2); ch.period = 3; scopy(ch.clock, "0:58"); bool c4 = closeGame(ch);
   printf("close game: 4th 1:45 by 4 %d, by 14 %d, 2:30 %d, hockey tied 0:58 %d\n", c1, c2, c3, c4);
   if (!c1 || c2 || c3 || !c4) bad++;
+  // 1.13: basketball - last 3 minutes within three possessions, beating faster
+  Game cb = mk(BASKETBALL, ST_IN, 102, 108); cb.period = 4; scopy(cb.clock, "1:32");
+  bool b6 = closeGame(cb); cb.home.score = 98; bool b10 = closeGame(cb); cb.home.score = 102; scopy(cb.clock, "2:50"); bool b250 = closeGame(cb);
+  scopy(cb.clock, "4:00"); bool b400 = closeGame(cb);
+  scopy(cb.clock, "2:30"); uint32_t g1 = heartbeatGap(cb); scopy(cb.clock, "1:30"); uint32_t g2 = heartbeatGap(cb); scopy(cb.clock, "0:40"); uint32_t g3 = heartbeatGap(cb);
+  printf("hoops close: down 6 at 1:32 %d, down 10 %d, 2:50 %d, 4:00 %d; beats every %u/%u/%u ms\n", b6, b10, b250, b400, g1, g2, g3);
+  if (!b6 || b10 || !b250 || b400 || !(g1 > g2 && g2 > g3)) bad++;
+  Game e1 = mk(BASKETBALL, ST_IN, 102, 108), e2 = mk(BASKETBALL, ST_POST, 102, 108);
+  snd("final buzzer (basketball)", soundEvent(e1, e2), SND_BUZZER);
+  Game e3 = mk(BASEBALL, ST_IN, 2, 3), e4 = mk(BASEBALL, ST_POST, 2, 3);
+  snd("game over (baseball): no buzzer", soundEvent(e3, e4), SND_NONE);
   printf("%s\n", bad ? "EVENTS: FAILURES" : "events: all ok");
   return bad != 0;
 }
