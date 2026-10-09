@@ -605,6 +605,26 @@ static void periodTracker(Frame& fb, int y, int n, int cur) {
   }
 }
 
+// A full-screen score centred on cx: the big double-size digits, or for 100
+// and up a narrower 4-wide set at the same size so three digits fit under the
+// logo (Joe's pick B; 108-102 ran together in a live Knicks game).
+static void bigScore(Frame& fb, int cx, int y, const char* s, RGB c) {
+  int n = (int)strlen(s);
+  if (n < 3) { scoreText(fb, cx - (tw(s, F5, 2) >> 1), y, s, c, F5, 2); return; }
+  static const uint8_t N4[10][7] = {   // bit 3 = left column
+    {6, 9, 9, 9, 9, 9, 6}, {2, 6, 2, 2, 2, 2, 7}, {6, 9, 1, 2, 4, 8, 15}, {14, 1, 1, 6, 1, 1, 14},
+    {9, 9, 9, 15, 1, 1, 1}, {15, 8, 14, 1, 1, 9, 6}, {6, 8, 8, 14, 9, 9, 6}, {15, 1, 2, 2, 4, 4, 4},
+    {6, 9, 9, 6, 9, 9, 6}, {6, 9, 9, 7, 1, 1, 6}};
+  int x = cx - ((n * 9 - 1) >> 1);
+  for (; *s; s++, x += 9) {
+    if (*s < '0' || *s > '9') continue;
+    const uint8_t* g = N4[*s - '0'];
+    for (int r = 0; r < 7; r++)
+      for (int q = 0; q < 4; q++)
+        if (g[r] & (8 >> q)) fillRect(fb, x + q * 2, y + r * 2, x + q * 2 + 1, y + r * 2 + 1, c);
+  }
+}
+
 // both logos, each score under its logo (your team's in scoreTop: gold after
 // it scores; theirs in scoreBot)
 static void teamsTop(Frame& fb, const Game& g, const Logo* la, const Logo* lh, int ax = 0, int hx = 38, RGB lose = 0) {
@@ -622,7 +642,7 @@ static void teamsTop(Frame& fb, const Game& g, const Logo* la, const Logo* lh, i
       const Side& o = homeSide ? g.away : g.home;
       if (o.hasScore && o.score > sd.score) sc = lose;
     }
-    scoreText(fb, x + 13 - (tw(s, F5, 2) >> 1), 32, s, sc, F5, 2);
+    bigScore(fb, x + 13, 32, s, sc);
   }
 }
 

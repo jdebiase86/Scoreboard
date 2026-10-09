@@ -526,6 +526,7 @@ bool parseGame(JsonObjectConst feed, const TeamDef& team, bool top25, time_t now
   JsonObjectConst s = c["situation"];
   if (state == ST_IN) {
     scopy(g.lastPlay, s["lastPlay"]["text"] | "");
+    g.playScore = s["lastPlay"]["scoreValue"] | 0;
     if (sport == FOOTBALL) {
       scopy(g.downDistance, s["downDistanceText"] | "");
       scopy(g.shortDD, s["shortDownDistanceText"] | "");
@@ -535,7 +536,6 @@ bool parseGame(JsonObjectConst feed, const TeamDef& team, bool top25, time_t now
       g.yardLine = s["yardLine"] | -1;
       g.toHome = s["homeTimeouts"] | -1;
       g.toAway = s["awayTimeouts"] | -1;
-      g.playScore = s["lastPlay"]["scoreValue"] | 0;
       JsonVariantConst wp = s["lastPlay"]["probability"]["homeWinPercentage"];
       g.winHome = wp.isNull() ? -1 : (int8_t)lround((wp.as<double>()) * 100);
       const char* p = s["possession"] | "";

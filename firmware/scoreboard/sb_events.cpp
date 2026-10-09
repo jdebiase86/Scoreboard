@@ -136,11 +136,16 @@ FxKind detectEvent(const Game& prev, const Game& now, FxSpec& f) {
     return f.kind;
   }
   if (sp == BASKETBALL && now.state == ST_IN && both && diff > 0) {
-    bool three = freshPlay ? ((icontains(now.lastPlay, "three point") || icontains(now.lastPlay, "three-point") ||
-                               icontains(now.lastPlay, "3-pt") || icontains(now.lastPlay, "3pt")) &&
-                              !icontains(now.lastPlay, "miss"))
-                           : diff == 3;
-    if (three) { base(now, FX_THREE, f); return f.kind; }
+    // The board looks every few seconds and ESPN's last play has often moved on
+    // (a rebound, a timeout), so a three is any of: the last play says so, the
+    // last play was worth 3, or the score went up exactly 3 and the last play
+    // wasn't a basket (not an and-one or a free throw).
+    bool said = freshPlay && (icontains(now.lastPlay, "three point") || icontains(now.lastPlay, "three-point") ||
+                              icontains(now.lastPlay, "3-pt") || icontains(now.lastPlay, "3pt")) &&
+                !icontains(now.lastPlay, "miss");
+    bool worth3 = freshPlay && now.playScore == 3 && diff >= 3;
+    bool jump3 = diff == 3 && (!freshPlay || now.playScore == 0);
+    if (said || worth3 || jump3) { base(now, FX_THREE, f); return f.kind; }
   }
   return FX_NONE;
 }
@@ -234,18 +239,27 @@ bool closeGame(const Game& g) {
   if (!g.valid || g.state != ST_IN || !g.home.hasScore || !g.away.hasScore) return false;
   int lastPeriod, margin;
   if (g.sport == FOOTBALL) { lastPeriod = 4; margin = 8; }
-  else if (g.sport == BASKETBALL) { lastPeriod = 4; margin = 3; }
+  else if (g.sport == BASKETBALL) { lastPeriod = 4; margin = 9; }   // three possessions (Joe)
   else if (g.sport == HOCKEY) { lastPeriod = 3; margin = 1; }
   else return false;
   if (g.period < lastPeriod) return false;
   if (g.sport == HOCKEY && g.intermission) return false;
   int s = clockSecs(g.clock);
-  return s >= 0 && s <= 120 && abs(g.home.score - g.away.score) <= margin;
+  int window = g.sport == BASKETBALL ? 180 : 120;
+  return s >= 0 && s <= window && abs(g.home.score - g.away.score) <= margin;
+}
+
+uint32_t heartbeatGap(const Game& g) {
+  if (g.sport != BASKETBALL) return 60000;
+  int s = clockSecs(g.clock);
+  return s > 120 ? 45000 : s > 60 ? 25000 : 12000;
 }
 
 SoundId soundEvent(const Game& prev, const Game& now) {
   if (!prev.valid || !now.valid || strcmp(prev.eventId, now.eventId) || prev.pinnedHome != now.pinnedHome) return SND_NONE;
   if (prev.state == ST_PRE && now.state == ST_IN && now.sport != FOOTBALL) return SND_GAMESTART;
+  // the final horn: a clock sport just ended (a win's song follows it)
+  if (prev.state == ST_IN && now.state == ST_POST && now.sport != BASEBALL) return SND_BUZZER;
   const Side& wasO = prev.other();
   const Side& o = now.other();
   const Side& wasM = prev.pinned();
