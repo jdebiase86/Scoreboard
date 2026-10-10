@@ -1,7 +1,7 @@
 // Scoreboard case - 2 inch deep box, the screen is the front.
 // Prints open side up, no supports. Needs 4x M3 x 30 mm screws (screen, its
 // brass inserts are M3) and 4x M2 x 4 mm heat-set inserts + 4x M2 x 6 mm screws (board).
-// part = "case" (default), "test_screen" or "test_board" - see the bottom of the file.
+// part = "case" (default), "badge" (the blank logo plate), "test_screen" or "test_board" - see the bottom of the file.
 // Coordinates as seen from the FRONT: x right, y up, z from the back (0) to the front.
 // Screen held upright with its wires at the bottom.
 panel = 191.9; panel_t = 14.4; clr = 0.4; wall = 2.5;
@@ -65,12 +65,13 @@ module side_slot() {  // wheel + USB-C: two openings with a bar between the whee
 // with an 8 mm bar centred 4.2 mm below the board's middle (wheel side), filling the gap
 // between the wheel and the first USB-C port.
 slot_len = 48; slot_z0 = board_z + 1.35; slot_z1 = board_z + 5.75; bar_w = 8; bar_y = -4.2;
-vent_r = 5; vent_g = 2.4;   // hexagon size and the ribs between them
+vent_r = 1.7; vent_g = 1.2;   // hexagon size and ribs (Joe's pick C: was 5 / 2.4, too see-through)
 module vents() {
   r = vent_r; g = vent_g; dx = 2*r*cos(30) + g; dy = 1.5*r + g*cos(30); c = [outer/2 + (board_left ? 22 : -22), outer/2 + 10];
   intersection() {
     translate(concat(c, -1)) cylinder(r = 42, h = floor_t + 2);
-    for (i = [-8:8], j = [-8:8]) translate([c[0] + i*dx + (j % 2)*dx/2, c[1] + j*dy, -1])
+    ni = ceil(42 / dx) + 1; nj = ceil(42 / dy) + 1;
+    for (i = [-ni:ni], j = [-nj:nj]) translate([c[0] + i*dx + (j % 2)*dx/2, c[1] + j*dy, -1])
       rotate(30) cylinder(r = r, h = floor_t + 2, $fn = 6);
   }
 }
@@ -79,10 +80,12 @@ module keyhole() translate([0, 0, -1]) {
   translate([-2.25, 0, 0]) cube([4.5, 9, floor_t + 2]);
   translate([0, 9, 0]) cylinder(d = 4.5, h = floor_t + 2);
 }
-// Badge pocket on the top of the case: the same badge as Joe's beer-crate
-// logos (a 97.8 x 47.2 x 0.6 mm plate with the logo raised 1.5 mm on it), so one
-// badge fits either. 0.2 mm clearance round it; glue it in.
-badge = true; badge_w = 97.8; badge_h = 47.2; badge_clr = 0.2; badge_depth = 0.6;
+// Badge pocket on the top of the case. Same make-up as Joe's beer-crate logo
+// badges (a 0.6 mm plate, 47.2 mm tall, the logo raised 1.5 mm on it), but
+// longer: the crate badge fills 97.8 of its 145 mm side, so here 197.7 x
+// 97.8 / 145 = 133.3 mm (Joe's pick). 0.2 mm clearance round it; glue it in.
+// The blank plate is part = "badge" - put the logo on it in Bambu Studio.
+badge = true; badge_w = 133.3; badge_h = 47.2; badge_clr = 0.2; badge_depth = 0.6;
 module badge_pocket() if (badge)
   translate([(outer - badge_w - 2*badge_clr)/2, outer - badge_depth, (depth - badge_h - 2*badge_clr)/2])
     cube([badge_w + 2*badge_clr, badge_depth + 1, badge_h + 2*badge_clr]);
@@ -153,7 +156,8 @@ module test_board() difference() {
   // open up the middle of the floor to save plastic
   place() translate([bx0 + 8, by0 + 8, -1]) cube([bw - 18, bl - 16, floor_t + 2]);
 }
-if (part == "test_screen") test_screen();
+if (part == "badge") cube([badge_w, badge_h, badge_depth]);
+else if (part == "test_screen") test_screen();
 else if (part == "test_board") test_board();
 else if (cut) difference() { all(); translate([-1, -1, -1]) cube([outer + 2, outer / 2 + 1, 100]); } else all();
 explode = 0;
