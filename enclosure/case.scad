@@ -65,8 +65,9 @@ module side_slot() {  // wheel + USB-C: two openings with a bar between the whee
 // with an 8 mm bar centred 4.2 mm below the board's middle (wheel side), filling the gap
 // between the wheel and the first USB-C port.
 slot_len = 48; slot_z0 = board_z + 1.35; slot_z1 = board_z + 5.75; bar_w = 8; bar_y = -4.2;
+vent_r = 5; vent_g = 2.4;   // hexagon size and the ribs between them
 module vents() {
-  r = 5; g = 2.4; dx = 2*r*cos(30) + g; dy = 1.5*r + g*cos(30); c = [outer/2 + (board_left ? 22 : -22), outer/2 + 10];
+  r = vent_r; g = vent_g; dx = 2*r*cos(30) + g; dy = 1.5*r + g*cos(30); c = [outer/2 + (board_left ? 22 : -22), outer/2 + 10];
   intersection() {
     translate(concat(c, -1)) cylinder(r = 42, h = floor_t + 2);
     for (i = [-8:8], j = [-8:8]) translate([c[0] + i*dx + (j % 2)*dx/2, c[1] + j*dy, -1])
@@ -78,9 +79,16 @@ module keyhole() translate([0, 0, -1]) {
   translate([-2.25, 0, 0]) cube([4.5, 9, floor_t + 2]);
   translate([0, 9, 0]) cylinder(d = 4.5, h = floor_t + 2);
 }
+// Badge pocket on the top of the case: the same badge as Joe's beer-crate
+// logos (a 97.8 x 47.2 x 0.6 mm plate with the logo raised 1.5 mm on it), so one
+// badge fits either. 0.2 mm clearance round it; glue it in.
+badge = true; badge_w = 97.8; badge_h = 47.2; badge_clr = 0.2; badge_depth = 0.6;
+module badge_pocket() if (badge)
+  translate([(outer - badge_w - 2*badge_clr)/2, outer - badge_depth, (depth - badge_h - 2*badge_clr)/2])
+    cube([badge_w + 2*badge_clr, badge_depth + 1, badge_h + 2*badge_clr]);
 module box() difference() {
   union() { shell(); posts(); place() standoffs(); }
-  post_holes(); place() side_slot(); vents();
+  post_holes(); place() side_slot(); vents(); badge_pocket();
   for (x = [outer/2 - 55, outer/2 + 55]) translate([x, outer - 30, 0]) keyhole();
 }
 
@@ -95,8 +103,14 @@ module board_model() {   // rough stand-in for pictures only
   color("#c0c0c0") for (dy = [7.5, 19.3]) translate([ex - 7.3, cy + dy - 4.5, top]) cube([7.5, 9, 3.2]); // USB-C x2
   color("#e07b00") translate([ex - 1.4, cy - 15, top + 1.8]) cylinder(d = 14, h = 3.4, center = true, $fn = 64); // wheel
 }
+show_badge = false;
 module all() {
   if (show_box) color("#3a3d42") box();
+  if (show_badge) translate([(outer - badge_w)/2, outer - badge_depth, (depth - badge_h)/2]) {
+    color("#e8e8e8") cube([badge_w, 0.6, badge_h]);
+    color("#0b2265") translate([badge_w/2, 0.6, badge_h/2]) rotate([-90, 0, 0]) linear_extrude(1.5)
+      text("TEAM", size = 16, font = "DejaVu Sans:style=Bold", halign = "center", valign = "center");
+  }
   if (show_board) place() board_model();
   if (show_panel) translate([wall + clr, wall + clr, panel_back_z]) {
     color("#222") cube([panel, panel, panel_t - 1.2]);
