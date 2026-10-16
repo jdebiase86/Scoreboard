@@ -30,7 +30,7 @@ by0 = 34; standoff_h = 11; sd = 7.5;
 // onto the LEFT wall (bottom left seen from the front) when board_left is true.
 board_left = true;
 // M2 x 4 mm heat-set inserts (kit: 3.0 mm top, 2.7 mm bottom): 2.9 mm hole, 6 mm deep
-insert_d = 2.9; insert_depth = 6;
+insert_d = 3.1; insert_depth = 6;   // 3.1 (was 2.9, Joe 1.14): room for the iron to slide in beside the insert
 // The board's USB/wheel edge sits edge_in mm into a pocket in the wall, so the
 // wheel sticks out further (was 0.8 mm short of the wall).
 edge_in = 0.7; pocket = 1.0;
