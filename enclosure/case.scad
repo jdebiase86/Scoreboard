@@ -17,7 +17,7 @@ panel_back_z = depth - recess - panel_t;   // posts stop the screen here
 // old design (171.9 x 151.5) by 1.6 mm at each side and 3.1 mm at top and bottom.
 ins_x = 11.6; ins_y = 23.3;
 ins = [[ins_x, ins_y], [panel - ins_x, ins_y], [ins_x, panel - ins_y], [panel - ins_x, panel - ins_y]];
-post_d = 9; screw_hole = 4.5;   // was 11: the posts pushed the panel's corners (Joe, 1.14); 9 keeps 0.75 mm wall round the 8 mm head pocket   // oversize M3 clearance for photo error
+post_d = 11; screw_hole = 4.5;   // was 11: the posts pushed the panel's corners (Joe, 1.14); 9 keeps 0.75 mm wall round the 8 mm head pocket   // oversize M3 clearance for photo error
 head_d = 8; screw_len = 30; bite = 6;   // M3 x 30 mm, ~6 mm into the insert
 pocket_h = panel_back_z - (screw_len - bite);
 
