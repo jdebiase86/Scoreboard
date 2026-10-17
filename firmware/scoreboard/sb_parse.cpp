@@ -440,6 +440,7 @@ void buildTicker(JsonObjectConst feed, const char* excludeId, Sport sport, bool 
     if (top25 && !hr && !ar && !isSec(h2["team"]["abbreviation"] | "") && !isSec(a2["team"]["abbreviation"] | ""))
       continue;
     Tick& e = g.ticker[g.nticker++];
+    e = Tick();   // a slot can hold last look's ball and red zone: clear it (a final must show no ball)
     scopy(e.home, h2["team"]["abbreviation"] | "");
     scopy(e.away, a2["team"]["abbreviation"] | "");
     scopy(e.homeId, h2["team"]["id"] | "");
