@@ -3,6 +3,15 @@
 #include "sb_gfx.h"
 #include <string>
 #include <vector>
+
+// ESPN says "Halftime" in the status while the second quarter's clock sits at 0:00
+static bool isHalftime(JsonObjectConst st) {
+  const char* d = st["type"]["shortDetail"] | "";
+  for (const char* p = d; *p; p++)
+    if (tolower((unsigned char)p[0]) == 'h' && tolower((unsigned char)p[1]) == 'a' && tolower((unsigned char)p[2]) == 'l' && tolower((unsigned char)p[3]) == 'f') return true;
+  return false;
+}
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -460,6 +469,7 @@ void buildTicker(JsonObjectConst feed, const char* excludeId, Sport sport, bool 
       periodLabel(sport, s2["period"] | 0, isPostseason(ev), pl);
       scopy(e.status, pl);
       scopy(e.clock, s2["displayClock"] | "");
+      if (sport == FOOTBALL || sport == BASKETBALL) { if (isHalftime(s2)) scopy(e.clock, "HALFTIME"); }
       if (sport == HOCKEY && isBreakText(s2["type"]["shortDetail"] | "")) scopy(e.clock, "INT");
       scopy(e.score, score);
       JsonObjectConst sit = c2["situation"];
@@ -512,6 +522,7 @@ bool parseGame(JsonObjectConst feed, const TeamDef& team, bool top25, time_t now
   if (timeValid) scopy(g.startTime, hm);
   dayWord(mine["date"] | "", now, g.day);
   scopy(g.clock, stt["displayClock"] | "");
+  if (state == ST_IN && (sport == FOOTBALL || sport == BASKETBALL) && isHalftime(stt)) scopy(g.clock, "HALFTIME");
   g.period = stt["period"] | 0;
   periodLabel(sport, g.period, post, g.periodLabel);
   g.postseason = post;
