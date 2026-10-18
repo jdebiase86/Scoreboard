@@ -5,7 +5,7 @@ Runs the draft scripts (make*.py) in a scratch folder, takes the picked WAVs,
 squeezes each to 8-bit mu-law (16 kHz mono) and writes them as C arrays.
 Run from anywhere:  python3 tools/sounds/build_sounds.py
 """
-import os, sys, subprocess, tempfile, wave, array, shutil
+import os, sys, math, subprocess, tempfile, wave, array, shutil
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SB = os.path.join(HERE, '..', '..', 'firmware', 'scoreboard')
@@ -27,6 +27,15 @@ PICKS = [
     ('SND_HEARTBEAT', 'make.py', '12_close_game_heartbeat.wav'),
     ('SND_GATORS', 'make6.py', 'v6_3_orange_blue_horns_only.wav'),
 ]
+
+# Loudness per sound: soft-clipped gain before 8-bit squeeze. The little speaker
+# drops low notes, so the heartbeat gets much more; the rest a touch more.
+GAIN = {'SND_HEARTBEAT': 8.0}
+DEFAULT_GAIN = 1.5
+
+def loud(samples, g):
+    top = math.tanh(g)
+    return [int(round(32767 * math.tanh(g * s / 32767) / top)) for s in samples]
 
 def mulaw(samples):
     out = bytearray()
@@ -54,7 +63,7 @@ def main():
             w = wave.open(os.path.join(tmp, wav))
             assert w.getframerate() == 16000 and w.getnchannels() == 1 and w.getsampwidth() == 2
             a = array.array('h', w.readframes(w.getnframes()))
-            data = mulaw(list(a))
+            data = mulaw(loud(list(a), GAIN.get(sid, DEFAULT_GAIN)))
             total += len(data)
             arr = sid.lower()
             lines.append('static const uint8_t %s[%d] = {' % (arr, len(data)))
