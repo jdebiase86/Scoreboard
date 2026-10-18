@@ -1,7 +1,7 @@
 // Scoreboard case - 2 inch deep box, the screen is the front.
 // Prints open side up, no supports. Needs 4x M3 x 30 mm screws (screen, its
 // brass inserts are M3) and 4x M2 x 4 mm heat-set inserts + 4x M2 x 6 mm screws (board).
-// part = "case" (default), "test_screen" or "test_board" - see the bottom of the file.
+// part = "case" (default), "badge" (the blank logo plate), "test_screen" or "test_board" - see the bottom of the file.
 // Coordinates as seen from the FRONT: x right, y up, z from the back (0) to the front.
 // Screen held upright with its wires at the bottom.
 panel = 191.9; panel_t = 14.4; clr = 0.4; wall = 2.5;
@@ -12,8 +12,12 @@ panel_back_z = depth - recess - panel_t;   // posts stop the screen here
 // four corner brass inserts, panel coordinates (wires side = bottom): 10 mm in from the
 // left/right sides, 20.2 mm from the top/bottom (measured on the panel, top-left insert;
 // the others assumed mirror images).
-ins = [[10, 20.2], [panel - 10, 20.2], [10, panel - 20.2], [panel - 10, panel - 20.2]];
-post_d = 11; screw_hole = 4.5;   // oversize M3 clearance for photo error
+// Measured on Joe's panel with calipers (1.14): the four screen inserts sit
+// 168.7 mm apart across and 145.3 mm apart down, so they come in from the
+// old design (171.9 x 151.5) by 1.6 mm at each side and 3.1 mm at top and bottom.
+ins_x = 11.6; ins_y = 23.3;
+ins = [[ins_x, ins_y], [panel - ins_x, ins_y], [ins_x, panel - ins_y], [panel - ins_x, panel - ins_y]];
+post_d = 11; screw_hole = 4.5;   // oversize M3 clearance for photo error (posts back at 11 mm, Joe 1.15)
 head_d = 8; screw_len = 30; bite = 6;   // M3 x 30 mm, ~6 mm into the insert
 pocket_h = panel_back_z - (screw_len - bite);
 
@@ -26,7 +30,7 @@ by0 = 34; standoff_h = 11; sd = 7.5;
 // onto the LEFT wall (bottom left seen from the front) when board_left is true.
 board_left = true;
 // M2 x 4 mm heat-set inserts (kit: 3.0 mm top, 2.7 mm bottom): 2.9 mm hole, 6 mm deep
-insert_d = 2.9; insert_depth = 6;
+insert_d = 3.1; insert_depth = 6;   // 3.1 (was 2.9, Joe 1.14): room for the iron to slide in beside the insert
 // The board's USB/wheel edge sits edge_in mm into a pocket in the wall, so the
 // wheel sticks out further (was 0.8 mm short of the wall).
 edge_in = 0.7; pocket = 1.0;
@@ -65,11 +69,13 @@ module side_slot() {  // wheel + USB-C: two openings with a bar between the whee
 // with an 8 mm bar centred 4.2 mm below the board's middle (wheel side), filling the gap
 // between the wheel and the first USB-C port.
 slot_len = 48; slot_z0 = board_z + 1.35; slot_z1 = board_z + 5.75; bar_w = 8; bar_y = -4.2;
+vent_r = 1.7; vent_g = 1.2;   // hexagon size and ribs (Joe's pick C: was 5 / 2.4, too see-through)
 module vents() {
-  r = 5; g = 2.4; dx = 2*r*cos(30) + g; dy = 1.5*r + g*cos(30); c = [outer/2 + (board_left ? 22 : -22), outer/2 + 10];
+  r = vent_r; g = vent_g; dx = 2*r*cos(30) + g; dy = 1.5*r + g*cos(30); c = [outer/2 + (board_left ? 22 : -22), outer/2 + 10];
   intersection() {
     translate(concat(c, -1)) cylinder(r = 42, h = floor_t + 2);
-    for (i = [-8:8], j = [-8:8]) translate([c[0] + i*dx + (j % 2)*dx/2, c[1] + j*dy, -1])
+    ni = ceil(42 / dx) + 1; nj = ceil(42 / dy) + 1;
+    for (i = [-ni:ni], j = [-nj:nj]) translate([c[0] + i*dx + (j % 2)*dx/2, c[1] + j*dy, -1])
       rotate(30) cylinder(r = r, h = floor_t + 2, $fn = 6);
   }
 }
@@ -78,9 +84,18 @@ module keyhole() translate([0, 0, -1]) {
   translate([-2.25, 0, 0]) cube([4.5, 9, floor_t + 2]);
   translate([0, 9, 0]) cylinder(d = 4.5, h = floor_t + 2);
 }
+// Badge pocket on the top of the case. Same make-up as Joe's beer-crate logo
+// badges (a 0.6 mm plate, 47.2 mm tall, the logo raised 1.5 mm on it), but
+// longer: the crate badge fills 97.8 of its 145 mm side, so here 197.7 x
+// 97.8 / 145 = 133.3 mm (Joe's pick). 0.2 mm clearance round it; glue it in.
+// The blank plate is part = "badge" - put the logo on it in Bambu Studio.
+badge = true; badge_w = 133.3; badge_h = 47.2; badge_clr = 0.2; badge_depth = 0.6;
+module badge_pocket() if (badge)
+  translate([(outer - badge_w - 2*badge_clr)/2, outer - badge_depth, (depth - badge_h - 2*badge_clr)/2])
+    cube([badge_w + 2*badge_clr, badge_depth + 1, badge_h + 2*badge_clr]);
 module box() difference() {
   union() { shell(); posts(); place() standoffs(); }
-  post_holes(); place() side_slot(); vents();
+  post_holes(); place() side_slot(); vents(); badge_pocket();
   for (x = [outer/2 - 55, outer/2 + 55]) translate([x, outer - 30, 0]) keyhole();
 }
 
@@ -95,8 +110,14 @@ module board_model() {   // rough stand-in for pictures only
   color("#c0c0c0") for (dy = [7.5, 19.3]) translate([ex - 7.3, cy + dy - 4.5, top]) cube([7.5, 9, 3.2]); // USB-C x2
   color("#e07b00") translate([ex - 1.4, cy - 15, top + 1.8]) cylinder(d = 14, h = 3.4, center = true, $fn = 64); // wheel
 }
+show_badge = false;
 module all() {
   if (show_box) color("#3a3d42") box();
+  if (show_badge) translate([(outer - badge_w)/2, outer - badge_depth, (depth - badge_h)/2]) {
+    color("#e8e8e8") cube([badge_w, 0.6, badge_h]);
+    color("#0b2265") translate([badge_w/2, 0.6, badge_h/2]) rotate([-90, 0, 0]) linear_extrude(1.5)
+      text("TEAM", size = 16, font = "DejaVu Sans:style=Bold", halign = "center", valign = "center");
+  }
   if (show_board) place() board_model();
   if (show_panel) translate([wall + clr, wall + clr, panel_back_z]) {
     color("#222") cube([panel, panel, panel_t - 1.2]);
@@ -139,7 +160,8 @@ module test_board() difference() {
   // open up the middle of the floor to save plastic
   place() translate([bx0 + 8, by0 + 8, -1]) cube([bw - 18, bl - 16, floor_t + 2]);
 }
-if (part == "test_screen") test_screen();
+if (part == "badge") cube([badge_w, badge_h, badge_depth]);
+else if (part == "test_screen") test_screen();
 else if (part == "test_board") test_board();
 else if (cut) difference() { all(); translate([-1, -1, -1]) cube([outer + 2, outer / 2 + 1, 100]); } else all();
 explode = 0;
