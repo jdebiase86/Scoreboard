@@ -169,8 +169,7 @@ hb=[]
 def thump(f=55, dur=0.18):
     return [math.sin(2*math.pi*f*i/R*(1-0.3*i/(dur*R)))*math.exp(-i/R*18)*(1+0.5*math.sin(2*math.pi*2*f*i/R)) for i in range(int(dur*R))]
 for k in range(4):
-    mix(hb, thump(), k*0.9); mix(hb, thump(48,0.15), k*0.9+0.22, 0.7)
-hb=[math.tanh(2.5*x) for x in hb]   # soft-clip so the small speaker's thump is louder
+    mix(hb, thump(110), k*0.9); mix(hb, thump(96,0.15), k*0.9+0.22, 0.7)
 save('12_close_game_heartbeat', hb)
 
 # 13 Crowd roar alone
