@@ -1365,10 +1365,10 @@ static void netTask(void*) {
     if (r == 1) {
       failures = 0;
       const TeamDef& td = TEAMS[team];
-      // The ticker (team modes only - Auto shows the full screen): that
-      // team's league, straight from the feed its game came from. College on
-      // top: every ranked game in the country, not just its conference feed.
-      if (pin >= 0 && td.league == L_CFB) {
+      // The ticker: that team's league, straight from the feed its game came
+      // from. College on top: every ranked game in the country, not just its
+      // conference feed. Auto too, so the ticker button works while Auto is on.
+      if (td.league == L_CFB) {
         updateFoot(footCfb, now);
         if (footCfb.at) mergeTicker(*cur, footCfb.tick, nullptr, true);
       }
