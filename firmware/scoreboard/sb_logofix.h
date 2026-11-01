@@ -64,6 +64,7 @@ static const LogoFix LOGO_FIXES[] = {
     {"/nhl/", "dal", FIX_LIGHT},   // Dallas Stars
     {"/nhl/", "det", FIX_LIGHT},   // Detroit Red Wings
     {"/nhl/", "nsh", FIX_LIGHT},   // Nashville Predators
+    {"/nhl/", "nyr", FIX_LIGHT},   // New York Rangers
     {"/nhl/", "sj", FIX_KEYLINE},   // San Jose Sharks
     {"/nhl/", "stl", FIX_LIGHT},   // St. Louis Blues
     {"/nhl/", "tb", FIX_LIGHT},   // Tampa Bay Lightning
